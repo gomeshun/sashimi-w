@@ -23,15 +23,25 @@ jobs:
           python-version: "3.11"
       - run: uv venv
       - name: Install migration dependencies
-        run: uv pip install numpy scipy pytest matplotlib
+        run: uv pip install numpy scipy pytest matplotlib astropy
       - name: Assemble pinned ITAMAE CI package
         run: |
-          mkdir -p .ci/runtime/itamae/cosmology
+          mkdir -p .ci/runtime/itamae/{cosmology,halo,types,units}
           touch .ci/runtime/itamae/__init__.py
-          cp .sashimi-c-migration/.ci/itamae_native_snapshot.py .ci/runtime/itamae/cosmology/native.py
-          printf 'from .native import NativeFlatLCDM\n\n__all__ = ["NativeFlatLCDM"]\n' > .ci/runtime/itamae/cosmology/__init__.py
+          cp .sashimi-c-migration/.ci/itamae_native_snapshot.py .ci/runtime/itamae/_snapshot.py
+          cp .sashimi-c-migration/.ci/itamae_units_snapshot.py .ci/runtime/itamae/_units_snapshot.py
+          printf 'from itamae._snapshot import NativeFlatLCDM\n\n__all__ = ["NativeFlatLCDM"]\n' > .ci/runtime/itamae/cosmology/__init__.py
+          printf 'from itamae._snapshot import invert_nfw_mass_function, nfw_mass_function\n\n__all__ = ["invert_nfw_mass_function", "nfw_mass_function"]\n' > .ci/runtime/itamae/halo/__init__.py
+          printf 'from itamae._snapshot import WeightedSubhaloCatalog\n\n__all__ = ["WeightedSubhaloCatalog"]\n' > .ci/runtime/itamae/types/__init__.py
+          printf 'from itamae._units_snapshot import AstropyUnits, NativeUnits\n\n__all__ = ["AstropyUnits", "NativeUnits"]\n' > .ci/runtime/itamae/units/__init__.py
       - name: Run ITAMAE migration regression tests
         env:
           PYTHONPATH: ${{ github.workspace }}/.ci/runtime:${{ github.workspace }}
           MPLBACKEND: Agg
-        run: uv run pytest -q tests/test_itamae_migration.py
+        run: uv run pytest -q --junitxml=test-results.xml tests/test_itamae_migration.py
+      - name: Upload migration test diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: migration-test-results
+          path: test-results.xml
