@@ -39,7 +39,7 @@ def test_growth_backend_uses_wmap7_configuration() -> None:
 
     assert np.isclose(migrated.itamae_cosmology.omega_m0, OmegaM)
     assert np.isclose(migrated.itamae_cosmology.h, h)
-    assert migrated.itamae_units.identifier == "native-v1"
+    assert migrated.itamae_units.identifier == "native-units:1.0"
 
 
 def test_wdm_variance_state_is_unchanged_by_growth_adapter() -> None:
@@ -87,6 +87,8 @@ def test_native_unit_backend_converts_legacy_catalog_to_canonical_units() -> Non
     np.testing.assert_array_equal(
         catalog.weight_final, legacy[8] * legacy[9].astype(float)
     )
+    assert set(catalog.weights) == {"weight_base", "weight_survival"}
+    assert catalog.metadata["schema_version"] == "1.0"
     assert catalog.metadata["canonical_units"]["length"] == "Mpc"
     assert catalog.metadata["legacy_units"]["length"] == "kpc"
 
@@ -105,7 +107,7 @@ def test_astropy_and_native_unit_backends_produce_same_internal_catalog() -> Non
             astropy_catalog.columns[name], native_catalog.columns[name], rtol=0.0, atol=0.0
         )
     np.testing.assert_array_equal(astropy_catalog.weight_final, native_catalog.weight_final)
-    assert astropy_catalog.metadata["unit_backend"] == "astropy-v1"
+    assert astropy_catalog.metadata["unit_backend"] == "astropy-units:1.0"
 
 
 def test_exact_nfw_inverse_and_compatibility_aliases_are_temporary(monkeypatch) -> None:

@@ -12,33 +12,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Check out pinned ITAMAE CI snapshot
+      - name: Check out pinned public ITAMAE
         uses: actions/checkout@v4
         with:
-          repository: gomeshun/sashimi-c
-          ref: itamae-migration
-          path: .sashimi-c-migration
+          repository: gomeshun/itamae
+          ref: 863cb0643c61ca4ea7458d7a221f48e5c5bfe515
+          path: .itamae
       - uses: astral-sh/setup-uv@v6
         with:
           python-version: "3.11"
       - run: uv venv
       - name: Install migration dependencies
-        run: uv pip install numpy scipy pytest matplotlib astropy
-      - name: Assemble pinned ITAMAE CI package
-        run: |
-          mkdir -p .ci/runtime/itamae/{cosmology,halo,types,units}
-          touch .ci/runtime/itamae/__init__.py
-          cp .sashimi-c-migration/.ci/itamae_native_snapshot.py .ci/runtime/itamae/_snapshot.py
-          cp .sashimi-c-migration/.ci/itamae_units_snapshot.py .ci/runtime/itamae/_units_snapshot.py
-          printf 'from itamae._snapshot import NativeFlatLCDM\n\n__all__ = ["NativeFlatLCDM"]\n' > .ci/runtime/itamae/cosmology/__init__.py
-          printf 'from itamae._snapshot import invert_nfw_mass_function, nfw_mass_function\n\n__all__ = ["invert_nfw_mass_function", "nfw_mass_function"]\n' > .ci/runtime/itamae/halo/__init__.py
-          printf 'from itamae._snapshot import WeightedSubhaloCatalog\n\n__all__ = ["WeightedSubhaloCatalog"]\n' > .ci/runtime/itamae/types/__init__.py
-          printf 'from itamae._units_snapshot import AstropyUnits, NativeUnits\n\n__all__ = ["AstropyUnits", "NativeUnits"]\n' > .ci/runtime/itamae/units/__init__.py
+        run: uv pip install ./.itamae pytest matplotlib astropy
       - name: Run ITAMAE migration regression tests
         env:
-          PYTHONPATH: ${{ github.workspace }}/.ci/runtime:${{ github.workspace }}
           MPLBACKEND: Agg
-        run: uv run pytest -q --junitxml=test-results.xml tests/test_itamae_migration.py
+        run: uv run pytest -q --junitxml=test-results.xml tests/test_itamae_migration.py tests/test_itamae_variance.py
       - name: Upload migration test diagnostics
         if: always()
         uses: actions/upload-artifact@v4

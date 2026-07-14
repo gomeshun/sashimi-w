@@ -14,9 +14,10 @@ from typing import Any
 
 import numpy as np
 
+from itamae.backends import BackendConfig
 from itamae.cosmology import NativeFlatLCDM
 from itamae.halo import invert_nfw_mass_function
-from itamae.types import WeightedSubhaloCatalog
+from itamae.types import CATALOG_SCHEMA_VERSION, WeightedSubhaloCatalog
 from itamae.units import NativeUnits
 import sashimi_w as _legacy
 from sashimi_w import OmegaM, h, subhalos
@@ -227,14 +228,20 @@ class ItamaeSubhalos(subhalos):
             "survive": survive,
         }
         legacy_weight = np.asarray(result[8], dtype=float)
+        backend_config = BackendConfig(self.itamae_cosmology, self.itamae_units)
         return WeightedSubhaloCatalog(
             columns=columns,
             weights={
-                "legacy_population": legacy_weight,
-                "survival": survive.astype(float),
+                "weight_base": legacy_weight,
+                "weight_survival": survive.astype(float),
             },
             metadata={
-                "model": "SASHIMI-W",
+                "schema_version": CATALOG_SCHEMA_VERSION,
+                "model_identifier": (
+                    f"sashimi-w:wdm:m_wdm_keV={self.mass_wdm:g}:itamae-migration:v1"
+                ),
+                "backend_identifier": backend_config.identifier,
+                "source_identifier": "sashimi-w:itamae-migration",
                 "mass_wdm_keV": float(self.mass_wdm),
                 "unit_backend": self.itamae_units.identifier,
                 "canonical_units": {
@@ -248,7 +255,6 @@ class ItamaeSubhalos(subhalos):
                     "density": "Msun/pc^3",
                 },
                 "legacy_weight_excludes_survival": True,
-                "catalog_schema": "itamae-migration-v1",
             },
         )
 
