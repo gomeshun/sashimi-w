@@ -27,7 +27,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - run: uv venv --python ${{ matrix.python-version }}
       - name: Install migration dependencies
-        run: uv pip install ./.itamae ".[test]"
+        run: uv pip install ./.itamae "astropy>=6" "pytest>=8"
       - name: Run ITAMAE migration regression tests
         run: uv run --no-sync python -m pytest -q --junitxml=test-results.xml
       - name: Upload migration test diagnostics
