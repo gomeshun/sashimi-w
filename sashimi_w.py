@@ -1,5 +1,5 @@
 import numpy as np
-import matplotlib.pyplot as plt
+from pathlib import Path
 from scipy import integrate
 from scipy import interpolate
 from scipy import optimize
@@ -9,8 +9,6 @@ from scipy.interpolate import interp1d
 from scipy.special import cbrt, gammainc, erf, erfc, hyp2f1
 from scipy.interpolate import interp1d, UnivariateSpline, splrep, splev
 from numpy.polynomial.hermite import hermgauss
-import warnings
-warnings.filterwarnings("ignore", category = RuntimeWarning, append = 1)
 
 
 
@@ -38,7 +36,7 @@ keV      = 1.0e-6*GeV
 #  Matter Power Spectrum
 ############################### 
 """ WMAP7 """ 
-filename_PS      = "WMAP7_camb_matterpower_z0_extrapolated.dat"
+filename_PS      = Path(__file__).resolve().with_name("WMAP7_camb_matterpower_z0_extrapolated.dat")
 PowerSpectrum    = np.genfromtxt(filename_PS, skip_header = 5)
 Pk_file, k_file  = PowerSpectrum[:,0], PowerSpectrum[:,1]
 k_min            = k_file.min() * 1.15
@@ -59,6 +57,15 @@ h             = PS_cosmology[2]
 H0            = h*100*km/s/Mpc 
 rhocrit0      = 3*pow(H0,2)*pow(8.0*np.pi*G,-1)
 sigma_8       = PS_cosmology[4]
+
+# Viel et al. define this q=5 expression for the transfer *amplitude*
+# T(k)=sqrt(P_WDM/P_CDM).  The published SASHIMI-W implementation instead
+# inserted the same expression directly as a power ratio.  Keep that q=5
+# convention here for exact public/published-result reproduction.  The opt-in
+# ITAMAE class overrides the hook below when the standard T**2 (q=10) power
+# convention is explicitly selected.
+WDM_TRANSFER_NU = 1.12
+PUBLISHED_WDM_POWER_Q = 5.0
 
 
 
@@ -96,14 +103,14 @@ class subhalos:
         for ii in range(500):
             self.logk      = self.log_k_min + self.dlogk*ii
             self.sum_rect  = Pk_interp(10**self.logk)*(10**self.logk)**2*10**self.logk*np.log(10) * \
-                                (1+(self.a*(10**self.logk))**(2*1.12))**(-5./1.12)
+                                self._wdm_power_ratio(10**self.logk)
             self.tot_sum   = self.tot_sum + self.sum_rect         
         self.log_k_min     = self.log_k_min - self.dlogk
         self.sum_rect_min  = Pk_interp(10**self.log_k_min)*(10**self.log_k_min)**2 * 10**self.log_k_min * np.log(10) * \
-                                (1+(self.a*(10**self.log_k_min))**(2*1.12))**(-5./1.12)
+                                self._wdm_power_ratio(10**self.log_k_min)
         self.log_k_max     = self.log_k_max + self.dlogk
         self.sum_rect_max  = Pk_interp(10**self.log_k_max)*(10**self.log_k_max)**2 * 10**self.log_k_max * np.log(10) * \
-                                (1+(self.a*(10**self.log_k_max))**(2*1.12))**(-5./1.12)
+                                self._wdm_power_ratio(10**self.log_k_max)
         self.sigma_sq      = (self.tot_sum + 0.5*self.sum_rect_min + 0.5*self.sum_rect_max) * self.dlogk
         self.sigma_sq     /= (2*np.pi**2)     
         
@@ -124,6 +131,19 @@ class subhalos:
         derivSigma   = np.diff(lnSigma_Sq) / np.diff(lnMass)
         return np.interp(M,lnMass[:-1],derivSigma)    
 
+    def _wdm_power_ratio(self, k, *, alpha=None):
+        """Return the published q=5 SASHIMI-W power suppression.
+
+        This intentionally preserves arXiv:2111.13137 and the established
+        ``sashimi_w.subhalos`` API.  It is not the standard square of the Viel
+        transfer amplitude; opt-in callers choose that separately through the
+        ITAMAE migration API.
+        """
+        alpha = self.a if alpha is None else alpha
+        return (1 + (alpha * k) ** (2 * WDM_TRANSFER_NU)) ** (
+            -PUBLISHED_WDM_POWER_Q / WDM_TRANSFER_NU
+        )
+
 
 
         ##################################################
@@ -138,8 +158,7 @@ class subhalos:
     def SigmaIntegrand(self,k, r):
         om_wdm = OmegaM-OmegaB
         a = 0.049*(1/self.mass_wdm)**1.11 * (om_wdm/0.25)**0.11 * (h/0.7)**1.22 # Mpc/h
-        nu = 1.12        
-        return k**2 * Pk_interp(k) * self.TopHat(k,r)**2     * (1+(a*k)**(2*nu))**(-5./nu)
+        return k**2 * Pk_interp(k) * self.TopHat(k,r)**2 * self._wdm_power_ratio(k, alpha=a)
 
     """ Integration function """ 
     def integratePk_th(self,kmin, kmax, r):
@@ -214,7 +233,12 @@ class subhalos:
             M2          = (np.log(2.)-0.5) / (np.log(1.+c_array)-c_array/(1.+c_array))
             rho_2       = 200. * c_array**3 * M2
             rhoc        = rho_2 / (200. * A)
-            z2          = (1. / OmegaM *(rhoc* (OmegaM*(1+z)**3 + OmegaL) - OmegaL))**0.3333 - 1.
+            with np.errstate(invalid="ignore"):
+                z2 = (
+                    1.0
+                    / OmegaM
+                    * (rhoc * (OmegaM * (1 + z) ** 3 + OmegaL) - OmegaL)
+                ) ** 0.3333 - 1.0
             delta_sc_z2 = delta_sc / self.linear_growth_factor(OmegaM, OmegaL, z2)
             delta_sc_0_vect = delta_sc / self.linear_growth_factor(OmegaM, 1.-OmegaM, z)
             
@@ -239,7 +263,12 @@ class subhalos:
                 M2          = (np.log(2.)-0.5) / (np.log(1.+c_array)-c_array/(1.+c_array))
                 rho_2       = 200. * c_array**3 * M2
                 rhoc        = rho_2 / (200. * A)
-                z2          = (1. / OmegaM *(rhoc* (OmegaM*(1+z)**3 + OmegaL) - OmegaL))**0.3333 - 1.
+                with np.errstate(invalid="ignore"):
+                    z2 = (
+                        1.0
+                        / OmegaM
+                        * (rhoc * (OmegaM * (1 + z) ** 3 + OmegaL) - OmegaL)
+                    ) ** 0.3333 - 1.0
                 delta_sc_z2 = delta_sc / self.linear_growth_factor(OmegaM, OmegaL, z2)
                 delta_sc_0_vect = delta_sc / self.linear_growth_factor(OmegaM, 1.-OmegaM, z)
                 
@@ -266,7 +295,16 @@ class subhalos:
                 M2          = (np.log(2.)-0.5) / (np.log(1.+c_array)-c_array/(1.+c_array))
                 rho_2       = 200. * c_array**3 * M2
                 rhoc        = rho_2 / (200. * A)
-                z2          = (1. / OmegaM *(rhoc* (OmegaM*(1+z_reshaped[i])**3 + OmegaL) - OmegaL))**0.3333 - 1.
+                with np.errstate(invalid="ignore"):
+                    z2 = (
+                        1.0
+                        / OmegaM
+                        * (
+                            rhoc
+                            * (OmegaM * (1 + z_reshaped[i]) ** 3 + OmegaL)
+                            - OmegaL
+                        )
+                    ) ** 0.3333 - 1.0
                 delta_sc_z2 = delta_sc / self.linear_growth_factor(OmegaM, OmegaL, z2)
                 delta_sc_0_vect = delta_sc / self.linear_growth_factor(OmegaM, 1.-OmegaM, z_reshaped[i])
                 
@@ -416,7 +454,7 @@ class subhalos:
 
     def Na_calc(self, ma, zacc, Mhost, z0=0, N_herm=200, Nrand=1000, sigmafac=0):
         """ Returns Na, Eq. (3) of Yang et al. (2011) """ 
-        zacc_2d = zacc.reshape(np.alen(zacc),1)
+        zacc_2d = zacc.reshape(len(zacc),1)
         M200_0 = self.Mzzi(Mhost,zacc_2d,z0)
         logM200_0 = np.log10(M200_0)
         if N_herm==1:
@@ -431,8 +469,8 @@ class subhalos:
                 M200 = np.where(M200<Mhost,M200,Mhost)
         else:
             xxi,wwi = hermgauss(N_herm)
-            xxi = xxi.reshape(np.alen(xxi),1,1)
-            wwi = wwi.reshape(np.alen(wwi),1,1)
+            xxi = xxi.reshape(len(xxi),1,1)
+            wwi = wwi.reshape(len(wwi),1,1)
             """ eq. (21) in Yang et al. (2011) """ 
             sigmalogM200 = 0.12-0.15*np.log10(M200_0/Mhost)
             logM200 = np.sqrt(2)*sigmalogM200*xxi+logM200_0
@@ -441,8 +479,8 @@ class subhalos:
         Mmax=np.minimum(M200_0+mmax,Mhost)
         zlist = zacc_2d*np.linspace(1,0,Nrand)
         iMmax = np.argmin(np.abs(self.Mzzi(Mhost,zlist,z0)-Mmax),axis=-1)
-        z_Max = zlist[np.arange(np.alen(zlist)),iMmax]
-        z_Max_3d = z_Max.reshape(N_herm,np.alen(zlist),1)
+        z_Max = zlist[np.arange(len(zlist)),iMmax]
+        z_Max_3d = z_Max.reshape(N_herm,len(zlist),1)
         delcM = self.delc_Y11(Mmax,z_Max_3d)
         delca = self.delc_Y11(ma,zacc_2d)
         sM = self.s_Y11(Mmax)
@@ -462,6 +500,16 @@ class subhalos:
     ###############################
     # Calculate subhalo properties at accretion and after tidal stripping
     ###############################         
+
+    def _invert_nfw_mass_fraction(self, enclosed_fraction):
+        """Invert the historical tabulated NFW enclosed-mass function."""
+        concentration = np.linspace(0, 100, 1000)
+        inverse = interp1d(
+            self.fc(concentration),
+            concentration,
+            fill_value="extrapolate",
+        )
+        return inverse(enclosed_fraction)
 
     def rs_rhos_calc(self, M0, redshift=0.0, dz=0.1, zmax=7.0, N_ma=100, sigmalogc=0.128,
                      N_herm=5, logmamin=1, logmamax=None, sigmafac=0,
@@ -527,8 +575,8 @@ class subhalos:
                 *200*4*np.pi,-1),1.0/3.0)
             c_mz = c200sub*rvirsub/r200sub
             x1,w1 = hermgauss(N_herm)
-            x1 = x1.reshape(np.alen(x1),1)
-            w1 = w1.reshape(np.alen(w1),1)
+            x1 = x1.reshape(len(x1),1)
+            w1 = w1.reshape(len(w1),1)
             log10c_sub = np.sqrt(2)*sigmalogc*x1+np.log10(c_mz)
             c_sub = pow(10.0,log10c_sub)
             rs_acc[iz] = rvirsub/c_sub
@@ -543,16 +591,16 @@ class subhalos:
             else:
                 rs_z0[iz] = rs_acc[iz]
                 rhos_z0[iz] = rhos_acc[iz]
-            ctemp = np.linspace(0,100,1000)
-            ftemp = interp1d(self.fc(ctemp),ctemp,fill_value='extrapolate')
-            ct_z0[iz] = ftemp(m0*Msolar/(4*np.pi*rhos_z0[iz]*rs_z0[iz]**3))
+            ct_z0[iz] = self._invert_nfw_mass_fraction(
+                m0*Msolar/(4*np.pi*rhos_z0[iz]*rs_z0[iz]**3)
+            )
             survive[iz] = np.where(ct_z0[iz]>0.77,1,0)
             m0_matrix[iz] = m0*np.ones((N_herm,1))
 
         Na = self.Na_calc(ma,zdist,M0,z0=0,N_herm=N_hermNa,Nrand=1000,
                           sigmafac=sigmafac)
-        Na_total = integrate.simps(integrate.simps(Na,x=np.log(ma)),x=np.log(1+zdist))
-        weight = Na/(1.0+zdist.reshape(np.alen(zdist),1))
+        Na_total = integrate.simpson(integrate.simpson(Na,x=np.log(ma)),x=np.log(1+zdist))
+        weight = Na/(1.0+zdist.reshape(len(zdist),1))
         weight = weight/np.sum(weight)*Na_total
         weight = (weight.reshape((len(zdist),1,len(ma))))*w1/np.sqrt(np.pi)
         z_acc = (zdist.reshape(len(zdist),1,1))*np.ones((1,N_herm,N_ma))
@@ -660,5 +708,3 @@ class subhalos:
         Ncum = Ncum[-1]-Ncum
 
         return Ncum[0], x, Ncum
-
-

@@ -1,0 +1,68 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "sashimi-w"
+version = "0.1.0a1"
+description = "Semi-Analytical SubHalo Inference ModelIng for warm dark matter"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+authors = [
+  {name = "Ariane Dekker"},
+  {name = "Shin'ichiro Ando"},
+  {name = "Correa A. Correa"},
+  {name = "Kenny C. Y. Ng"},
+]
+dependencies = [
+  "itamae>=0.1.0a4",
+  "numpy>=1.26",
+  "scipy>=1.11",
+]
+
+[project.urls]
+Repository = "https://github.com/gomeshun/sashimi-w"
+Issues = "https://github.com/gomeshun/sashimi-w/issues"
+
+[project.optional-dependencies]
+astropy = ["astropy>=6"]
+test = [
+  "astropy>=6",
+  "pytest>=8",
+]
+
+[tool.hatch.build.targets.sdist]
+include = [
+  "/README.md",
+  "/LICENSE",
+  "/WMAP7_camb_matterpower_z0_extrapolated.dat",
+  "/sashimi_w_itamae_migration.py",
+  "/sashimi_w_itamae_variance.py",
+  "/sashimi_w.py",
+  "/sashimi_w_itamae.py",
+]
+
+[tool.hatch.build.targets.wheel]
+bypass-selection = true
+
+[tool.hatch.build.targets.wheel.force-include]
+"WMAP7_camb_matterpower_z0_extrapolated.dat" = "WMAP7_camb_matterpower_z0_extrapolated.dat"
+"sashimi_w_itamae_migration.py" = "sashimi_w_itamae_migration.py"
+"sashimi_w_itamae_variance.py" = "sashimi_w_itamae_variance.py"
+"sashimi_w.py" = "sashimi_w.py"
+"sashimi_w_itamae.py" = "sashimi_w_itamae.py"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers --strict-config"
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F"]
+ignore = ["E501"]
+
+[tool.uv.sources]
+itamae = {git = "https://github.com/gomeshun/itamae.git", rev = "476b2025913bc38c3d3e25a23424e7e2274873a8"}
