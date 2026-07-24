@@ -511,6 +511,17 @@ class subhalos:
         )
         return inverse(enclosed_fraction)
 
+    def _select_accretion_mass_grid(self, mass_by_redshift, final_mass):
+        """Return the historical mass grid passed to ``Na_calc``.
+
+        ``rs_rhos_calc`` historically overwrote ``ma`` inside its redshift
+        loop and passed only the final row to every accretion redshift.  Keep
+        that behavior in the public class for exact result reproduction.
+        Migration subclasses may override this hook when selecting corrected
+        physics without changing the legacy tuple API.
+        """
+        return final_mass
+
     def rs_rhos_calc(self, M0, redshift=0.0, dz=0.1, zmax=7.0, N_ma=100, sigmalogc=0.128,
                      N_herm=5, logmamin=1, logmamax=None, sigmafac=0,
                      N_hermNa=200, profile_change=True):
@@ -526,6 +537,7 @@ class subhalos:
         ct_z0 = np.zeros((len(zdist),N_herm,len(ma200)))
         survive=np.zeros((len(zdist),N_herm,len(ma200)))
         m0_matrix = np.zeros((len(zdist),N_herm,len(ma200)))
+        ma_by_redshift = np.zeros((len(zdist), len(ma200)))
         Oz_0 = self.Omegaz(pOmega,redshift)
 
         def Mzvir(z):
@@ -564,6 +576,7 @@ class subhalos:
 
         for iz in range(len(zdist)):
             ma = self.Mvir_from_M200(ma200*Msolar,zdist[iz])/Msolar
+            ma_by_redshift[iz] = ma
             Oz = self.Omegaz(pOmega,zdist[iz])
             zcalc = np.linspace(zdist[iz],redshift,100)
             sol = odeint(msolve,ma,zcalc)
@@ -597,7 +610,8 @@ class subhalos:
             survive[iz] = np.where(ct_z0[iz]>0.77,1,0)
             m0_matrix[iz] = m0*np.ones((N_herm,1))
 
-        Na = self.Na_calc(ma,zdist,M0,z0=0,N_herm=N_hermNa,Nrand=1000,
+        ma_accretion = self._select_accretion_mass_grid(ma_by_redshift, ma)
+        Na = self.Na_calc(ma_accretion,zdist,M0,z0=0,N_herm=N_hermNa,Nrand=1000,
                           sigmafac=sigmafac)
         Na_total = integrate.simpson(integrate.simpson(Na,x=np.log(ma)),x=np.log(1+zdist))
         weight = Na/(1.0+zdist.reshape(len(zdist),1))

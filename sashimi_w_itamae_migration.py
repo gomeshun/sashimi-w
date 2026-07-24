@@ -332,6 +332,29 @@ class ItamaeSubhalos(subhalos):
         )
         return float(result) if result.ndim == 0 else result
 
+    def _select_accretion_mass_grid(self, mass_by_redshift: Any, final_mass: Any):
+        """Select exact legacy or redshift-resolved accretion masses.
+
+        The historical routine passed the last redshift row to ``Na_calc`` for
+        every redshift. Legacy mode retains that bug-for-bug behavior.
+        Consistent mode uses the already calculated row for each accretion
+        redshift, so the EPS factors and their mass derivative are evaluated at
+        the matching virial mass.
+        """
+        if self.physics_mode == "legacy":
+            return super()._select_accretion_mass_grid(
+                mass_by_redshift,
+                final_mass,
+            )
+        mass_grid = np.asarray(mass_by_redshift, dtype=float)
+        if (
+            mass_grid.ndim != 2
+            or not np.all(np.isfinite(mass_grid))
+            or np.any(mass_grid <= 0.0)
+        ):
+            raise ValueError("Accretion mass grid must be finite, positive, and two-dimensional.")
+        return mass_grid
+
     def conc200(self, mass_cgs: Any, z: Any):
         """Evaluate concentration with an explicit physical-Msun boundary.
 
@@ -565,6 +588,30 @@ class ItamaeSubhalos(subhalos):
             atol=0.0,
         ):
             raise ValueError("Factorized weights do not reconstruct the legacy catalog weight.")
+        negative_weight = legacy_weight < 0.0
+        if np.any(negative_weight):
+            count = int(np.count_nonzero(negative_weight))
+            minimum = float(np.min(legacy_weight))
+            if self.physics_mode == "legacy":
+                # The old fixed-node sharp-k variance table is slightly
+                # non-monotonic on its WDM plateau.  Exact legacy reproduction
+                # must retain the resulting signed tuple weights, but an
+                # ITAMAE weighted catalog represents nonnegative effective
+                # counts.  Never clip or renormalize here: either operation
+                # would silently create a third, scientifically unreviewed
+                # model between legacy and consistent.
+                raise ValueError(
+                    "Legacy SASHIMI-W produced signed population weights "
+                    f"({count} negative entries; minimum={minimum:.6e}). "
+                    "Use rs_rhos_calc() for exact legacy tuple reproduction, "
+                    "or physics_mode='consistent' for the corrected monotonic "
+                    "sharp-k derivative. Weights were not clipped or renormalized."
+                )
+            raise ValueError(
+                "Consistent SASHIMI-W produced negative population weights "
+                f"({count} entries; minimum={minimum:.6e}); this violates the "
+                "corrected catalog contract."
+            )
         backend_config = BackendConfig(self.itamae_cosmology, self.itamae_units)
         backend_identifier = (
             backend_config.identifier
@@ -575,6 +622,7 @@ class ItamaeSubhalos(subhalos):
                 f"OmegaL={_LEGACY_OMEGA_L:.17g};h={float(h):.17g}"
             )
         )
+        model_revision = "v5" if self.physics_mode == "consistent" else "v4"
         return WeightedSubhaloCatalog(
             columns=columns,
             weights={
@@ -587,7 +635,8 @@ class ItamaeSubhalos(subhalos):
                 "model_identifier": (
                     f"sashimi-w:wdm:m_wdm_keV={self.mass_wdm:g}:"
                     f"physics={self.physics_mode}:"
-                    f"power={self.wdm_power_convention}:itamae-migration:v4"
+                    f"power={self.wdm_power_convention}:"
+                    f"itamae-migration:{model_revision}"
                 ),
                 "backend_identifier": backend_identifier,
                 "source_identifier": "sashimi-w:itamae-migration",
@@ -623,6 +672,16 @@ class ItamaeSubhalos(subhalos):
                     if self.physics_mode == "consistent"
                     else "legacy-unconverted-variance-and-concentration-divides-by-h"
                 ),
+                "accretion_mass_redshift_mapping": (
+                    "per-redshift-virial-mass-grid"
+                    if self.physics_mode == "consistent"
+                    else "legacy-final-redshift-grid-reused"
+                ),
+                "population_weight_contract": (
+                    "nonnegative-corrected-counts"
+                    if self.physics_mode == "consistent"
+                    else "exact-signed-tuple;structured-catalog-requires-nonnegative-grid"
+                ),
                 "unit_backend": self.itamae_units.identifier,
                 "itamae_version": itamae.__version__,
                 "canonical_units": {
@@ -643,6 +702,8 @@ class ItamaeSubhalos(subhalos):
                         "dS/dM scales as D instead of D^2",
                         "physical Msun values are passed directly to the Msun/h variance grid",
                         "conc200 divides physical Msun by h instead of multiplying by h",
+                        "all accretion redshifts reuse the final redshift virial-mass grid",
+                        "fixed-node variance noise can create signed population weights",
                     ]
                     if self.physics_mode == "legacy"
                     else []

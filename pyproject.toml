@@ -27,6 +27,11 @@ Issues = "https://github.com/gomeshun/sashimi-w/issues"
 
 [project.optional-dependencies]
 astropy = ["astropy>=6"]
+demo = [
+  "ipykernel>=6",
+  "matplotlib>=3.8",
+  "nbconvert>=7",
+]
 test = [
   "astropy>=6",
   "pytest>=8",
@@ -37,6 +42,7 @@ include = [
   "/README.md",
   "/LICENSE",
   "/WMAP7_camb_matterpower_z0_extrapolated.dat",
+  "/itamae_migration_demo.ipynb",
   "/sashimi_w_itamae_migration.py",
   "/sashimi_w_itamae_variance.py",
   "/sashimi_w.py",

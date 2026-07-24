@@ -87,6 +87,30 @@ The repository's `uv.lock` and CI resolve ITAMAE from a reviewed, pinned public
 Git commit. A sibling checkout can instead be installed directly before this
 project.
 
+### Executable migration demo
+
+[`itamae_migration_demo.ipynb`](itamae_migration_demo.ipynb) is a compact,
+executed comparison of:
+
+- the unchanged public `sashimi_w.subhalos` tuple API;
+- `physics_mode="legacy"` with `wdm_power_convention="published-q5"`;
+- consistent growth and mass units with the same published q5 spectrum; and
+- consistent physics with the standard transfer-squared q10 spectrum.
+
+It checks legacy tuple parity, displays a catalog summary table, and plots the
+subhalo mass function and cumulative satellite abundance. Install the
+notebook-only dependencies and rerun it from a clean kernel with:
+
+```bash
+uv sync --extra demo
+uv run --no-sync jupyter nbconvert \
+  --to notebook --execute --inplace itamae_migration_demo.ipynb
+```
+
+The original [`Examples.ipynb`](Examples.ipynb) demonstrates the historical
+high-resolution API defaults and is correspondingly much slower. Its imports
+are explicit so it remains compatible with current NumPy and Matplotlib.
+
 ## Physics modes and known legacy differences
 
 The opt-in class requires one of two explicit modes. They never change the
@@ -102,7 +126,7 @@ behavior of `sashimi_w.subhalos`.
 - `physics_mode="legacy"` reproduces the original SASHIMI-W equations and is
   provided for regression and published-result reproduction.
 
-Five coupled legacy inconsistencies motivated the separate consistent mode:
+Six coupled legacy inconsistencies motivated the separate consistent mode:
 
 1. The historical expression defines
    `OmegaL = 1 - OmegaC - Omegar`, omitting the baryon contribution when
@@ -122,12 +146,27 @@ Five coupled legacy inconsistencies motivated the separate consistent mode:
 5. The historical concentration boundary converts a physical CGS mass using
    \(M/M_\odot/h\), rather than the same
    \(hM/M_\odot\) table coordinate.
+6. The catalog loop overwrites the virial-mass grid at each accretion
+   redshift, then passes only the final redshift's grid to `Na_calc` for every
+   redshift. Consistent mode instead evaluates the accretion factors with the
+   matching virial-mass row at each redshift.
 
 These corrections are physically linked, so `consistent` applies them
 together and catalog metadata prevents results from the two conventions from
 being mixed silently. They can materially change abundance normalization;
 `legacy` should therefore be selected explicitly when reproducing an earlier
 SASHIMI-W result.
+
+The historical sharp-\(k\) implementation evaluates each mass with a separate
+fixed-node quadrature. On the WDM variance plateau, integration noise can make
+the tabulated \(S(M)\) locally increase and hence produce negative
+\(\mathrm{d}S/\mathrm{d}M\), accretion rates, and population weights for some
+otherwise valid grids. The tuple API retains those signed values for exact
+reproduction. `WeightedSubhaloCatalog` deliberately rejects them because its
+weights represent nonnegative effective counts; the migration does not clip
+or silently renormalize them. The consistent mode uses ITAMAE's
+moving-boundary derivative and does not show this sign failure. The compact
+demo uses the reviewed nonnegative golden grid.
 
 The canonical WMAP7 matter density and Hubble parameter are fixed during this
 migration. A custom cosmology backend is rejected unless it matches them,

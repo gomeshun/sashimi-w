@@ -177,6 +177,70 @@ def test_growth_and_derivative_modes_are_explicit_and_self_consistent() -> None:
     )
 
 
+def test_signed_legacy_variance_is_reproduced_but_not_mislabeled_as_counts() -> None:
+    """Legacy signed weights stay in tuples; consistent catalogs remove their cause."""
+
+    public = subhalos(mass_wdm=2.0)
+    legacy = ItamaeSubhalos(
+        mass_wdm=2.0,
+        physics_mode="legacy",
+        wdm_power_convention=PUBLISHED_Q5,
+    )
+    consistent = ItamaeSubhalos(
+        mass_wdm=2.0,
+        physics_mode="consistent",
+        wdm_power_convention=PUBLISHED_Q5,
+    )
+    mass = np.geomspace(1.0e5, 1.0e8, 128)
+
+    public_derivative = public.dsdm(mass, 0.0)
+    np.testing.assert_array_equal(legacy.dsdm(mass, 0.0), public_derivative)
+    assert np.any(public_derivative > 0.0)
+    assert np.all(consistent.dsdm(mass, 0.0) < 0.0)
+
+    signed_tuple = list(_synthetic_legacy_tuple())
+    signed_tuple[8] = np.array([0.5, -0.1, 1.5, 2.0])
+    with pytest.raises(
+        ValueError,
+        match=r"signed population weights.*not clipped or renormalized",
+    ):
+        legacy.catalog_from_legacy(tuple(signed_tuple))
+
+    # The compatibility tuple remains untouched for exact reproduction.
+    np.testing.assert_array_equal(signed_tuple[8], np.array([0.5, -0.1, 1.5, 2.0]))
+
+
+def test_consistent_accretion_rate_uses_each_redshift_mass_grid() -> None:
+    """Only corrected mode should stop reusing the final redshift mass row."""
+
+    legacy = ItamaeSubhalos(
+        mass_wdm=2.0,
+        physics_mode="legacy",
+        wdm_power_convention=PUBLISHED_Q5,
+    )
+    consistent = ItamaeSubhalos(
+        mass_wdm=2.0,
+        physics_mode="consistent",
+        wdm_power_convention=PUBLISHED_Q5,
+    )
+    mass_by_redshift = np.array(
+        [
+            [1.1e6, 1.1e7, 1.1e8],
+            [1.2e6, 1.2e7, 1.2e8],
+        ]
+    )
+    final_mass = mass_by_redshift[-1]
+
+    np.testing.assert_array_equal(
+        legacy._select_accretion_mass_grid(mass_by_redshift, final_mass),
+        final_mass,
+    )
+    np.testing.assert_array_equal(
+        consistent._select_accretion_mass_grid(mass_by_redshift, final_mass),
+        mass_by_redshift,
+    )
+
+
 def test_concentration_boundary_converts_physical_mass_to_msun_per_h() -> None:
     """Consistent concentration must evaluate the legacy grid at h*M."""
     public = subhalos(mass_wdm=2.0)
@@ -382,6 +446,14 @@ def test_full_catalog_matches_mode_specific_golden_and_invariants(
     assert catalog.metadata["wdm_power_q"] == 5.0
     assert catalog.metadata["variance_growth_power"] == (2 if physics_mode == "consistent" else 1)
     if physics_mode == "consistent":
+        assert catalog.metadata["model_identifier"].endswith("itamae-migration:v5")
+        assert (
+            catalog.metadata["accretion_mass_redshift_mapping"]
+            == "per-redshift-virial-mass-grid"
+        )
+        assert catalog.metadata["population_weight_contract"] == (
+            "nonnegative-corrected-counts"
+        )
         assert fixture["units"]["consistent_variance_mass"] == "physical Msun"
         assert catalog.metadata["variance_mass_unit"] == "Msun"
         assert catalog.metadata["variance_power_units"] == {
@@ -393,6 +465,13 @@ def test_full_catalog_matches_mode_specific_golden_and_invariants(
             "M_filter[Msun/h] = h * M_physical[Msun]"
         )
     else:
+        assert catalog.metadata["model_identifier"].endswith("itamae-migration:v4")
+        assert catalog.metadata["accretion_mass_redshift_mapping"] == (
+            "legacy-final-redshift-grid-reused"
+        )
+        assert catalog.metadata["population_weight_contract"].startswith(
+            "exact-signed-tuple"
+        )
         assert "Msun/h grid" in fixture["units"]["legacy_variance_mass"]
         assert "legacy-raw" in catalog.metadata["variance_mass_unit"]
     assert catalog.metadata["itamae_version"] == "0.1.0a4"
@@ -410,11 +489,12 @@ def test_legacy_full_catalog_reproduces_the_public_tuple() -> None:
     """Compatibility mode should preserve all historical tuple fields."""
     parameters = _fixture()["parameters"]
     public = subhalos(mass_wdm=2.0).rs_rhos_calc(**parameters)
-    migrated = ItamaeSubhalos(
+    migrated_model = ItamaeSubhalos(
         mass_wdm=2.0,
         physics_mode="legacy",
         wdm_power_convention=PUBLISHED_Q5,
-    ).rs_rhos_calc(**parameters)
+    )
+    migrated = migrated_model.rs_rhos_calc(**parameters)
 
     for index, (actual, expected) in enumerate(zip(migrated, public, strict=True)):
         if index == 9:
@@ -426,6 +506,87 @@ def test_legacy_full_catalog_reproduces_the_public_tuple() -> None:
                 rtol=2.0e-9,
                 atol=1.0e-13,
             )
+
+    catalog = migrated_model.rs_rhos_catalog_calc(**parameters)
+    public_columns = {
+        "m200_acc": (public[0], 1.0),
+        "z_acc": (public[1], 1.0),
+        "r_s_acc": (public[2], 1.0e-3),
+        "rho_s_acc": (public[3], 1.0e18),
+        "m_bound": (public[4], 1.0),
+        "r_s": (public[5], 1.0e-3),
+        "rho_s": (public[6], 1.0e18),
+        "c_t": (public[7], 1.0),
+    }
+    for name, (values, scale) in public_columns.items():
+        np.testing.assert_allclose(
+            catalog.columns[name],
+            np.asarray(values) * scale,
+            rtol=2.0e-9,
+            atol=1.0e-13,
+        )
+    np.testing.assert_array_equal(catalog.columns["survive"], public[9])
+    np.testing.assert_allclose(
+        catalog.weights["weight_base"] * catalog.weights["weight_concentration"],
+        public[8],
+        rtol=5.0e-12,
+        atol=1.0e-100,
+    )
+    np.testing.assert_allclose(
+        catalog.weight_final,
+        public[8] * public[9],
+        rtol=5.0e-12,
+        atol=1.0e-100,
+    )
+
+
+def test_legacy_mass_function_and_cumulative_satellites_reproduce_public_api() -> None:
+    """Derived legacy observables must agree, not only the underlying tuple."""
+    parameters = dict(_fixture()["parameters"])
+    host_mass = parameters.pop("M0")
+    public = subhalos(mass_wdm=2.0)
+    migrated = ItamaeSubhalos(
+        mass_wdm=2.0,
+        physics_mode="legacy",
+        wdm_power_convention=PUBLISHED_Q5,
+    )
+
+    public_mass, public_dndm = public.subhalo_distr(host_mass, **parameters)
+    migrated_mass, migrated_dndm = migrated.subhalo_distr(host_mass, **parameters)
+    np.testing.assert_allclose(
+        migrated_mass,
+        public_mass,
+        rtol=2.0e-9,
+        atol=1.0e-13,
+    )
+    np.testing.assert_allclose(
+        migrated_dndm,
+        public_dndm,
+        rtol=2.0e-9,
+        atol=1.0e-100,
+    )
+
+    public_total, public_threshold, public_cumulative = public.N_sat(
+        host_mass,
+        **parameters,
+    )
+    migrated_total, migrated_threshold, migrated_cumulative = migrated.N_sat(
+        host_mass,
+        **parameters,
+    )
+    assert migrated_total == pytest.approx(public_total, rel=2.0e-9, abs=1.0e-100)
+    np.testing.assert_allclose(
+        migrated_threshold,
+        public_threshold,
+        rtol=2.0e-9,
+        atol=1.0e-13,
+    )
+    np.testing.assert_allclose(
+        migrated_cumulative,
+        public_cumulative,
+        rtol=2.0e-9,
+        atol=1.0e-100,
+    )
 
 
 def test_standard_q10_full_catalog_golden_metadata_and_roundtrip(
@@ -479,6 +640,10 @@ def test_standard_q10_full_catalog_golden_metadata_and_roundtrip(
         model.half_mode_wavenumber(),
     )
     assert "power=standard-t2-q10" in metadata["model_identifier"]
+    assert metadata["model_identifier"].endswith("itamae-migration:v5")
+    assert metadata["accretion_mass_redshift_mapping"] == (
+        "per-redshift-virial-mass-grid"
+    )
 
     archive = tmp_path / "standard-t2-q10.npz"
     catalog.to_npz(archive)
@@ -496,7 +661,7 @@ def test_consistent_mode_records_a_material_abundance_change() -> None:
     consistent_total = np.sum(fixture["modes"]["consistent"]["weight"])
 
     assert consistent_total / legacy_total == pytest.approx(
-        0.1741595573013332,
+        0.18222963347293586,
         rel=2.0e-14,
     )
 
