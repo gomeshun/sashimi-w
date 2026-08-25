@@ -1,4 +1,26 @@
 {
+  "provenance": {
+    "fixture_schema": "sashimi-family:golden-provenance:v1",
+    "fixture_category": "full_small_catalog_golden",
+    "fixture_purpose": "Full WDM catalog regression for published q5 in both migration modes.",
+    "variant": "sashimi-w",
+    "generated_repository_revision": "8c935894f635ebbe28efa359ab391a29a3f04968",
+    "itamae_source_revision": "a557a0d975b284c9fc3fe9697746e4847783653b",
+    "physics_modes": ["consistent", "legacy"],
+    "mode_policy": {
+      "legacy": "strict legacy tuple reproduction with published q5",
+      "consistent": "reviewed corrected growth, units, and mass-grid conventions"
+    },
+    "parameters_key": "parameters",
+    "units_key": "units",
+    "wdm_power_convention": "published-q5",
+    "comparison": {
+      "catalog_rtol": 5e-10,
+      "weight_rtol": 5e-12,
+      "atol": 1e-14,
+      "rationale": "Catalog values use double-precision integration; legacy interpolation and weight checks use their documented local tolerances."
+    }
+  },
   "modes": {
     "consistent": {
       "c_t": [1.6227571686911042, 1.8595310413946848, 2.1925747619562075, 2.7442634286295466, 2.7872019867157776, 3.1837065564904865, 3.739278023640899, 4.65514787528354, 1.400865308938788, 1.5750558091351536, 1.8083292426698758, 2.1827010883021005, 2.377344416869937, 2.6631504442942684, 3.044176743773645, 3.6522137754200914],

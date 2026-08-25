@@ -9,6 +9,7 @@ import numpy as np
 import pytest
 
 from itamae.cosmology import NativeFlatLCDM
+from itamae.provenance import MIGRATION_METADATA_KEYS
 from itamae.types import WeightedSubhaloCatalog
 from itamae.units import AstropyUnits, NativeUnits
 from sashimi_w_itamae_migration import ItamaeSubhalos, PUBLISHED_Q5, STANDARD_T2_Q10
@@ -37,6 +38,24 @@ def _fixture() -> dict:
 
 def _q10_fixture() -> dict:
     return json.loads(_Q10_GOLDEN.read_text())
+
+
+def test_golden_fixture_provenance_is_complete() -> None:
+    """Both WDM fixtures identify their convention and comparison policy."""
+    for fixture, convention, modes in (
+        (_fixture(), PUBLISHED_Q5, {"legacy", "consistent"}),
+        (_q10_fixture(), STANDARD_T2_Q10, {"consistent"}),
+    ):
+        provenance = fixture["provenance"]
+        assert provenance["fixture_schema"] == "sashimi-family:golden-provenance:v1"
+        assert provenance["fixture_category"] == "full_small_catalog_golden"
+        assert provenance["variant"] == "sashimi-w"
+        assert len(provenance["generated_repository_revision"]) == 40
+        assert len(provenance["itamae_source_revision"]) == 40
+        assert set(provenance["physics_modes"]) == modes
+        assert provenance["parameters_key"] == "parameters"
+        assert provenance["units_key"] == "units"
+        assert provenance["wdm_power_convention"] == convention
 
 
 def _synthetic_legacy_tuple() -> tuple[np.ndarray, ...]:
@@ -442,6 +461,23 @@ def test_full_catalog_matches_mode_specific_golden_and_invariants(
         atol=2.0e-13,
     )
     assert catalog.metadata["physics_mode"] == physics_mode
+    assert set(MIGRATION_METADATA_KEYS) <= set(catalog.metadata)
+    assert catalog.metadata["sashimi_variant"] == "sashimi-w"
+    assert len(catalog.metadata["itamae_source_revision"]) == 40
+    assert len(catalog.metadata["sashimi_source_revision"]) == 40
+    assert catalog.metadata["sashimi_version"] == "0.1.0a1"
+    assert catalog.metadata["catalog_schema_version"] == "1.0"
+    assert catalog.metadata["canonical_unit_schema"] == "1.0"
+    assert catalog.metadata["variance_identifier"] == (
+        f"sashimi-w:sharp-k:{PUBLISHED_Q5}:physics={physics_mode}:v1"
+    )
+    assert catalog.metadata["power_identifier"] == f"sashimi-w:{PUBLISHED_Q5}:v1"
+    assert catalog.metadata["solver_identifier"] == "sashimi-w:tidal-stripping:nfw:v1"
+    assert catalog.metadata["cosmology_parameters"] == {
+        "omega_m0": float(OmegaM),
+        "omega_lambda0": float(catalog.metadata["omega_lambda0"]),
+        "h": float(h),
+    }
     assert catalog.metadata["wdm_power_convention"] == PUBLISHED_Q5
     assert catalog.metadata["wdm_power_q"] == 5.0
     assert catalog.metadata["variance_growth_power"] == (2 if physics_mode == "consistent" else 1)

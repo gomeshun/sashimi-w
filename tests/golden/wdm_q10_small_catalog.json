@@ -1,4 +1,25 @@
 {
+  "provenance": {
+    "fixture_schema": "sashimi-family:golden-provenance:v1",
+    "fixture_category": "full_small_catalog_golden",
+    "fixture_purpose": "Explicit standard transfer-amplitude-squared q10 validation catalog.",
+    "variant": "sashimi-w",
+    "generated_repository_revision": "8c935894f635ebbe28efa359ab391a29a3f04968",
+    "itamae_source_revision": "a557a0d975b284c9fc3fe9697746e4847783653b",
+    "physics_modes": ["consistent"],
+    "mode_policy": {
+      "consistent": "reviewed explicit q10 validation path; not an implicit physics-mode default"
+    },
+    "parameters_key": "parameters",
+    "units_key": "units",
+    "wdm_power_convention": "standard-t2-q10",
+    "comparison": {
+      "catalog_rtol": 5e-10,
+      "weight_rtol": 5e-12,
+      "atol": 1e-14,
+      "rationale": "Explicit q10 validation is compared with the same compact double-precision catalog tolerances."
+    }
+  },
   "catalog": {
     "c_t": [1.5458202530615557, 1.6859073608720712, 1.8834531974961404, 2.2324523636273548, 2.6584288345036855, 2.893724384782533, 3.2245937254112755, 3.8067945473654867, 1.3459002962760214, 1.451219343079385, 1.5889800535220069, 1.8336537483067479, 2.2872187560135315, 2.460561602353573, 2.6866005193119387, 3.0862371964312993],
     "m200_acc": [1000000.0, 4641588.833612782, 21544346.900318824, 100000000.0, 1000000.0, 4641588.833612782, 21544346.900318824, 100000000.0, 1000000.0, 4641588.833612782, 21544346.900318824, 100000000.0, 1000000.0, 4641588.833612782, 21544346.900318824, 100000000.0],

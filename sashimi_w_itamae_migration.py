@@ -16,12 +16,12 @@ from typing import Any
 import numpy as np
 from numpy.polynomial.hermite import hermgauss
 
-import itamae
 from itamae.backends import BackendConfig
 from itamae.cosmology import NativeFlatLCDM
 from itamae.halo import invert_nfw_mass_function
+from itamae.provenance import build_migration_metadata
 from itamae.protocols import CosmologyBackend
-from itamae.types import CATALOG_SCHEMA_VERSION, WeightedSubhaloCatalog
+from itamae.types import WeightedSubhaloCatalog
 from itamae.units import NativeUnits
 import sashimi_w as _legacy
 from sashimi_w import OmegaM, WDM_TRANSFER_NU, h, subhalos
@@ -630,85 +630,99 @@ class ItamaeSubhalos(subhalos):
                 "weight_concentration": weight_concentration,
                 "weight_survival": survive.astype(float),
             },
-            metadata={
-                "schema_version": CATALOG_SCHEMA_VERSION,
-                "model_identifier": (
+            metadata=build_migration_metadata(
+                variant="sashimi-w",
+                distribution_name="sashimi-w",
+                module_file=__file__,
+                model_identifier=(
                     f"sashimi-w:wdm:m_wdm_keV={self.mass_wdm:g}:"
                     f"physics={self.physics_mode}:"
                     f"power={self.wdm_power_convention}:"
                     f"itamae-migration:{model_revision}"
                 ),
-                "backend_identifier": backend_identifier,
-                "source_identifier": "sashimi-w:itamae-migration",
-                "mass_wdm_keV": float(self.mass_wdm),
-                "physics_mode": self.physics_mode,
-                "wdm_power_convention": self.wdm_power_convention,
-                "wdm_power_formula_role": self.wdm_power_formula_role,
-                "wdm_power_q": self.wdm_power_q,
-                "wdm_transfer_nu": float(WDM_TRANSFER_NU),
-                "half_mode_definition": self.half_mode_definition,
-                "half_mode_power_ratio": self.half_mode_power_ratio,
-                "half_mode_wavenumber_h_per_mpc": self.half_mode_wavenumber(),
-                "omega_m0": float(OmegaM),
-                "omega_lambda0": self.omega_lambda,
-                "growth_normalized_at_z0": self.physics_mode == "consistent",
-                "variance_growth_power": (2 if self.physics_mode == "consistent" else 1),
-                "variance_mass_unit": (
-                    "Msun"
-                    if self.physics_mode == "consistent"
-                    else "legacy-raw-Msun-values-on-Msun/h-grid"
+                backend_identifier=backend_identifier,
+                source_identifier="sashimi-w:itamae-migration",
+                physics_mode=self.physics_mode,
+                variance_identifier=(
+                    f"sashimi-w:sharp-k:{self.wdm_power_convention}:"
+                    f"physics={self.physics_mode}:v1"
                 ),
-                "variance_power_units": (
-                    {"wavenumber": "1/Mpc", "power": "Mpc^3", "density": "Msun/Mpc^3"}
-                    if self.physics_mode == "consistent"
-                    else {
-                        "wavenumber": "h/Mpc",
-                        "power": "(Mpc/h)^3",
-                        "density": "(Msun/h)/(Mpc/h)^3",
-                    }
-                ),
-                "physical_to_filter_mass": (
-                    "M_filter[Msun/h] = h * M_physical[Msun]"
-                    if self.physics_mode == "consistent"
-                    else "legacy-unconverted-variance-and-concentration-divides-by-h"
-                ),
-                "accretion_mass_redshift_mapping": (
-                    "per-redshift-virial-mass-grid"
-                    if self.physics_mode == "consistent"
-                    else "legacy-final-redshift-grid-reused"
-                ),
-                "population_weight_contract": (
-                    "nonnegative-corrected-counts"
-                    if self.physics_mode == "consistent"
-                    else "exact-signed-tuple;structured-catalog-requires-nonnegative-grid"
-                ),
-                "unit_backend": self.itamae_units.identifier,
-                "itamae_version": itamae.__version__,
-                "canonical_units": {
-                    "mass": "Msun",
-                    "length": "Mpc",
-                    "density": "Msun/Mpc^3",
+                power_identifier=f"sashimi-w:{self.wdm_power_convention}:v1",
+                solver_identifier="sashimi-w:tidal-stripping:nfw:v1",
+                extra={
+                    "mass_wdm_keV": float(self.mass_wdm),
+                    "wdm_power_convention": self.wdm_power_convention,
+                    "wdm_power_formula_role": self.wdm_power_formula_role,
+                    "wdm_power_q": self.wdm_power_q,
+                    "wdm_transfer_nu": float(WDM_TRANSFER_NU),
+                    "half_mode_definition": self.half_mode_definition,
+                    "half_mode_power_ratio": self.half_mode_power_ratio,
+                    "half_mode_wavenumber_h_per_mpc": self.half_mode_wavenumber(),
+                    "omega_m0": float(OmegaM),
+                    "omega_lambda0": self.omega_lambda,
+                    "cosmology_parameters": {
+                        "omega_m0": float(OmegaM),
+                        "omega_lambda0": self.omega_lambda,
+                        "h": float(h),
+                    },
+                    "growth_normalized_at_z0": self.physics_mode == "consistent",
+                    "variance_growth_power": (2 if self.physics_mode == "consistent" else 1),
+                    "variance_mass_unit": (
+                        "Msun"
+                        if self.physics_mode == "consistent"
+                        else "legacy-raw-Msun-values-on-Msun/h-grid"
+                    ),
+                    "variance_power_units": (
+                        {"wavenumber": "1/Mpc", "power": "Mpc^3", "density": "Msun/Mpc^3"}
+                        if self.physics_mode == "consistent"
+                        else {
+                            "wavenumber": "h/Mpc",
+                            "power": "(Mpc/h)^3",
+                            "density": "(Msun/h)/(Mpc/h)^3",
+                        }
+                    ),
+                    "physical_to_filter_mass": (
+                        "M_filter[Msun/h] = h * M_physical[Msun]"
+                        if self.physics_mode == "consistent"
+                        else "legacy-unconverted-variance-and-concentration-divides-by-h"
+                    ),
+                    "accretion_mass_redshift_mapping": (
+                        "per-redshift-virial-mass-grid"
+                        if self.physics_mode == "consistent"
+                        else "legacy-final-redshift-grid-reused"
+                    ),
+                    "population_weight_contract": (
+                        "nonnegative-corrected-counts"
+                        if self.physics_mode == "consistent"
+                        else "exact-signed-tuple;structured-catalog-requires-nonnegative-grid"
+                    ),
+                    "unit_backend": self.itamae_units.identifier,
+                    "canonical_units": {
+                        "mass": "Msun",
+                        "length": "Mpc",
+                        "density": "Msun/Mpc^3",
+                    },
+                    "legacy_units": {
+                        "mass": "Msun",
+                        "length": "kpc",
+                        "density": "Msun/pc^3",
+                    },
+                    "legacy_weight_excludes_survival": True,
+                    "legacy_mode_known_inconsistencies": (
+                        [
+                            "OmegaM+OmegaL!=1",
+                            "D(0)!=1",
+                            "dS/dM scales as D instead of D^2",
+                            "physical Msun values are passed directly to the Msun/h variance grid",
+                            "conc200 divides physical Msun by h instead of multiplying by h",
+                            "all accretion redshifts reuse the final redshift virial-mass grid",
+                            "fixed-node variance noise can create signed population weights",
+                        ]
+                        if self.physics_mode == "legacy"
+                        else []
+                    ),
                 },
-                "legacy_units": {
-                    "mass": "Msun",
-                    "length": "kpc",
-                    "density": "Msun/pc^3",
-                },
-                "legacy_weight_excludes_survival": True,
-                "legacy_mode_known_inconsistencies": (
-                    [
-                        "OmegaM+OmegaL!=1",
-                        "D(0)!=1",
-                        "dS/dM scales as D instead of D^2",
-                        "physical Msun values are passed directly to the Msun/h variance grid",
-                        "conc200 divides physical Msun by h instead of multiplying by h",
-                        "all accretion redshifts reuse the final redshift virial-mass grid",
-                        "fixed-node variance noise can create signed population weights",
-                    ]
-                    if self.physics_mode == "legacy"
-                    else []
-                ),
-            },
+            ),
         )
 
 
