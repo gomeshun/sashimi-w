@@ -40,6 +40,35 @@ def _q10_fixture() -> dict:
     return json.loads(_Q10_GOLDEN.read_text())
 
 
+def _fixture_mass_wdm(fixture: dict | None = None) -> float:
+    """Return the WDM particle mass recorded by a golden fixture."""
+    selected = _fixture() if fixture is None else fixture
+    return float(selected["parameters"]["mass_wdm"])
+
+
+def _catalog_parameters(fixture: dict) -> dict:
+    """Return catalog-call parameters without constructor-only values."""
+    parameters = dict(fixture["parameters"])
+    parameters.pop("mass_wdm")
+    return parameters
+
+
+def _model_from_fixture(fixture: dict, physics_mode: str) -> ItamaeSubhalos:
+    """Reconstruct a WDM model from its recorded constructor parameters."""
+    constructor = fixture["provenance"]["constructor_parameters"]
+    backend_parameters = constructor["cosmology_backend"]["parameters"]
+    backend = NativeFlatLCDM(
+        omega_m0=backend_parameters["omega_m0"],
+        h=backend_parameters["h"],
+    )
+    return ItamaeSubhalos(
+        mass_wdm=constructor["mass_wdm"],
+        physics_mode=physics_mode,
+        wdm_power_convention=constructor["wdm_power_convention"],
+        cosmology_backend=backend,
+    )
+
+
 def test_golden_fixture_provenance_is_complete() -> None:
     """Both WDM fixtures identify their convention and comparison policy."""
     for fixture, convention, modes in (
@@ -56,6 +85,20 @@ def test_golden_fixture_provenance_is_complete() -> None:
         assert provenance["parameters_key"] == "parameters"
         assert provenance["units_key"] == "units"
         assert provenance["wdm_power_convention"] == convention
+        constructor = provenance["constructor_parameters"]
+        assert fixture["parameters"]["mass_wdm"] == constructor["mass_wdm"]
+        assert constructor["wdm_power_convention"] == convention
+        assert constructor["cosmology_backend"]["identifier"] == (
+            "native-flatlcdm:Om=0.27:h=0.7"
+        )
+        assert constructor["cosmology_backend"]["parameters"]["omega_m0"] == (
+            provenance["cosmology"]["parameters"]["omega_m0"]
+        )
+        assert constructor["cosmology_backend"]["parameters"]["h"] == (
+            provenance["cosmology"]["parameters"]["h"]
+        )
+        assert provenance["cosmology"]["parameters"]["omega_m0"] == 0.27
+        assert provenance["cosmology"]["parameters"]["h"] == 0.7
 
 
 def _synthetic_legacy_tuple() -> tuple[np.ndarray, ...]:
@@ -91,19 +134,20 @@ def test_wdm_power_convention_is_explicit_and_validated() -> None:
 
 def test_q5_q10_formulas_half_mode_and_consumers_are_coherent() -> None:
     """One explicit convention must feed both EPS and concentration power."""
-    public = subhalos(mass_wdm=2.0)
+    mass_wdm = _fixture_mass_wdm()
+    public = subhalos(mass_wdm=mass_wdm)
     q5 = ItamaeSubhalos(
-        mass_wdm=2.0,
+        mass_wdm=mass_wdm,
         physics_mode="consistent",
         wdm_power_convention=PUBLISHED_Q5,
     )
     q10 = ItamaeSubhalos(
-        mass_wdm=2.0,
+        mass_wdm=mass_wdm,
         physics_mode="consistent",
         wdm_power_convention=STANDARD_T2_Q10,
     )
     q10_legacy_growth = ItamaeSubhalos(
-        mass_wdm=2.0,
+        mass_wdm=mass_wdm,
         physics_mode="legacy",
         wdm_power_convention=STANDARD_T2_Q10,
     )
@@ -152,14 +196,15 @@ def test_q5_q10_formulas_half_mode_and_consumers_are_coherent() -> None:
 
 def test_growth_and_derivative_modes_are_explicit_and_self_consistent() -> None:
     """Legacy reproduction and corrected flat-WMAP7 evolution must stay separate."""
-    public = subhalos(mass_wdm=2.0)
+    mass_wdm = _fixture_mass_wdm()
+    public = subhalos(mass_wdm=mass_wdm)
     legacy = ItamaeSubhalos(
-        mass_wdm=2.0,
+        mass_wdm=mass_wdm,
         physics_mode="legacy",
         wdm_power_convention=PUBLISHED_Q5,
     )
     consistent = ItamaeSubhalos(
-        mass_wdm=2.0,
+        mass_wdm=mass_wdm,
         physics_mode="consistent",
         wdm_power_convention=PUBLISHED_Q5,
     )
@@ -199,14 +244,15 @@ def test_growth_and_derivative_modes_are_explicit_and_self_consistent() -> None:
 def test_signed_legacy_variance_is_reproduced_but_not_mislabeled_as_counts() -> None:
     """Legacy signed weights stay in tuples; consistent catalogs remove their cause."""
 
-    public = subhalos(mass_wdm=2.0)
+    mass_wdm = _fixture_mass_wdm()
+    public = subhalos(mass_wdm=mass_wdm)
     legacy = ItamaeSubhalos(
-        mass_wdm=2.0,
+        mass_wdm=mass_wdm,
         physics_mode="legacy",
         wdm_power_convention=PUBLISHED_Q5,
     )
     consistent = ItamaeSubhalos(
-        mass_wdm=2.0,
+        mass_wdm=mass_wdm,
         physics_mode="consistent",
         wdm_power_convention=PUBLISHED_Q5,
     )
@@ -232,13 +278,14 @@ def test_signed_legacy_variance_is_reproduced_but_not_mislabeled_as_counts() -> 
 def test_consistent_accretion_rate_uses_each_redshift_mass_grid() -> None:
     """Only corrected mode should stop reusing the final redshift mass row."""
 
+    mass_wdm = _fixture_mass_wdm()
     legacy = ItamaeSubhalos(
-        mass_wdm=2.0,
+        mass_wdm=mass_wdm,
         physics_mode="legacy",
         wdm_power_convention=PUBLISHED_Q5,
     )
     consistent = ItamaeSubhalos(
-        mass_wdm=2.0,
+        mass_wdm=mass_wdm,
         physics_mode="consistent",
         wdm_power_convention=PUBLISHED_Q5,
     )
@@ -262,14 +309,15 @@ def test_consistent_accretion_rate_uses_each_redshift_mass_grid() -> None:
 
 def test_concentration_boundary_converts_physical_mass_to_msun_per_h() -> None:
     """Consistent concentration must evaluate the legacy grid at h*M."""
-    public = subhalos(mass_wdm=2.0)
+    mass_wdm = _fixture_mass_wdm()
+    public = subhalos(mass_wdm=mass_wdm)
     legacy = ItamaeSubhalos(
-        mass_wdm=2.0,
+        mass_wdm=mass_wdm,
         physics_mode="legacy",
         wdm_power_convention=PUBLISHED_Q5,
     )
     consistent = ItamaeSubhalos(
-        mass_wdm=2.0,
+        mass_wdm=mass_wdm,
         physics_mode="consistent",
         wdm_power_convention=PUBLISHED_Q5,
     )
@@ -298,9 +346,10 @@ def test_concentration_boundary_converts_physical_mass_to_msun_per_h() -> None:
 
 def test_itamae_growth_interval_api_retains_the_established_convention() -> None:
     """The separate interval helper remains compatible with the original API."""
-    public = subhalos(mass_wdm=2.0)
+    mass_wdm = _fixture_mass_wdm()
+    public = subhalos(mass_wdm=mass_wdm)
     migrated = ItamaeSubhalos(
-        mass_wdm=2.0,
+        mass_wdm=mass_wdm,
         wdm_power_convention=PUBLISHED_Q5,
     )
     omega_lambda = 1.0 - OmegaM
@@ -329,13 +378,14 @@ def test_itamae_growth_interval_api_retains_the_established_convention() -> None
 def test_native_and_astropy_units_produce_the_same_canonical_catalog() -> None:
     """Implicit kpc and Msun/pc3 values must cross one explicit unit boundary."""
     legacy = _synthetic_legacy_tuple()
+    mass_wdm = _fixture_mass_wdm()
     native = ItamaeSubhalos(
-        mass_wdm=2.0,
+        mass_wdm=mass_wdm,
         unit_backend=NativeUnits(),
         wdm_power_convention=PUBLISHED_Q5,
     )
     astropy = ItamaeSubhalos(
-        mass_wdm=2.0,
+        mass_wdm=mass_wdm,
         unit_backend=AstropyUnits(),
         wdm_power_convention=PUBLISHED_Q5,
     )
@@ -369,13 +419,14 @@ def test_native_and_astropy_units_produce_the_same_canonical_catalog() -> None:
 
 def test_nfw_inverse_is_injected_without_mutating_module_globals() -> None:
     """Consistent mode uses ITAMAE exactly while legacy mode stays reproducible."""
+    mass_wdm = _fixture_mass_wdm()
     legacy = ItamaeSubhalos(
-        mass_wdm=2.0,
+        mass_wdm=mass_wdm,
         physics_mode="legacy",
         wdm_power_convention=PUBLISHED_Q5,
     )
     consistent = ItamaeSubhalos(
-        mass_wdm=2.0,
+        mass_wdm=mass_wdm,
         physics_mode="consistent",
         wdm_power_convention=PUBLISHED_Q5,
     )
@@ -384,7 +435,7 @@ def test_nfw_inverse_is_injected_without_mutating_module_globals() -> None:
     fraction = np.array([1.0e-5, 0.01, 0.5, 2.0])
 
     legacy_concentration = legacy._invert_nfw_mass_fraction(fraction)
-    public_concentration = subhalos(mass_wdm=2.0)._invert_nfw_mass_fraction(fraction)
+    public_concentration = subhalos(mass_wdm=mass_wdm)._invert_nfw_mass_fraction(fraction)
     np.testing.assert_array_equal(legacy_concentration, public_concentration)
 
     exact_concentration = consistent._invert_nfw_mass_fraction(fraction)
@@ -408,12 +459,10 @@ def test_full_catalog_matches_mode_specific_golden_and_invariants(
     fixture = _fixture()
     expected = fixture["modes"][physics_mode]
     assert fixture["units"]["catalog_mass"] == "physical Msun"
-    model = ItamaeSubhalos(
-        mass_wdm=2.0,
-        physics_mode=physics_mode,
-        wdm_power_convention=PUBLISHED_Q5,
-    )
-    catalog = model.rs_rhos_catalog_calc(**fixture["parameters"])
+    constructor = fixture["provenance"]["constructor_parameters"]
+    assert _fixture_mass_wdm(fixture) == constructor["mass_wdm"]
+    model = _model_from_fixture(fixture, physics_mode)
+    catalog = model.rs_rhos_catalog_calc(**_catalog_parameters(fixture))
 
     assert catalog.shape == (16,)
     for column, (golden_name, scale) in _COLUMN_MAPPING.items():
@@ -468,15 +517,21 @@ def test_full_catalog_matches_mode_specific_golden_and_invariants(
     assert catalog.metadata["sashimi_version"] == "0.1.0a1"
     assert catalog.metadata["catalog_schema_version"] == "1.0"
     assert catalog.metadata["canonical_unit_schema"] == "1.0"
+    convention = constructor["wdm_power_convention"]
     assert catalog.metadata["variance_identifier"] == (
-        f"sashimi-w:sharp-k:{PUBLISHED_Q5}:physics={physics_mode}:v1"
+        f"sashimi-w:sharp-k:{convention}:physics={physics_mode}:v1"
     )
-    assert catalog.metadata["power_identifier"] == f"sashimi-w:{PUBLISHED_Q5}:v1"
+    assert catalog.metadata["power_identifier"] == f"sashimi-w:{convention}:v1"
     assert catalog.metadata["solver_identifier"] == "sashimi-w:tidal-stripping:nfw:v1"
+    assert catalog.metadata["backend_identifier"] == (
+        fixture["provenance"]["cosmology"]["backend_identifier"][physics_mode]
+    )
     assert catalog.metadata["cosmology_parameters"] == {
-        "omega_m0": float(OmegaM),
-        "omega_lambda0": float(catalog.metadata["omega_lambda0"]),
-        "h": float(h),
+        "omega_m0": fixture["provenance"]["cosmology"]["parameters"]["omega_m0"],
+        "omega_lambda0": fixture["provenance"]["cosmology"]["parameters"][
+            "omega_lambda0"
+        ][physics_mode],
+        "h": fixture["provenance"]["cosmology"]["parameters"]["h"],
     }
     assert catalog.metadata["wdm_power_convention"] == PUBLISHED_Q5
     assert catalog.metadata["wdm_power_q"] == 5.0
@@ -523,12 +578,15 @@ def test_full_catalog_matches_mode_specific_golden_and_invariants(
 
 def test_legacy_full_catalog_reproduces_the_public_tuple() -> None:
     """Compatibility mode should preserve all historical tuple fields."""
-    parameters = _fixture()["parameters"]
-    public = subhalos(mass_wdm=2.0).rs_rhos_calc(**parameters)
+    fixture = _fixture()
+    parameters = _catalog_parameters(fixture)
+    mass_wdm = _fixture_mass_wdm(fixture)
+    convention = fixture["provenance"]["constructor_parameters"]["wdm_power_convention"]
+    public = subhalos(mass_wdm=mass_wdm).rs_rhos_calc(**parameters)
     migrated_model = ItamaeSubhalos(
-        mass_wdm=2.0,
+        mass_wdm=mass_wdm,
         physics_mode="legacy",
-        wdm_power_convention=PUBLISHED_Q5,
+        wdm_power_convention=convention,
     )
     migrated = migrated_model.rs_rhos_calc(**parameters)
 
@@ -578,13 +636,16 @@ def test_legacy_full_catalog_reproduces_the_public_tuple() -> None:
 
 def test_legacy_mass_function_and_cumulative_satellites_reproduce_public_api() -> None:
     """Derived legacy observables must agree, not only the underlying tuple."""
-    parameters = dict(_fixture()["parameters"])
+    fixture = _fixture()
+    parameters = _catalog_parameters(fixture)
     host_mass = parameters.pop("M0")
-    public = subhalos(mass_wdm=2.0)
+    mass_wdm = _fixture_mass_wdm(fixture)
+    convention = fixture["provenance"]["constructor_parameters"]["wdm_power_convention"]
+    public = subhalos(mass_wdm=mass_wdm)
     migrated = ItamaeSubhalos(
-        mass_wdm=2.0,
+        mass_wdm=mass_wdm,
         physics_mode="legacy",
-        wdm_power_convention=PUBLISHED_Q5,
+        wdm_power_convention=convention,
     )
 
     public_mass, public_dndm = public.subhalo_distr(host_mass, **parameters)
@@ -630,14 +691,12 @@ def test_standard_q10_full_catalog_golden_metadata_and_roundtrip(
 ) -> None:
     """The standard T-squared path is pinned as a complete catalog artifact."""
     fixture = _q10_fixture()
-    assert fixture["wdm_power_convention"] == STANDARD_T2_Q10
-    assert fixture["physics_mode"] == "consistent"
-    model = ItamaeSubhalos(
-        mass_wdm=2.0,
-        physics_mode=fixture["physics_mode"],
-        wdm_power_convention=fixture["wdm_power_convention"],
-    )
-    catalog = model.rs_rhos_catalog_calc(**fixture["parameters"])
+    constructor = fixture["provenance"]["constructor_parameters"]
+    assert constructor["wdm_power_convention"] == STANDARD_T2_Q10
+    assert _fixture_mass_wdm(fixture) == constructor["mass_wdm"]
+    assert constructor["physics_mode"] == "consistent"
+    model = _model_from_fixture(fixture, constructor["physics_mode"])
+    catalog = model.rs_rhos_catalog_calc(**_catalog_parameters(fixture))
     expected = fixture["catalog"]
 
     assert catalog.shape == (16,)
@@ -666,6 +725,12 @@ def test_standard_q10_full_catalog_golden_metadata_and_roundtrip(
 
     metadata = catalog.metadata
     assert metadata["wdm_power_convention"] == STANDARD_T2_Q10
+    assert metadata["backend_identifier"] == fixture["provenance"]["cosmology"][
+        "backend_identifier"
+    ]
+    assert metadata["cosmology_parameters"] == fixture["provenance"]["cosmology"][
+        "parameters"
+    ]
     assert metadata["wdm_power_formula_role"] == "viel-transfer-amplitude-squared"
     assert metadata["wdm_power_q"] == 10.0
     assert metadata["half_mode_definition"] == (
@@ -748,7 +813,7 @@ def test_catalog_input_validation_fails_before_numerical_work(
     error: type[Exception],
     message: str,
 ) -> None:
-    parameters = _fixture()["parameters"] | overrides
+    parameters = _catalog_parameters(_fixture()) | overrides
     with pytest.raises(error, match=message):
         ItamaeSubhalos(
             wdm_power_convention=PUBLISHED_Q5,

@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
+
 import numpy as np
 import pytest
 
@@ -21,10 +24,18 @@ from sashimi_w_itamae_variance import (
 )
 from sashimi_w import h, k_file, sigma_8, subhalos
 
+_GOLDEN = Path(__file__).parent / "golden" / "wdm_small_catalog.json"
+
+
+def _fixture_mass_wdm() -> float:
+    """Return the standard WDM particle mass recorded by the q5 fixture."""
+    with _GOLDEN.open(encoding="utf-8") as input_file:
+        return float(json.load(input_file)["parameters"]["mass_wdm"])
+
 
 def test_callable_variance_adapter_exactly_preserves_legacy_model() -> None:
     """The reproduction adapter must retain native sigma and derivative arrays."""
-    public = subhalos(mass_wdm=2.0)
+    public = subhalos(mass_wdm=_fixture_mass_wdm())
     variance = make_variance_model(public)
     mass = np.array([1.0e7, 1.0e9, 1.0e11])
     redshift = np.array([0.0, 1.0, 3.0])
@@ -42,7 +53,7 @@ def test_callable_variance_adapter_exactly_preserves_legacy_model() -> None:
         variance.dvariance_dmass(mass, redshift),
         public.dsdm(mass, redshift),
     )
-    assert "m_wdm_keV=2" in variance.identifier
+    assert f"m_wdm_keV={_fixture_mass_wdm():g}" in variance.identifier
     assert "physics=legacy" in variance.identifier
     assert "power=published-q5" in variance.identifier
     assert "formula-role=q5-expression-used-as-power-ratio" in variance.identifier
@@ -59,7 +70,7 @@ def test_variance_factories_require_and_preserve_one_power_convention() -> None:
         make_integrated_variance_model()
 
     q5 = ItamaeSubhalos(
-        mass_wdm=2.0,
+        mass_wdm=_fixture_mass_wdm(),
         physics_mode="consistent",
         wdm_power_convention=PUBLISHED_Q5,
     )
@@ -74,7 +85,7 @@ def test_variance_factories_require_and_preserve_one_power_convention() -> None:
 
 def test_callable_adapter_uses_consistent_derivative_when_requested() -> None:
     model = ItamaeSubhalos(
-        mass_wdm=2.0,
+        mass_wdm=_fixture_mass_wdm(),
         physics_mode="consistent",
         wdm_power_convention=PUBLISHED_Q5,
     )
@@ -91,7 +102,7 @@ def test_callable_adapter_uses_consistent_derivative_when_requested() -> None:
 def test_integrated_sharp_k_path_is_sigma8_normalized_and_continuous() -> None:
     """The corrected moving cutoff should produce finite nonzero derivatives."""
     model = ItamaeSubhalos(
-        mass_wdm=2.0,
+        mass_wdm=_fixture_mass_wdm(),
         physics_mode="consistent",
         wdm_power_convention=PUBLISHED_Q5,
     )
@@ -122,7 +133,7 @@ def test_integrated_sharp_k_path_is_sigma8_normalized_and_continuous() -> None:
 def test_integrated_sigma_tracks_legacy_with_reviewed_quadrature_difference() -> None:
     """Accurate integration should remain close without reproducing rectangle bias."""
     model = ItamaeSubhalos(
-        mass_wdm=2.0,
+        mass_wdm=_fixture_mass_wdm(),
         physics_mode="consistent",
         wdm_power_convention=PUBLISHED_Q5,
     )
@@ -152,12 +163,12 @@ def test_integrated_sigma_tracks_legacy_with_reviewed_quadrature_difference() ->
 def test_standard_q10_integrated_variance_formula_and_identifier_are_pinned() -> None:
     """T-squared suppresses low-mass variance while retaining sigma8."""
     q5_model = ItamaeSubhalos(
-        mass_wdm=2.0,
+        mass_wdm=_fixture_mass_wdm(),
         physics_mode="consistent",
         wdm_power_convention=PUBLISHED_Q5,
     )
     q10_model = ItamaeSubhalos(
-        mass_wdm=2.0,
+        mass_wdm=_fixture_mass_wdm(),
         physics_mode="consistent",
         wdm_power_convention=STANDARD_T2_Q10,
     )
@@ -186,7 +197,7 @@ def test_standard_q10_integrated_variance_formula_and_identifier_are_pinned() ->
 def test_consistent_sigma_cache_uses_physical_mass_and_is_reused() -> None:
     """Catalog calls interpolate one canonical physical-mass cache."""
     model = ItamaeSubhalos(
-        mass_wdm=2.0,
+        mass_wdm=_fixture_mass_wdm(),
         physics_mode="consistent",
         wdm_power_convention=PUBLISHED_Q5,
     )
@@ -230,7 +241,7 @@ def test_lighter_wdm_has_more_small_scale_power_suppression() -> None:
 
 def test_integrated_path_rejects_legacy_derivative_convention() -> None:
     model = ItamaeSubhalos(
-        mass_wdm=2.0,
+        mass_wdm=_fixture_mass_wdm(),
         physics_mode="legacy",
         wdm_power_convention=PUBLISHED_Q5,
     )
@@ -240,7 +251,7 @@ def test_integrated_path_rejects_legacy_derivative_convention() -> None:
 
 def test_variance_cache_binds_wdm_particle_mass_and_round_trips(tmp_path) -> None:
     model = ItamaeSubhalos(
-        mass_wdm=2.0,
+        mass_wdm=_fixture_mass_wdm(),
         physics_mode="consistent",
         wdm_power_convention=PUBLISHED_Q5,
     )
@@ -269,7 +280,7 @@ def test_variance_cache_binds_wdm_particle_mass_and_round_trips(tmp_path) -> Non
     )
     assert key != changed
     q10_model = ItamaeSubhalos(
-        mass_wdm=2.0,
+        mass_wdm=_fixture_mass_wdm(),
         physics_mode="consistent",
         wdm_power_convention=STANDARD_T2_Q10,
     )

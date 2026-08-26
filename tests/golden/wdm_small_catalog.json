@@ -11,6 +11,32 @@
       "legacy": "strict legacy tuple reproduction with published q5",
       "consistent": "reviewed corrected growth, units, and mass-grid conventions"
     },
+    "constructor_parameters": {
+      "mass_wdm": 2.0,
+      "physics_mode": ["consistent", "legacy"],
+      "wdm_power_convention": "published-q5",
+      "cosmology_backend": {
+        "identifier": "native-flatlcdm:Om=0.27:h=0.7",
+        "parameters": {
+          "omega_m0": 0.27,
+          "h": 0.7
+        }
+      }
+    },
+    "cosmology": {
+      "backend_identifier": {
+        "consistent": "array=numpy;cosmology=native-flatlcdm:Om=0.27:h=0.7;units=native-units:1.0",
+        "legacy": "legacy-wmap7-module:OmegaM=0.27000000000000002;OmegaL=0.77689999999999992;h=0.69999999999999996"
+      },
+      "parameters": {
+        "omega_m0": 0.27,
+        "h": 0.7,
+        "omega_lambda0": {
+          "consistent": 0.73,
+          "legacy": 0.7768999999999999
+        }
+      }
+    },
     "parameters_key": "parameters",
     "units_key": "units",
     "wdm_power_convention": "published-q5",
@@ -49,6 +75,7 @@
   },
   "parameters": {
     "M0": 10000000000.0,
+    "mass_wdm": 2.0,
     "N_herm": 2,
     "N_hermNa": 3,
     "N_ma": 4,

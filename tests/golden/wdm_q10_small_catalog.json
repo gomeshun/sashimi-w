@@ -10,6 +10,27 @@
     "mode_policy": {
       "consistent": "reviewed explicit q10 validation path; not an implicit physics-mode default"
     },
+    "constructor_parameters": {
+      "mass_wdm": 2.0,
+      "physics_mode": "consistent",
+      "wdm_power_convention": "standard-t2-q10",
+      "cosmology_backend": {
+        "identifier": "native-flatlcdm:Om=0.27:h=0.7",
+        "parameters": {
+          "omega_m0": 0.27,
+          "h": 0.7,
+          "omega_lambda0": 0.73
+        }
+      }
+    },
+    "cosmology": {
+      "backend_identifier": "array=numpy;cosmology=native-flatlcdm:Om=0.27:h=0.7;units=native-units:1.0",
+      "parameters": {
+        "omega_m0": 0.27,
+        "h": 0.7,
+        "omega_lambda0": 0.73
+      }
+    },
     "parameters_key": "parameters",
     "units_key": "units",
     "wdm_power_convention": "standard-t2-q10",
@@ -34,6 +55,7 @@
   },
   "parameters": {
     "M0": 10000000000.0,
+    "mass_wdm": 2.0,
     "N_herm": 2,
     "N_hermNa": 3,
     "N_ma": 4,
