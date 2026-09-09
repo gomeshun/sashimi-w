@@ -1,10 +1,10 @@
 <p align="center">
+  <img src="assets/logo.svg" alt="SASHIMI-W logo" width="440">
+</p>
 
 ## Hands-on usage walkthrough
 
 Start with [the executable usage walkthrough](notebooks/usage_walkthrough.ipynb): setup, main APIs, plots, catalogue export and checks in one notebook for this package. Its coverage table records remaining gaps. The **Usage walkthrough** CI runs every cell against the candidate package and uploads an executed notebook. This is a mandatory migration deliverable tracked in [sashimi-family #28](https://github.com/gomeshun/sashimi-family/issues/28).
-  <img src="assets/logo.svg" alt="SASHIMI-W logo" width="440">
-</p>
 
 # Semi-Analytical SubHalo Inference ModelIng for WDM (SASHIMI-W)
 [![arXiv](https://img.shields.io/badge/arXiv-2111.13137%20-green.svg)](https://arxiv.org/abs/2111.13137)
