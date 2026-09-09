@@ -1,0 +1,31 @@
+name: Usage walkthrough
+on:
+  pull_request:
+  push:
+    branches: [main, itamae-migration]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  walkthrough:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Record candidate provenance
+        run: echo "SASHIMI_W_SOURCE_REVISION=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+      - name: Install candidate and notebook dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install "itamae @ git+https://github.com/gomeshun/itamae.git@1c5b1ad67725671fd4dc1a2306d2731ba337e563"
+          python -m pip install . numpy scipy matplotlib astropy colossus h5py numexpr tqdm nbformat nbclient ipykernel
+      - name: Execute all cells in a fresh kernel
+        run: python scripts/execute_walkthrough.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sashimi-w-usage-walkthrough
+          path: artifacts/usage_walkthrough.executed.ipynb
+          if-no-files-found: error
