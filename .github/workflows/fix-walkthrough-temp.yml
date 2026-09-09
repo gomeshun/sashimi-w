@@ -1,0 +1,51 @@
+name: Normalize walkthrough sources (temporary)
+on:
+  push:
+    branches: [docs/usage-walkthrough-20260907]
+permissions:
+  contents: write
+jobs:
+  normalize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: docs/usage-walkthrough-20260907
+      - name: Normalize notebook and README
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          notebook_path = Path('notebooks/usage_walkthrough.ipynb')
+          notebook = json.loads(notebook_path.read_text())
+          for cell in notebook['cells']:
+              if cell.get('cell_type') == 'code':
+                  cell['execution_count'] = None
+                  cell['outputs'] = []
+              if cell.get('cell_type') == 'markdown':
+                  text = ''.join(cell.get('source', []))
+                  text = text.replace('python -m ipykernel install --user --name sashimi-walkthrough\n', '')
+                  text = text.replace(
+                      'Select that kernel. ITAMAE means this project\'s GitHub package; do not substitute an unrelated package with the same PyPI name. No data download is performed by notebook cells. F uses its packaged Planck power table and a temporary cache.\n',
+                      'Open this notebook with the `python3` kernel from that environment. ITAMAE means this project\'s GitHub package; do not substitute an unrelated package with the same PyPI name. No data download is performed by notebook cells.\n',
+                  )
+                  cell['source'] = text.splitlines(keepends=True)
+          notebook_path.write_text(json.dumps(notebook, indent=1, ensure_ascii=False) + '\n')
+
+          readme_path = Path('README.md')
+          readme = readme_path.read_text()
+          bad = '''<p align="center">\n\n## Hands-on usage walkthrough\n\nStart with [the executable usage walkthrough](notebooks/usage_walkthrough.ipynb): setup, main APIs, plots, catalogue export and checks in one notebook for this package. Its coverage table records remaining gaps. The **Usage walkthrough** CI runs every cell against the candidate package and uploads an executed notebook. This is a mandatory migration deliverable tracked in [sashimi-family #28](https://github.com/gomeshun/sashimi-family/issues/28).\n  <img src="assets/logo.svg" alt="SASHIMI-W logo" width="440">\n</p>'''
+          good = '''<p align="center">\n  <img src="assets/logo.svg" alt="SASHIMI-W logo" width="440">\n</p>\n\n## Hands-on usage walkthrough\n\nStart with [the executable usage walkthrough](notebooks/usage_walkthrough.ipynb): setup, main APIs, plots, catalogue export and checks in one notebook for this package. Its coverage table records remaining gaps. The **Usage walkthrough** CI runs every cell against the candidate package and uploads an executed notebook. This is a mandatory migration deliverable tracked in [sashimi-family #28](https://github.com/gomeshun/sashimi-family/issues/28).'''
+          if bad not in readme:
+              raise SystemExit('expected README walkthrough block not found')
+          readme_path.write_text(readme.replace(bad, good, 1))
+          PY
+      - name: Commit normalized sources
+        run: |
+          if git diff --quiet; then exit 0; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add README.md notebooks/usage_walkthrough.ipynb
+          git commit -m 'docs: normalize W walkthrough sources'
+          git push origin HEAD:docs/usage-walkthrough-20260907
