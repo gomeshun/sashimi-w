@@ -1565,7 +1565,7 @@ wheels = [
 [[package]]
 name = "sashimi-itamae"
 version = "0.1.0a4"
-source = { git = "https://github.com/gomeshun/itamae.git?rev=a601177e7996f6798b9a1f1d109bc6b2837d9cc6#a601177e7996f6798b9a1f1d109bc6b2837d9cc6" }
+source = { git = "https://github.com/gomeshun/itamae.git?rev=d752306e62bf295b7a96100b9cc022f8f9c61071#d752306e62bf295b7a96100b9cc022f8f9c61071" }
 dependencies = [
     { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12'" },
     { name = "numpy", version = "2.5.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
@@ -1608,7 +1608,7 @@ requires-dist = [
     { name = "nbconvert", marker = "extra == 'demo'", specifier = ">=7" },
     { name = "numpy", specifier = ">=1.26" },
     { name = "pytest", marker = "extra == 'test'", specifier = ">=8" },
-    { name = "sashimi-itamae", git = "https://github.com/gomeshun/itamae.git?rev=a601177e7996f6798b9a1f1d109bc6b2837d9cc6" },
+    { name = "sashimi-itamae", git = "https://github.com/gomeshun/itamae.git?rev=d752306e62bf295b7a96100b9cc022f8f9c61071" },
     { name = "scipy", specifier = ">=1.11" },
 ]
 provides-extras = ["astropy", "demo", "test"]
