@@ -18,7 +18,7 @@ from itamae.power import (
     TransferModifiedPowerSpectrum,
 )
 from itamae.variance import CallableVarianceModel, IntegratedVarianceModel
-from sashimi_w_itamae_migration import ItamaeSubhalos
+from sashimi_w_itamae_migration import ItamaeSubhalos, STANDARD_T2_Q10, CALCULATION_SPECIFICATION
 from sashimi_w_physics import Pk_file, WDM_TRANSFER_NU, h, k_file, sigma_8
 
 
@@ -29,9 +29,15 @@ _SHARP_K_CUTOFF = _SHARP_K_MASS_ASSIGNMENT * (9.0 * np.pi / 2.0) ** (1.0 / 3.0)
 def _resolve_model(model, *, mass_wdm, wdm_power_convention):
     if model is None:
         if wdm_power_convention is None:
-            raise ValueError("wdm_power_convention must be explicit.")
+            wdm_power_convention = STANDARD_T2_Q10
         model = ItamaeSubhalos(mass_wdm=mass_wdm, wdm_power_convention=wdm_power_convention)
+    if wdm_power_convention == "published-q5":
+        raise ValueError(
+            "wdm_power_convention='published-q5' is retired; use the frozen reference."
+        )
     selected = model.wdm_power_convention
+    if selected != STANDARD_T2_Q10 or model.wdm_power_q != 10.0:
+        raise ValueError("The supplied model must use the supported q10 thermal WDM specification.")
     if wdm_power_convention is not None and wdm_power_convention != selected:
         raise ValueError("wdm_power_convention does not match the configured model.")
     return model, selected
@@ -65,11 +71,9 @@ def make_integrated_variance_model(
         constructed from ``mass_wdm``.
     mass_wdm : float, optional
         WDM particle mass in keV used only when constructing a model.
-    wdm_power_convention : {"published-q5", "standard-t2-q10"}, optional
-        Required when constructing a model. If ``model`` is supplied, an
-        explicitly supplied value must match the model rather than replacing
-        it. This prevents a q5 top-hat concentration from being paired with a
-        q10 sharp-k variance, or vice versa.
+    wdm_power_convention : {"standard-t2-q10"}, optional
+        Defaults to the supported q10 thermal WDM specification. Retired q5
+        selectors and models are explicitly rejected, without conversion.
     n_k : int, optional
         Number of logarithmic integration nodes between the bundled spectrum
         endpoints and each mass-dependent sharp-k cutoff.
@@ -118,14 +122,16 @@ def make_integrated_variance_model(
 
     def wdm_power_ratio(wavenumber: Any) -> np.ndarray:
         k = np.asarray(wavenumber, dtype=float)
-        return np.asarray(configured._wdm_power_ratio(k, alpha=canonical_alpha), dtype=float)
+        # Snapshot the configured alpha and q rather than retaining a mutable
+        # model callback behind an already calculated content identifier.
+        return (1.0 + (canonical_alpha * k) ** (2.0 * WDM_TRANSFER_NU)) ** (-q / WDM_TRANSFER_NU)
 
     particle_mass = float(configured.mass_wdm)
     raw_power = TransferModifiedPowerSpectrum(
         base,
         wdm_power_ratio,
         ratio_identifier=(
-            "sashimi-w:wdm-power-ratio:unnormalized:"
+            f"{CALCULATION_SPECIFICATION}:wdm-power-ratio:unnormalized:"
             f"m_wdm_keV={particle_mass:.17g};"
             f"alpha_Mpc={canonical_alpha:.17g};"
             f"nu={WDM_TRANSFER_NU:.17g};"
@@ -158,7 +164,7 @@ def make_integrated_variance_model(
         base,
         normalized_wdm_power_ratio,
         ratio_identifier=(
-            "sashimi-w:wdm-power-ratio:"
+            f"{CALCULATION_SPECIFICATION}:wdm-power-ratio:"
             f"m_wdm_keV={particle_mass:.17g};"
             f"alpha_Mpc={canonical_alpha:.17g};"
             f"nu={WDM_TRANSFER_NU:.17g};"
@@ -172,7 +178,9 @@ def make_integrated_variance_model(
         power=power,
         **integration_options,
         growth_function=configured.growthD,
-        growth_identifier=(f"growth={configured.itamae_cosmology.identifier};calculation=cpt-normalized-v1"),
+        growth_identifier=(
+            f"growth={configured.itamae_cosmology.identifier};calculation=cpt-normalized-v1"
+        ),
     )
 
 

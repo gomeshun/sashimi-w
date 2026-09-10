@@ -1,0 +1,33 @@
+{
+  "before": "09322feb1e348f40fa93d0514f42dd02171a7282",
+  "after": "e3017d93b4dfdcb975bca71f1a00535e8faf4ec2",
+  "core": "dfa083d0d46181c376947ac7b2da829facaf2e8b",
+  "environment_equal": true,
+  "reports": {
+    "q10-before-09322fe/report.json": "62846879546ccc8e7581da0ca1cee61e87b3838dc8276cc52f8b7f385d6bed76",
+    "q10-adopted-v2/report.json": "aecdef7436e54db0ff55f0cf1929c689673bd3a42cb37d6a2dddeda53d2d79b8"
+  },
+  "checks": [
+    {
+      "mass_wdm_keV": 0.5,
+      "array_count": 21,
+      "all_bitwise_equal": true,
+      "count": 4.3015090364922547e-07,
+      "bound_mass_fraction": 2.612171039837246e-09
+    },
+    {
+      "mass_wdm_keV": 2.0,
+      "array_count": 21,
+      "all_bitwise_equal": true,
+      "count": 1.2421418704021492,
+      "bound_mass_fraction": 0.0022900792600091184
+    },
+    {
+      "mass_wdm_keV": 5.0,
+      "array_count": 21,
+      "all_bitwise_equal": true,
+      "count": 24.800867950552988,
+      "bound_mass_fraction": 0.011902715334411987
+    }
+  ]
+}

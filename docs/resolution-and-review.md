@@ -1,5 +1,8 @@
 # Resolution limits carried into peer review
 
+Update 2026-09-11: q10 is now the sole supported thermal-WDM product prescription.
+The q5 results below are historical; see [adoption](q10-adoption.md).
+
 On 2026-09-10 the user approved retaining the existing redshift step (`dz=0.1`).
 Changing that default is not a completion condition for this release preparation.
 The observed resolution dependence and the following convergence procedure remain

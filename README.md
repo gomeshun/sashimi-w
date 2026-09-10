@@ -10,9 +10,9 @@ survival threshold belong to W; shared numerical mechanisms belong to ITAMAE.
 ## Standard API
 
 ```python
-from sashimi_w import Subhalos, PUBLISHED_Q5
+from sashimi_w import Subhalos
 
-model = Subhalos(mass_wdm=2.0, wdm_power_convention=PUBLISHED_Q5)
+model = Subhalos(mass_wdm=2.0)
 catalog = model.rs_rhos_catalog_calc(
     M0=1e10, dz=0.5, zmax=1.0, N_ma=4, N_herm=2,
     N_hermNa=3, logmamin=6, logmamax=8,
@@ -48,18 +48,21 @@ The current-survivor definition was adopted after the independent review on
 
 ## Power and background specification
 
-The power convention is required explicitly:
+The current Viel coefficients and thermal-particle mass definition use the
+transfer amplitude `T=[1+(alpha k)^(2 nu)]^(-5/nu)` and power ratio `T²`
+(exponent `-10/nu`). q10 is the sole standard path after the 2026-09-11 adoption.
+`Subhalos(2.0)` and explicit `wdm_power_convention="standard-t2-q10"` select it.
+The old `published-q5` selector raises a descriptive error; `PUBLISHED_Q5` is
+removed. Frozen q5 references remain available for historical reproduction.
 
-- `published-q5`: `[1 + (alpha k)^(2 nu)]^(-5/nu)` is used as the power ratio,
-  preserving the published SASHIMI-W spectrum choice.
-- `standard-t2-q10`: that transfer amplitude is squared, producing exponent
-  `-10/nu`. It is an explicit alternative, not a new default.
-
-Both sharp-k EPS variance and top-hat Ludlow concentration use the selected
-convention. At the recorded half-mode scale the q5 **power** ratio is 0.5;
-the q10 **amplitude** ratio is 0.5 (power 0.25). Equal numerical half-mode
-scales do not imply equal spectra or catalogs. No likelihood or published
-constraint is reinterpreted by a half-mode conversion.
+Both sharp-k EPS variance and top-hat Ludlow concentration use q10.
+`transfer_amplitude(k)` and `power_ratio(k)` distinguish the two quantities
+(k in h/Mpc). `half_mode_wavenumber()` retains amplitude half (T=0.5, power=0.25);
+`half_mode_wavenumber(power_ratio=0.5)` explicitly reports power half. The
+threshold diagnostic does not change the population or concentration calculation.
+[Adoption and controlled comparison](docs/q10-adoption.md) records the evidence,
+old-input/cache rejection and unchanged coefficients. New fitting formulas and
+observational limits are separate work; no old mass bound is rescaled here.
 
 The standard background is flat WMAP7 (Omega_m=0.27, h=0.7), with D(0)=1 and
 S(M,z)=D(z)² S(M,0). Nonmatching cosmology parameters are rejected. The table
@@ -85,7 +88,7 @@ from broad grid/solver convergence and simulation validation.
 
 The existing `dz=0.1` default is retained by explicit scope agreement.
 [Measured resolution dependence and review procedure](docs/resolution-and-review.md)
-report the fixed q5/q10 sweep: `.1` to `.0125` changes representative catalog
+report the fixed historical q5 and adopted q10 sweep: `.1` to `.0125` changes representative catalog
 counts by about 5% and bound mass fractions by 17–18%. These finite-grid effects
 are not universal error estimates for the full default configuration.
 

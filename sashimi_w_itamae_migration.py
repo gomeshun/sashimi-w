@@ -15,27 +15,13 @@ from sashimi_w_physics import OmegaM, WDM_TRANSFER_NU, h, WDMPhysics
 
 _CANONICAL_SCALE = {"Msun": 1.0, "kpc": 0.001, "Msun/pc3": 1e18, "dimensionless": 1.0}
 _CANONICAL_ASTROPY_UNIT = {"mass": "Msun", "length": "Mpc", "density": "Msun / Mpc3"}
-PUBLISHED_Q5 = "published-q5"
 STANDARD_T2_Q10 = "standard-t2-q10"
-_WDM_POWER_CONVENTIONS = {
-    PUBLISHED_Q5: {
-        "q": 5.0,
-        "formula_role": "q5-expression-used-as-power-ratio",
-        "half_mode_definition": "P_WDM/P_CDM=0.5",
-        "half_mode_power_ratio": 0.5,
-    },
-    STANDARD_T2_Q10: {
-        "q": 10.0,
-        "formula_role": "viel-transfer-amplitude-squared",
-        "half_mode_definition": "T_WDM/T_CDM=0.5;P_WDM/P_CDM=0.25",
-        "half_mode_power_ratio": 0.25,
-    },
-}
+CALCULATION_SPECIFICATION = "sashimi-w:thermal-wdm-q10:2026-09-11:v2"
 _CONSISTENT_OMEGA_L = 1.0 - float(OmegaM)
 
 
 class Subhalos(WDMPhysics):
-    """WDM model with explicit q5/q10 power choice and a fixed calculation specification.
+    """Thermal WDM with the Viel transfer amplitude squared and a fixed specification.
 
     Canonical catalogs use Msun, Mpc and Msun/Mpc^3. Tuple conversion uses the
     historical Msun, kpc and Msun/pc^3 format. No legacy calculation is provided."""
@@ -44,7 +30,7 @@ class Subhalos(WDMPhysics):
         self,
         mass_wdm: float = 1.5,
         *,
-        wdm_power_convention: str,
+        wdm_power_convention: str = STANDARD_T2_Q10,
         cosmology_backend: Any | None = None,
         unit_backend: Any | None = None,
     ) -> None:
@@ -54,50 +40,80 @@ class Subhalos(WDMPhysics):
             raise ValueError("mass_wdm must be finite and positive.") from error
         if not np.isfinite(particle_mass) or particle_mass <= 0.0:
             raise ValueError("mass_wdm must be finite and positive.")
-        try:
-            convention = _WDM_POWER_CONVENTIONS[wdm_power_convention]
-        except (KeyError, TypeError) as error:
+        if wdm_power_convention == "published-q5":
             raise ValueError(
-                f"wdm_power_convention must be one of {sorted(_WDM_POWER_CONVENTIONS)}."
-            ) from error
+                "wdm_power_convention='published-q5' is retired. Reproduce q5 with "
+                "the frozen historical reference; it is not converted to q10."
+            )
+        if wdm_power_convention != STANDARD_T2_Q10:
+            raise ValueError("wdm_power_convention must be 'standard-t2-q10'.")
         backend = cosmology_backend or NativeFlatLCDM(omega_m0=float(OmegaM), h=float(h))
         self._validate_cosmology(backend)
-        self.wdm_power_convention = wdm_power_convention
-        self.wdm_power_q = float(convention["q"])
-        self.wdm_power_formula_role = str(convention["formula_role"])
-        self.half_mode_definition = str(convention["half_mode_definition"])
-        self.half_mode_power_ratio = float(convention["half_mode_power_ratio"])
         self.itamae_cosmology = backend
         self.itamae_units = unit_backend or NativeUnits()
         super().__init__(mass_wdm=particle_mass)
         self._variance_model = None
 
-    def _wdm_power_ratio(self, k: Any, *, alpha: Any | None = None):
-        """Return the explicitly selected WDM-to-CDM power ratio.
+    @property
+    def wdm_power_convention(self) -> str:
+        return STANDARD_T2_Q10
 
-        Viel et al. define ``[1 + (alpha*k)^(2*nu)]^(-5/nu)`` as the
-        transfer amplitude ``T=sqrt(P_WDM/P_CDM)``. Published SASHIMI-W used
-        it directly as a power ratio (q=5); the standard convention squares
-        it (q=10). This single hook is consumed by both the inherited sharp-k
-        table and its top-hat concentration calculation, preventing a mixed
-        q5/q10 model.
+    @property
+    def wdm_power_q(self) -> float:
+        return 10.0
+
+    @property
+    def wdm_power_formula_role(self) -> str:
+        return "viel-transfer-amplitude-squared"
+
+    @property
+    def half_mode_definition(self) -> str:
+        return "T_WDM/T_CDM=0.5;P_WDM/P_CDM=0.25"
+
+    @property
+    def half_mode_power_ratio(self) -> float:
+        return 0.25
+
+    def transfer_amplitude(self, k: Any):
+        """Viel transfer amplitude T=sqrt(P_WDM/P_CDM), for k in h/Mpc."""
+        wavenumber = np.asarray(k, dtype=float)
+        return (1.0 + (self.a * wavenumber) ** (2.0 * WDM_TRANSFER_NU)) ** (-5.0 / WDM_TRANSFER_NU)
+
+    def power_ratio(self, k: Any):
+        """Thermal WDM/CDM power ratio T^2, for k in h/Mpc.
+
+        Evaluate exponent -10/nu directly to retain the existing q10 floating
+        point operation order. It equals transfer_amplitude(k)**2 to roundoff.
         """
+        return self._wdm_power_ratio(k)
+
+    def _wdm_power_ratio(self, k: Any, *, alpha: Any | None = None):
+        """Single q10 power hook for sharp-k variance and top-hat concentration."""
         selected_alpha = self.a if alpha is None else alpha
         wavenumber = np.asarray(k, dtype=float)
         return (1.0 + (selected_alpha * wavenumber) ** (2.0 * WDM_TRANSFER_NU)) ** (
-            -self.wdm_power_q / WDM_TRANSFER_NU
+            -10.0 / WDM_TRANSFER_NU
         )
 
-    def half_mode_wavenumber(self) -> float:
-        """Return the convention's documented half-mode scale in ``h/Mpc``.
+    def half_mode_wavenumber(self, *, power_ratio: float = 0.25) -> float:
+        """Return k in h/Mpc at an explicit power-ratio threshold.
 
-        Both supported conventions use the same numerical factor but assign
-        it different physical roles. Published q5 calls the q5 power ratio
-        one half. Standard q10 follows the later amplitude convention
-        ``T=0.5``, for which the power ratio is one quarter. Metadata records
-        the distinction so identically valued scales cannot be mixed silently.
+        The default is amplitude half (T=1/2, power=1/4), preserving the old
+        q10 numerical scale. Use power_ratio=0.5 for power half. This diagnostic
+        threshold does not alter the concentration or population prescription.
         """
-        factor = (2.0 ** (WDM_TRANSFER_NU / 5.0) - 1.0) ** (1.0 / (2.0 * WDM_TRANSFER_NU))
+        value = np.asarray(power_ratio)
+        if value.ndim != 0 or value.dtype.kind not in "iuf" or not np.isfinite(value):
+            raise ValueError("power_ratio must be a real scalar strictly between 0 and 1.")
+        threshold = float(value)
+        if not 0.0 < threshold < 1.0:
+            raise ValueError("power_ratio must be a real scalar strictly between 0 and 1.")
+        if threshold == 0.25:
+            factor = (2.0 ** (WDM_TRANSFER_NU / 5.0) - 1.0) ** (1.0 / (2.0 * WDM_TRANSFER_NU))
+        else:
+            factor = (threshold ** (-WDM_TRANSFER_NU / 10.0) - 1.0) ** (
+                1.0 / (2.0 * WDM_TRANSFER_NU)
+            )
         return float(factor / self.a)
 
     @staticmethod
@@ -474,8 +490,8 @@ class Subhalos(WDMPhysics):
             variant="sashimi-w",
             distribution_name="sashimi-w",
             module_file=__file__,
-            calculation_specification="sashimi-w:wdm:2026-09-10:v1",
-            model_identifier=f"sashimi-w:wdm:m_wdm_keV={self.mass_wdm:g}:power={self.wdm_power_convention}:v1",
+            calculation_specification=CALCULATION_SPECIFICATION,
+            model_identifier=f"sashimi-w:wdm:m_wdm_keV={self.mass_wdm:g}:power={self.wdm_power_convention}:v2",
             backend_identifier=backend.identifier,
             source_identifier="sashimi-w:itamae-migration",
             variance_identifier=variance.identifier,
@@ -490,6 +506,16 @@ class Subhalos(WDMPhysics):
                 "half_mode_definition": self.half_mode_definition,
                 "half_mode_power_ratio": self.half_mode_power_ratio,
                 "half_mode_wavenumber_h_per_mpc": self.half_mode_wavenumber(),
+                "half_mode_scales": {
+                    "amplitude_half": {
+                        "power_ratio": 0.25,
+                        "wavenumber_h_per_mpc": self.half_mode_wavenumber(),
+                    },
+                    "power_half": {
+                        "power_ratio": 0.5,
+                        "wavenumber_h_per_mpc": self.half_mode_wavenumber(power_ratio=0.5),
+                    },
+                },
                 "cosmology_parameters": {
                     "omega_m0": float(OmegaM),
                     "omega_lambda0": self.omega_lambda,
@@ -519,4 +545,4 @@ class Subhalos(WDMPhysics):
 
 
 ItamaeSubhalos = Subhalos
-__all__ = ["Subhalos", "ItamaeSubhalos", "PUBLISHED_Q5", "STANDARD_T2_Q10"]
+__all__ = ["Subhalos", "ItamaeSubhalos", "STANDARD_T2_Q10"]

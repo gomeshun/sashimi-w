@@ -2,7 +2,7 @@
 
 | Previous entry | Standard behavior |
 | --- | --- |
-| sashimi_w.subhalos without a convention | Subhalos/subhalos requires explicit wdm_power_convention |
+| sashimi_w.subhalos without a convention | Subhalos/subhalos defaults to the adopted q10 thermal WDM prescription |
 | sashimi_w_itamae.subhalos | Alias of the standard Subhalos class |
 | physics_mode=legacy or consistent | Removed; raises TypeError |
 | rs_rhos_catalog_calc | Primary named catalog via PopulationComponents |
@@ -39,3 +39,5 @@ The first science execution exposed a source-bundle lookup assumption: Hatch's
 editable force-included modules can live in site-packages. The science runner
 now starts in the explicit validation bundle; the usage runner still executes
 in an unrelated temporary directory. The plots were visually inspected.
+
+The 2026-09-11 q10 adoption supersedes the earlier two-choice API. See [q10 migration](q10-adoption.md). Historical tests and q5 artifacts below describe their original revisions.

@@ -35,7 +35,7 @@ from sashimi_w_physics import (
     WDM_TRANSFER_NU as WDM_TRANSFER_NU,
     PUBLISHED_WDM_POWER_Q as PUBLISHED_WDM_POWER_Q,
 )
-from sashimi_w_itamae_migration import Subhalos, PUBLISHED_Q5, STANDARD_T2_Q10
+from sashimi_w_itamae_migration import Subhalos, STANDARD_T2_Q10
 
 subhalos = Subhalos
-__all__ = ["Subhalos", "subhalos", "PUBLISHED_Q5", "STANDARD_T2_Q10"]
+__all__ = ["Subhalos", "subhalos", "STANDARD_T2_Q10"]

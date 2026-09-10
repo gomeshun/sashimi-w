@@ -11,7 +11,7 @@ args = parser.parse_args()
 options=dict(M0=1e10, redshift=0., dz=.5, zmax=1., N_ma=8, N_herm=2,
              logmamin=5., logmamax=8., N_hermNa=3)
 rows=[]
-for convention in ['published-q5','standard-t2-q10']:
+for convention in ['standard-t2-q10']:
  for profile in [True,False]:
   model=Subhalos(2.,wdm_power_convention=convention)
   kwargs={**options,'profile_change':profile}
