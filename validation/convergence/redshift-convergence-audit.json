@@ -1,0 +1,136 @@
+{
+  "status": "share with finite-resolution caveats",
+  "summary_sha256": "939d59eae8a44d0a8976da442c56f95d6551a30302fc6c5cf35e2ca0d8fda2ae",
+  "worker_sha256": "26465358a73b571bea5ea987044c4c4456101a3da079b900e2640d89cf997890",
+  "checks": [
+    {
+      "q": 5,
+      "dz": 0.1,
+      "artifact_sha256": "f941c03ec67f055757dca246e369a1d46dec29f7e3f43e5bcdaffc58d5867f00",
+      "config_sha256": "3582e14c10bb6126b9ef9fe1b75fe65403b4a779b3ce0f8096fec8b7ca4c2f4b",
+      "metrics": {
+        "count_surviving": 15.187644488920753,
+        "bound_mass_fraction": 0.010827764821427093,
+        "count_above_1e7": 13.00644797103074
+      },
+      "dependencies": {
+        "numpy": "2.4.6",
+        "scipy": "1.17.1",
+        "sashimi-itamae": "0.1.0a4"
+      }
+    },
+    {
+      "q": 5,
+      "dz": 0.05,
+      "artifact_sha256": "d87f223e40ec7366639450f6b9531b5c17576dbdb76501e2fc35972eae50557a",
+      "config_sha256": "cf14e7d4535567794ba1636d9128b2076c0d480a9cecc23b322d2e1acc38aac5",
+      "metrics": {
+        "count_surviving": 15.616004647417098,
+        "bound_mass_fraction": 0.011862027421647192,
+        "count_above_1e7": 13.404025271798881
+      },
+      "dependencies": {
+        "numpy": "2.4.6",
+        "scipy": "1.17.1",
+        "sashimi-itamae": "0.1.0a4"
+      }
+    },
+    {
+      "q": 5,
+      "dz": 0.025,
+      "artifact_sha256": "e04defc5268b8b53c59cb44ffdab61374118cf74d21686b7fd7f9cbb69118b90",
+      "config_sha256": "20277687b74a15bfa1eeaaf4a4bf11c6e6b7bfe597dde995b974d6a6127e8f35",
+      "metrics": {
+        "count_surviving": 15.829405666959582,
+        "bound_mass_fraction": 0.012408813618189428,
+        "count_above_1e7": 13.603083868152064
+      },
+      "dependencies": {
+        "numpy": "2.4.6",
+        "scipy": "1.17.1",
+        "sashimi-itamae": "0.1.0a4"
+      }
+    },
+    {
+      "q": 5,
+      "dz": 0.0125,
+      "artifact_sha256": "ea9651df790b1c8df3e4dd08ab4050a5ed4aa52c8e27ae81233be61c7c8cac74",
+      "config_sha256": "c8619fbaab7220d432ca0378f37c7a0e79753732e3d903414fae7941e8d1a20f",
+      "metrics": {
+        "count_surviving": 15.93793799975887,
+        "bound_mass_fraction": 0.012690022317838485,
+        "count_above_1e7": 13.694021280611414
+      },
+      "dependencies": {
+        "numpy": "2.4.6",
+        "scipy": "1.17.1",
+        "sashimi-itamae": "0.1.0a4"
+      }
+    },
+    {
+      "q": 10,
+      "dz": 0.1,
+      "artifact_sha256": "ce4f4613b5a91f54be5e3955c36464d1f1147b528495f18b8bb0d6622f989741",
+      "config_sha256": "1fdfd8eb8287f23d46456aaa656bb3f5faaff21fbafa38e757fde8c0139a2658",
+      "metrics": {
+        "count_surviving": 3.7907166730294883,
+        "bound_mass_fraction": 0.004569699984323441,
+        "count_above_1e7": 3.559886760302502
+      },
+      "dependencies": {
+        "numpy": "2.4.6",
+        "scipy": "1.17.1",
+        "sashimi-itamae": "0.1.0a4"
+      }
+    },
+    {
+      "q": 10,
+      "dz": 0.05,
+      "artifact_sha256": "cee229a6305b1c19579fca8587176dd8873cbf3297731e68648e002ba08000d6",
+      "config_sha256": "18a590cd9574629af3aa67774316db25bca01da7e94e95e2308cc3afee77f552",
+      "metrics": {
+        "count_surviving": 3.898289451716156,
+        "bound_mass_fraction": 0.005016058152534871,
+        "count_above_1e7": 3.670889905542498
+      },
+      "dependencies": {
+        "numpy": "2.4.6",
+        "scipy": "1.17.1",
+        "sashimi-itamae": "0.1.0a4"
+      }
+    },
+    {
+      "q": 10,
+      "dz": 0.025,
+      "artifact_sha256": "ca8daa1e6bff4d106b88febc37749f97b6d64c7acaec663e36fd905f586c1e0f",
+      "config_sha256": "916d572e5c2aa0c868d41b35a3500f84528866f678d14eb9f39f5eec297aea44",
+      "metrics": {
+        "count_surviving": 3.9525934361877106,
+        "bound_mass_fraction": 0.00525538203084196,
+        "count_above_1e7": 3.7236933689147778
+      },
+      "dependencies": {
+        "numpy": "2.4.6",
+        "scipy": "1.17.1",
+        "sashimi-itamae": "0.1.0a4"
+      }
+    },
+    {
+      "q": 10,
+      "dz": 0.0125,
+      "artifact_sha256": "2259432c630e8f731fb0edd6c141b3f7187134dcab0e1bf2f730fdb6ce353ee6",
+      "config_sha256": "9735e0888b233fb07c8dd233d389b3986b1e042e15fcb8de5b92889d5f2aab40",
+      "metrics": {
+        "count_surviving": 3.9802369866012413,
+        "bound_mass_fraction": 0.005376850861819312,
+        "count_above_1e7": 3.751115884034093
+      },
+      "dependencies": {
+        "numpy": "2.4.6",
+        "scipy": "1.17.1",
+        "sashimi-itamae": "0.1.0a4"
+      }
+    }
+  ],
+  "scope": "Recomputed metrics from eight frozen full catalogs; not a continuum or simulation calibration."
+}

@@ -81,6 +81,12 @@ uses the validation source bundle and compares independent B/C full catalogs,
 historical A provenance, and the numerical derivative. These are separate
 from broad grid/solver convergence and simulation validation.
 
+The existing `dz=0.1` default is retained by explicit scope agreement.
+[Measured resolution dependence and review procedure](docs/resolution-and-review.md)
+report the fixed q5/q10 sweep: `.1` to `.0125` changes representative catalog
+counts by about 5% and bound mass fractions by 17–18%. These finite-grid effects
+are not universal error estimates for the full default configuration.
+
 The [family reference workflow](https://github.com/gomeshun/sashimi-family/tree/codex/migration-release-20260910/validation/references/sashimi-w)
 freezes A and separately applies each correction as B without importing the
 current product. Historical signed weights and original fixtures remain

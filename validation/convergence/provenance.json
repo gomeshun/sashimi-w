@@ -1,0 +1,16 @@
+{
+  "source_family_revision": "62388f22c6b36a5758fb1dc8069e6d5b0c6174e5",
+  "source_product_revision": "dcc4379186174a016924d88b362fbe40d1ac8f88",
+  "source_itamae_revision": "d752306e62bf295b7a96100b9cc022f8f9c61071",
+  "raw_bundle": "https://github.com/gomeshun/sashimi-family/tree/62388f2/validation/references/sashimi-w",
+  "files": {
+    "redshift-convergence.json": "939d59eae8a44d0a8976da442c56f95d6551a30302fc6c5cf35e2ca0d8fda2ae",
+    "redshift-convergence-audit.json": "7cbd555d8ca159cb155013a0912832b1929f18e8ea79e5ffb46e5fba9ce4e361",
+    "refined-convergence.json": "497f2f0dc8bfd2d7ae881566472e4074204225b1a74174728feb592b32394a21"
+  },
+  "decision": {
+    "date": "2026-09-10",
+    "explicit_user_approval": true,
+    "policy": "Keep existing dz default; disclose step dependence and convergence procedure; default-step improvement excluded from preparation scope."
+  }
+}
