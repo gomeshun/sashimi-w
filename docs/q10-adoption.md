@@ -47,8 +47,12 @@ dfa083d0d46181c376947ac7b2da829facaf2e8b. Controls cover 0.5, 2 and 5 keV,
 81 physical masses (1e6–1e14 Msun), four redshifts, 101 wavenumbers, concentration,
 derivatives, the default half-mode, all catalog columns and weight factors.
 Catalog settings: M0=1e12 Msun, zmax=1, dz=.25, N_ma=16, N_herm=3,
-N_hermNa=4, logmamin=7, logmamax=10. The controlled result is recorded with the
-candidate after committing the implementation, before PR integration.
+N_hermNa=4, logmamin=7, logmamax=10. At candidate e3017d93b4dfdcb975bca71f1a00535e8faf4ec2, all 21 arrays per
+particle mass are bitwise identical to old q10, with zero warnings on both sides.
+See `validation/q10-adoption/comparison.json`. The full local suite passes
+87 tests. The controlled run retains an explicit note that installed core
+metadata still said 0.1.0a4, while the verified editable source/runtime was
+0.2.0rc1 at the exact SHA above; both sides used the same environment.
 
 The existing q10 finite-grid convergence evidence remains distinct from
 formula adoption. Its remaining dz sensitivity is not removed by choosing q10;
