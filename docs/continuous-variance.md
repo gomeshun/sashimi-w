@@ -1,5 +1,8 @@
 # Continuous WDM variance and redshift-resolved mass integration
 
+Update 2026-09-11: q10 is now the sole supported thermal-WDM product prescription.
+The q5 results below are historical; see [adoption](q10-adoption.md).
+
 The previous corrected path interpolated 100 sigma nodes and projected them
 with a cumulative minimum, while using the exact moving-boundary derivative.
 Thus sigma and its derivative represented different functions. Sigma now uses

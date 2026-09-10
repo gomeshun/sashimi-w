@@ -3,7 +3,7 @@
 import numpy as np
 import pytest
 
-from sashimi_w import Subhalos, OmegaM, PUBLISHED_Q5, Msolar
+from sashimi_w import Subhalos, OmegaM, STANDARD_T2_Q10, Msolar
 
 
 def test_nonreal_formation_trials_are_removed_before_growth():
@@ -18,7 +18,7 @@ def test_nonreal_formation_trials_are_removed_before_growth():
 
 
 def test_concentration_scalar_and_matrix_use_valid_background_inputs():
-    model = Subhalos(2.0, wdm_power_convention=PUBLISHED_Q5)
+    model = Subhalos(2.0, wdm_power_convention=STANDARD_T2_Q10)
     scalar = model.conc200(1e9 * Msolar, 0.5)
     matrix = model.conc200(np.array([[1e9]]) * Msolar, np.array([[0.5]]))
     assert np.isfinite(scalar) and scalar > 0

@@ -11,7 +11,7 @@ from itamae.halo import nfw_mass_function
 from itamae.provenance import CALCULATION_METADATA_KEYS
 from itamae.types import WeightedSubhaloCatalog
 from itamae.units import AstropyUnits, NativeUnits
-from sashimi_w import Subhalos, subhalos, PUBLISHED_Q5, STANDARD_T2_Q10, OmegaM, h, Msolar
+from sashimi_w import Subhalos, subhalos, STANDARD_T2_Q10, OmegaM, h, Msolar
 import sashimi_w_itamae
 
 
@@ -22,20 +22,19 @@ COLUMNS = ["m200_acc", "z_acc", "r_s_acc", "rho_s_acc", "m_bound", "r_s", "rho_s
 SCALES = [1.0, 1.0, 1e-3, 1e18, 1.0, 1e-3, 1e18, 1.0]
 
 
-@pytest.fixture(scope="module", params=[(5, PUBLISHED_Q5), (10, STANDARD_T2_Q10)])
-def population(request):
-    q, convention = request.param
+@pytest.fixture(scope="module")
+def population():
+    q, convention = 10, STANDARD_T2_Q10
     model = Subhalos(2.0, wdm_power_convention=convention)
     return q, model, model.rs_rhos_catalog_calc(**PARAMETERS)
 
 
 def test_standard_import_and_removed_mode():
     assert subhalos is Subhalos is sashimi_w_itamae.subhalos
-    with pytest.raises(TypeError, match="wdm_power_convention"):
-        Subhalos(2)
+    assert Subhalos(2).wdm_power_q == 10
     for mode in ("legacy", "consistent"):
         with pytest.raises(TypeError, match="physics_mode"):
-            Subhalos(2, wdm_power_convention=PUBLISHED_Q5, physics_mode=mode)
+            Subhalos(2, wdm_power_convention=STANDARD_T2_Q10, physics_mode=mode)
 
 
 def test_frozen_records_keep_original_mode_and_source_identity():
@@ -91,7 +90,9 @@ def test_calculation_metadata_and_serialization(population, tmp_path):
     q, model, catalog = population
     assert set(CALCULATION_METADATA_KEYS) <= set(catalog.metadata)
     assert "physics_mode" not in catalog.metadata
-    assert catalog.metadata["calculation_specification"] == "sashimi-w:wdm:2026-09-10:v1"
+    assert (
+        catalog.metadata["calculation_specification"] == "sashimi-w:thermal-wdm-q10:2026-09-11:v2"
+    )
     assert catalog.metadata["calculation_parameters"] == PARAMETERS
     assert catalog.metadata["wdm_power_q"] == q
     assert catalog.metadata["variance_identifier"] == model.variance_model().identifier
@@ -135,35 +136,28 @@ def test_native_astropy_tuple_units(population):
         catalog.columns["survive"],
     )
     first = Subhalos(
-        2, wdm_power_convention=PUBLISHED_Q5, unit_backend=NativeUnits()
+        2, wdm_power_convention=STANDARD_T2_Q10, unit_backend=NativeUnits()
     ).catalog_from_tuple(raw)
     second = Subhalos(
-        2, wdm_power_convention=PUBLISHED_Q5, unit_backend=AstropyUnits()
+        2, wdm_power_convention=STANDARD_T2_Q10, unit_backend=AstropyUnits()
     ).catalog_from_tuple(raw)
     for name in first.columns:
         np.testing.assert_array_equal(first.columns[name], second.columns[name])
     np.testing.assert_array_equal(first.weight_final, second.weight_final)
 
 
-def test_power_choices_growth_derivative_and_physical_mass_boundary():
-    q5 = Subhalos(2, wdm_power_convention=PUBLISHED_Q5)
-    q10 = Subhalos(2, wdm_power_convention=STANDARD_T2_Q10)
-    k = np.geomspace(1e-3, 1e3, 12)
-    np.testing.assert_allclose(q10._wdm_power_ratio(k), q5._wdm_power_ratio(k) ** 2, rtol=4e-15)
-    for model in (q5, q10):
-        assert model._wdm_power_ratio(model.half_mode_wavenumber()) == pytest.approx(
-            model.half_mode_power_ratio
-        )
-        assert model.growthD(0.0) == 1.0
-        z = np.array([0.0, 0.5, 1.0, 3.0, 5.0])
-        step = 1e-5
-        numerical = (model.growthD(z + step) - model.growthD(z - step)) / (2 * step)
-        np.testing.assert_allclose(model.dDdz(z), numerical, rtol=3e-9)
-        assert model.linear_growth_factor(OmegaM, 1 - OmegaM, [0.5, 3.0]) == pytest.approx(
-            model.growthD(3.0) / model.growthD(0.5)
-        )
-        scalar = model.conc200(1e9 * Msolar, 0.5)
-        np.testing.assert_allclose(model.conc200(np.array([1e9]) * Msolar, 0.5), scalar, rtol=1e-14)
+def test_growth_derivative_and_physical_mass_boundary():
+    model = Subhalos(2)
+    assert model.growthD(0.0) == 1.0
+    z = np.array([0.0, 0.5, 1.0, 3.0, 5.0])
+    step = 1e-5
+    numerical = (model.growthD(z + step) - model.growthD(z - step)) / (2 * step)
+    np.testing.assert_allclose(model.dDdz(z), numerical, rtol=3e-9)
+    assert model.linear_growth_factor(OmegaM, 1 - OmegaM, [0.5, 3.0]) == pytest.approx(
+        model.growthD(3.0) / model.growthD(0.5)
+    )
+    scalar = model.conc200(1e9 * Msolar, 0.5)
+    np.testing.assert_allclose(model.conc200(np.array([1e9]) * Msolar, 0.5), scalar, rtol=1e-14)
 
 
 @pytest.mark.parametrize(
@@ -177,7 +171,7 @@ def test_power_choices_growth_derivative_and_physical_mass_boundary():
     ],
 )
 def test_constructor_errors(parameters, error):
-    arguments = {"mass_wdm": 2.0, "wdm_power_convention": PUBLISHED_Q5, **parameters}
+    arguments = {"mass_wdm": 2.0, "wdm_power_convention": STANDARD_T2_Q10, **parameters}
     with pytest.raises(ValueError, match=error):
         Subhalos(**arguments)
 
@@ -197,7 +191,7 @@ def test_constructor_errors(parameters, error):
     ],
 )
 def test_catalog_rejects_invalid_inputs_before_work(invalid, monkeypatch):
-    model = Subhalos(2.0, wdm_power_convention=PUBLISHED_Q5)
+    model = Subhalos(2.0, wdm_power_convention=STANDARD_T2_Q10)
 
     def forbidden(*args, **kwargs):
         raise AssertionError("numerical calculation must not run")
