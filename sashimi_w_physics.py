@@ -235,13 +235,13 @@ class WDMPhysics:
             p = a2 + a3 * np.log(f) + a4 * np.power(np.log(f), 2.0)
             return np.power(a1 * np.power(f, 2.0 * p) + (3.0 / 4.0) ** 2, -0.5) + 2.0 * f
 
+        concentration = self.conc200(M200, z)
         return (
             self.Delc(Oz - 1)
             / 200.0
             * M200
             * np.power(
-                self.conc200(M200, z)
-                * xfunc(self.Delc(Oz - 1) / 200.0 * ffunc(1.0 / self.conc200(M200, z))),
+                concentration * xfunc(self.Delc(Oz - 1) / 200.0 * ffunc(1.0 / concentration)),
                 -3.0,
             )
         )
