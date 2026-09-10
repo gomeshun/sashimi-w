@@ -120,7 +120,7 @@ def test_integrated_sharp_k_path_is_sigma8_normalized_and_continuous() -> None:
     assert np.all(np.isfinite(derivative))
     assert np.all(derivative < 0.0)
     assert np.unique(derivative).size == derivative.size
-    assert "integrated-variance:v2" in variance.identifier
+    assert "integrated-variance:v3" in variance.identifier
     assert "filter_scale=6.0449698275617605" in variance.identifier
     assert "wdm-power-ratio" in variance.identifier
     assert "convention=published-q5" in variance.identifier
@@ -189,35 +189,26 @@ def test_standard_q10_integrated_variance_formula_and_identifier_are_pinned() ->
     assert "power=standard-t2-q10" in callable_q10.identifier
     assert "formula-role=viel-transfer-amplitude-squared" in callable_q10.identifier
     assert "q=10" in callable_q10.identifier
-    assert "half-mode=T_WDM/T_CDM=0.5;P_WDM/P_CDM=0.25" in (
-        callable_q10.identifier
+    assert "half-mode=T_WDM/T_CDM=0.5;P_WDM/P_CDM=0.25" in (callable_q10.identifier)
+
+
+@pytest.mark.parametrize("convention", [PUBLISHED_Q5, STANDARD_T2_Q10])
+def test_variance_and_derivative_use_one_continuous_integral(convention) -> None:
+    """Mass interpolation/projection must not decouple sigma from its slope."""
+    model = ItamaeSubhalos(mass_wdm=2.0, wdm_power_convention=convention)
+    mass = np.geomspace(1.0e9, 1.0e13, 24)
+    step = 1.0e-4
+    upper, lower = mass * np.exp(step), mass * np.exp(-step)
+    numerical = (model.sigmaMz(upper, 0.5) ** 2 - model.sigmaMz(lower, 0.5) ** 2) / (upper - lower)
+    np.testing.assert_allclose(model.dsdm(mass, 0.5), numerical, rtol=4e-8, atol=0.0)
+    np.testing.assert_array_equal(
+        model.sigmaMz(mass, 0.5), model._consistent_variance().sigma(mass, 0.5)
     )
-
-
-def test_consistent_sigma_cache_uses_physical_mass_and_is_reused() -> None:
-    """Catalog calls interpolate one canonical physical-mass cache."""
-    model = ItamaeSubhalos(
-        mass_wdm=_fixture_mass_wdm(),
-        physics_mode="consistent",
-        wdm_power_convention=PUBLISHED_Q5,
-    )
-    mass = np.geomspace(1.0e8, 1.0e13, 24).reshape(2, 3, 4)
-    redshift = np.linspace(0.0, 3.0, mass.size).reshape(mass.shape)
-
-    sigma = model.sigmaMz(mass, redshift)
-    cache = model._consistent_sigma_z0_values
-    assert cache is not None
-    assert sigma.shape == mass.shape
-    assert np.all(np.isfinite(sigma))
-    np.testing.assert_allclose(
-        sigma,
-        model._consistent_variance().sigma(mass, redshift),
-        rtol=3.5e-3,
-        atol=0.0,
-    )
-
-    model.sigmaMz(mass[::-1], 0.5)
-    assert model._consistent_sigma_z0_values is cache
+    # The model composition is reused; no projected mass-variance table exists.
+    variance = model._consistent_variance()
+    model.sigmaMz(mass[::-1], 1.0)
+    assert model._consistent_variance() is variance
+    assert not hasattr(model, "_consistent_sigma_z0_values")
 
 
 def test_lighter_wdm_has_more_small_scale_power_suppression() -> None:

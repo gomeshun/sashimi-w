@@ -613,7 +613,7 @@ class subhalos:
         ma_accretion = self._select_accretion_mass_grid(ma_by_redshift, ma)
         Na = self.Na_calc(ma_accretion,zdist,M0,z0=0,N_herm=N_hermNa,Nrand=1000,
                           sigmafac=sigmafac)
-        Na_total = integrate.simpson(integrate.simpson(Na,x=np.log(ma)),x=np.log(1+zdist))
+        Na_total = integrate.simpson(integrate.simpson(Na,x=np.log(ma_accretion)),x=np.log(1+zdist))
         weight = Na/(1.0+zdist.reshape(len(zdist),1))
         weight = weight/np.sum(weight)*Na_total
         weight = (weight.reshape((len(zdist),1,len(ma))))*w1/np.sqrt(np.pi)
