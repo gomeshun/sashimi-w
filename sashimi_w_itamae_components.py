@@ -5,7 +5,7 @@ kernel calls use the historical CGS convention. Redshift is the evolution
 coordinate; no time or h rescaling is implicit in ITAMAE's controller.
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
 import numpy as np
@@ -24,14 +24,20 @@ class WDMHostHistory:
     mass: float
     N_hermNa: int
     sigmafac: float
+    _parameters: tuple = field(init=False, repr=False)
+
+    def __post_init__(self):
+        # This component is created anew for each population calculation.
+        # The selected host/background coefficients do not depend on ODE time.
+        object.__setattr__(self, "_parameters", self.model._host_history_parameters(self.mass, 0))
 
     def mass_virial(self, z):
         model = self.model
-        mass = model.Mzzi(self.mass, z, 0)
+        mass = model._host_history_mass(self._parameters, z, 0)
         if self.N_hermNa == 1:
             logmass = np.log10(mass)
             scatter_high = 0.12 - 0.15 * np.log10(mass / self.mass)
-            mass1 = model.Mzzi(self.mass, 1.0, 0.0)
+            mass1 = model._host_history_mass(self._parameters, 1.0, 0.0)
             scatter1 = 0.12 - 0.15 * np.log10(mass1 / self.mass)
             scatter_low = scatter1 / np.log10(mass1 / self.mass) * np.log10(mass / self.mass)
             mass = 10 ** (logmass + self.sigmafac * np.where(z > 1.0, scatter_high, scatter_low))

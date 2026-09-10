@@ -256,7 +256,8 @@ class WDMPhysics:
         fM0 = pow(pow(self.sigmaMz(M0 / q, 0), 2) - pow(self.sigmaMz(M0, 0), 2), -0.5)
         return M0 * pow(1 + z, a * fM0) * np.exp(-fM0 * z)
 
-    def Mzzi(self, M0, z, zi):
+    def _host_history_parameters(self, M0, zi):
+        """Prepare the WDM history coefficients for a fixed host and anchor."""
         Mzi0 = self.Mzi(M0, zi)
         zf = -0.0064 * pow(np.log10(M0), 2) + 0.0237 * np.log10(M0) + 1.8837
         q = 4.137 * pow(zf, -0.9476)
@@ -265,7 +266,16 @@ class WDMPhysics:
             1.686 * np.sqrt(2.0 / np.pi) * pow(self.growthD(zi), -2) * self.dDdz(zi) + 1
         )
         beta = -fMzi
+        return Mzi0, alpha, beta
+
+    @staticmethod
+    def _host_history_mass(parameters, z, zi):
+        """Evaluate prepared coefficients with the original arithmetic."""
+        Mzi0, alpha, beta = parameters
         return Mzi0 * pow(1 + z - zi, alpha) * np.exp(beta * (z - zi))
+
+    def Mzzi(self, M0, z, zi):
+        return self._host_history_mass(self._host_history_parameters(M0, zi), z, zi)
 
     def Delc(self, x):
         return 18 * pow(np.pi, 2) + 82.0 * x - 39 * pow(x, 2)
