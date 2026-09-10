@@ -47,13 +47,11 @@ class WDMTidalMassLoss:
 
     def rhs(self, z, mass):
         # Keep the supplied WDM fitting functions and arithmetic grouping.
-        log10a = (-0.0019 * np.log10(self.history.mass_virial(z)) + 0.045) * z + (
-            0.0097 * np.log10(self.history.mass_virial(z)) - 0.313
-        )
+        host_mass = self.history.mass_virial(z)
+        log_host_mass = np.log10(host_mass)
+        log10a = (-0.0019 * log_host_mass + 0.045) * z + (0.0097 * log_host_mass - 0.313)
         amplitude = pow(10, log10a)
-        exponent = (-5.55e-5 * np.log10(self.history.mass_virial(z)) + 1.43e-3) * z + (
-            3.34e-4 * np.log10(self.history.mass_virial(z)) - 8.11e-3
-        )
+        exponent = (-5.55e-5 * log_host_mass + 1.43e-3) * z + (3.34e-4 * log_host_mass - 8.11e-3)
         omega = self.model.Omegaz(pOmega, z)
         dynamic_time = (
             1.628
@@ -65,7 +63,7 @@ class WDMTidalMassLoss:
         return (
             amplitude
             * (mass / dynamic_time)
-            * pow(mass / self.history.mass_virial(z), exponent)
+            * pow(mass / host_mass, exponent)
             * pow(self.model.Hz(z) * (1 + z), -1)
         )
 
