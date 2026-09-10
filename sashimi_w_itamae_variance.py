@@ -18,99 +18,34 @@ from itamae.power import (
     TransferModifiedPowerSpectrum,
 )
 from itamae.variance import CallableVarianceModel, IntegratedVarianceModel
-from sashimi_w_itamae_migration import ItamaeSubhalos, PUBLISHED_Q5
-from sashimi_w import Pk_file, WDM_TRANSFER_NU, h, k_file, sigma_8
+from sashimi_w_itamae_migration import ItamaeSubhalos
+from sashimi_w_physics import Pk_file, WDM_TRANSFER_NU, h, k_file, sigma_8
 
 
 _SHARP_K_MASS_ASSIGNMENT = 2.5
 _SHARP_K_CUTOFF = _SHARP_K_MASS_ASSIGNMENT * (9.0 * np.pi / 2.0) ** (1.0 / 3.0)
 
 
-def _resolve_model(
-    model: Any | None,
-    *,
-    mass_wdm: float,
-    physics_mode: str,
-    wdm_power_convention: str | None,
-) -> tuple[Any, str]:
-    """Resolve one convention without inferring it from ``physics_mode``."""
+def _resolve_model(model, *, mass_wdm, wdm_power_convention):
     if model is None:
         if wdm_power_convention is None:
-            raise ValueError(
-                "wdm_power_convention must be explicit when constructing an ITAMAE model."
-            )
-        configured = ItamaeSubhalos(
-            mass_wdm=mass_wdm,
-            physics_mode=physics_mode,
-            wdm_power_convention=wdm_power_convention,
-        )
-        return configured, wdm_power_convention
-
-    selected = getattr(model, "wdm_power_convention", PUBLISHED_Q5)
+            raise ValueError("wdm_power_convention must be explicit.")
+        model = ItamaeSubhalos(mass_wdm=mass_wdm, wdm_power_convention=wdm_power_convention)
+    selected = model.wdm_power_convention
     if wdm_power_convention is not None and wdm_power_convention != selected:
-        raise ValueError(
-            "Requested wdm_power_convention does not match the configured model: "
-            f"{wdm_power_convention!r} != {selected!r}."
-        )
+        raise ValueError("wdm_power_convention does not match the configured model.")
     return model, selected
 
 
-def make_variance_model(
-    model: Any | None = None,
-    *,
-    mass_wdm: float = 1.5,
-    physics_mode: str = "consistent",
-    wdm_power_convention: str | None = None,
-) -> CallableVarianceModel:
-    """Wrap the configured SASHIMI-W sharp-k variance implementation.
-
-    Parameters
-    ----------
-    model : object, optional
-        Existing SASHIMI-W model. A migrated model is constructed when omitted.
-    mass_wdm : float, optional
-        WDM particle mass in keV used only when constructing a model.
-    physics_mode : {"consistent", "legacy"}, optional
-        Growth and derivative convention used only when constructing a model.
-    wdm_power_convention : {"published-q5", "standard-t2-q10"}, optional
-        Required when constructing a migrated model. If ``model`` is supplied,
-        an explicitly supplied value must match it. A plain public
-        ``sashimi_w.subhalos`` model is identified as published q5.
-
-    Returns
-    -------
-    itamae.variance.CallableVarianceModel
-        Variance model backed by SASHIMI-W ``sigmaMz`` and ``dsdm``.
-    """
-
-    model, selected_convention = _resolve_model(
-        model,
-        mass_wdm=mass_wdm,
-        physics_mode=physics_mode,
-        wdm_power_convention=wdm_power_convention,
-    )
-    particle_mass = float(model.mass_wdm)
-    selected_mode = getattr(model, "physics_mode", "legacy")
-    q = float(getattr(model, "wdm_power_q", 5.0))
-    formula_role = getattr(
-        model,
-        "wdm_power_formula_role",
-        "q5-expression-used-as-power-ratio",
-    )
-    half_mode_definition = getattr(
-        model,
-        "half_mode_definition",
-        "P_WDM/P_CDM=0.5",
+def make_variance_model(model=None, *, mass_wdm=1.5, wdm_power_convention=None):
+    """Expose the standard continuous WDM variance through the common protocol."""
+    model, selected = _resolve_model(
+        model, mass_wdm=mass_wdm, wdm_power_convention=wdm_power_convention
     )
     return CallableVarianceModel(
-        identifier=(
-            f"sashimi-w:m_wdm_keV={particle_mass:.17g}:sharp-k:"
-            f"physics={selected_mode}:power={selected_convention}:"
-            f"formula-role={formula_role}:q={q:.17g}:"
-            f"half-mode={half_mode_definition}:legacy-callable:v3"
-        ),
-        sigma_function=lambda mass, z: model.sigmaMz(mass, z),
-        derivative_function=lambda mass, z: model.dsdm(mass, z),
+        identifier=f"{model.variance_model().identifier}:callable:v1",
+        sigma_function=model.sigmaMz,
+        derivative_function=model.dsdm,
     )
 
 
@@ -126,7 +61,7 @@ def make_integrated_variance_model(
     Parameters
     ----------
     model : object, optional
-        Configured migrated WDM model. When omitted, a consistent-mode model is
+        Configured migrated WDM model. When omitted, a standard model is
         constructed from ``mass_wdm``.
     mass_wdm : float, optional
         WDM particle mass in keV used only when constructing a model.
@@ -150,7 +85,7 @@ def make_integrated_variance_model(
     The bundled table uses ``k`` in ``h/Mpc`` and power in ``(Mpc/h)^3``.
     This opt-in path converts it to canonical ``1/Mpc`` and ``Mpc^3`` before
     constructing the ITAMAE model. The mean density is likewise converted from
-    the legacy numerical ``(Msun/h)/(Mpc/h)^3`` convention to ``Msun/Mpc^3``.
+    the historical numerical ``(Msun/h)/(Mpc/h)^3`` convention to ``Msun/Mpc^3``.
     SASHIMI-W defines ``R=R_th/2.5`` and integrates to
     ``k_c=(9*pi/2)^(1/3)/R``. ITAMAE's ``filter_scale`` therefore receives the
     combined coefficient ``2.5*(9*pi/2)^(1/3)``, not merely 2.5.
@@ -158,15 +93,8 @@ def make_integrated_variance_model(
     configured, selected_convention = _resolve_model(
         model,
         mass_wdm=mass_wdm,
-        physics_mode="consistent",
         wdm_power_convention=wdm_power_convention,
     )
-    if getattr(configured, "physics_mode", None) != "consistent":
-        raise ValueError(
-            "IntegratedVarianceModel enforces S=sigma**2 and requires "
-            "physics_mode='consistent'; use make_variance_model for legacy "
-            "reproduction."
-        )
     hubble = float(h)
     canonical_k = np.asarray(k_file, dtype=float) * hubble
     canonical_power = np.asarray(Pk_file, dtype=float) / hubble**3
@@ -244,7 +172,7 @@ def make_integrated_variance_model(
         power=power,
         **integration_options,
         growth_function=configured.growthD,
-        growth_identifier=(f"growth={configured.itamae_cosmology.identifier};physics=consistent"),
+        growth_identifier=(f"growth={configured.itamae_cosmology.identifier};calculation=cpt-normalized-v1"),
     )
 
 

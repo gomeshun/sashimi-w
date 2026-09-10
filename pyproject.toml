@@ -47,6 +47,7 @@ include = [
   "/sashimi_w_itamae_components.py",
   "/sashimi_w_itamae_variance.py",
   "/sashimi_w.py",
+  "/sashimi_w_physics.py",
   "/sashimi_w_itamae.py",
 ]
 
@@ -62,6 +63,7 @@ path = "hatch_build.py"
 "sashimi_w_itamae_components.py" = "sashimi_w_itamae_components.py"
 "sashimi_w_itamae_variance.py" = "sashimi_w_itamae_variance.py"
 "sashimi_w.py" = "sashimi_w.py"
+"sashimi_w_physics.py" = "sashimi_w_physics.py"
 "sashimi_w_itamae.py" = "sashimi_w_itamae.py"
 
 [tool.pytest.ini_options]
