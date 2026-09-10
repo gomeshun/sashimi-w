@@ -14,7 +14,6 @@ import inspect
 from typing import Any
 
 import numpy as np
-from numpy.polynomial.hermite import hermgauss
 
 from itamae.backends import BackendConfig
 from itamae.cosmology import NativeFlatLCDM
@@ -412,43 +411,88 @@ class ItamaeSubhalos(subhalos):
         return self.itamae_units.to_internal(canonical, physical_type)
 
     def rs_rhos_catalog_calc(self, *args: Any, **kwargs: Any) -> WeightedSubhaloCatalog:
-        """Calculate a WDM catalog with exact NFW inversion and canonical units.
-
-        The inherited public tuple calculation remains available as
-        ``rs_rhos_calc``. This method additionally reconstructs the independent
-        population and concentration-quadrature factors used to create that
-        tuple and returns the common ITAMAE catalog schema.
-        """
+        """Execute WDM-owned stages with canonical arrays and independent factors."""
         bound = _LEGACY_CATALOG_SIGNATURE.bind(self, *args, **kwargs)
         bound.apply_defaults()
-        parameters = bound.arguments
+        parameters = dict(bound.arguments)
         self._validate_catalog_inputs(parameters)
-        result = super().rs_rhos_calc(*args, **kwargs)
+        if self.physics_mode == "legacy":
+            return self.catalog_from_legacy(super().rs_rhos_calc(*args, **kwargs))
+        return self._execute_population(parameters).to_catalog(self._catalog_metadata())
 
-        n_redshift = len(
-            np.arange(
-                float(parameters["redshift"]) + float(parameters["dz"]),
-                float(parameters["zmax"]) + float(parameters["dz"]),
-                float(parameters["dz"]),
-            )
+    def rs_rhos_calc(self, *args: Any, **kwargs: Any):
+        """Return the historical tuple format of the current population calculation."""
+        if self.physics_mode == "legacy":
+            return super().rs_rhos_calc(*args, **kwargs)
+        catalog = self.rs_rhos_catalog_calc(*args, **kwargs)
+        columns = catalog.columns
+        return (
+            columns["m200_acc"],
+            columns["z_acc"],
+            columns["r_s_acc"] * 1e3,
+            columns["rho_s_acc"] / 1e18,
+            columns["m_bound"],
+            columns["r_s"] * 1e3,
+            columns["rho_s"] / 1e18,
+            columns["c_t"],
+            catalog.weights["weight_base"] * catalog.weights["weight_concentration"],
+            columns["survive"],
         )
-        n_hermite = int(parameters["N_herm"])
-        n_mass = int(parameters["N_ma"])
-        concentration_nodes = hermgauss(n_hermite)[1] / np.sqrt(np.pi)
-        if not np.all(np.isfinite(concentration_nodes)) or np.any(concentration_nodes <= 0.0):
-            raise ValueError("N_herm produced invalid Gauss-Hermite concentration weights.")
-        weight_concentration = np.broadcast_to(
-            concentration_nodes[None, :, None],
-            (n_redshift, n_hermite, n_mass),
-        ).reshape(-1)
-        legacy_weight = np.asarray(result[8], dtype=float)
-        if legacy_weight.shape != weight_concentration.shape:
-            raise ValueError("Legacy catalog shape does not match its quadrature configuration.")
-        weight_base = legacy_weight / weight_concentration
-        return self.catalog_from_legacy(
-            result,
-            weight_base=weight_base,
-            weight_concentration=weight_concentration,
+
+    def _execute_population(self, parameters):
+        from scipy.integrate import simpson
+        from itamae.execution import PopulationComponents
+        from sashimi_w_itamae_components import (
+            WDMAccretionSlices,
+            WDMCatalogColumns,
+            WDMHostHistory,
+            WDMInitialStructure,
+            WDMProfileEvolution,
+            WDMSurvival,
+            WDMTidalMassLoss,
+        )
+
+        p = parameters
+        zdist = np.arange(p["redshift"] + p["dz"], p["zmax"] + p["dz"], p["dz"])
+        logmax = np.log10(0.1 * p["M0"]) if p["logmamax"] is None else p["logmamax"]
+        ma200 = np.logspace(p["logmamin"], logmax, p["N_ma"])
+        ma_by_redshift = np.array(
+            [self.Mvir_from_M200(ma200 * _legacy.Msolar, za) / _legacy.Msolar for za in zdist]
+        )
+        accretion = self.Na_calc(
+            ma_by_redshift,
+            zdist,
+            p["M0"],
+            z0=0,
+            N_herm=p["N_hermNa"],
+            Nrand=1000,
+            sigmafac=p["sigmafac"],
+        )
+        total = simpson(simpson(accretion, x=np.log(ma_by_redshift)), x=np.log(1 + zdist))
+        population = accretion / (1.0 + zdist[:, None])
+        # Preserve the documented global quadrature normalization before splitting.
+        population = population / np.sum(population) * total
+        slices = WDMAccretionSlices(
+            self, ma200, ma_by_redshift, zdist, population, p["sigmalogc"], p["N_herm"]
+        )
+        history = WDMHostHistory(self, p["M0"], p["N_hermNa"], p["sigmafac"])
+        components = PopulationComponents(
+            initializer=WDMInitialStructure(self, p["N_herm"]),
+            evolver=WDMProfileEvolution(
+                self,
+                WDMTidalMassLoss(self, history),
+                p["redshift"],
+                p["N_herm"],
+                p["profile_change"],
+            ),
+            survival=WDMSurvival(),
+            columns=WDMCatalogColumns(),
+        )
+        batches, contexts = zip(*(slices.build(i) for i in range(zdist.size)), strict=True)
+        return components.execute(
+            batches,
+            contexts=contexts,
+            diagnostics={"variant": "sashimi-w", "accretion_integral": total},
         )
 
     @staticmethod
@@ -583,6 +627,17 @@ class ItamaeSubhalos(subhalos):
                 f"({count} entries; minimum={minimum:.6e}); this violates the "
                 "corrected catalog contract."
             )
+        return WeightedSubhaloCatalog(
+            columns=columns,
+            weights={
+                "weight_base": weight_base,
+                "weight_concentration": weight_concentration,
+                "weight_survival": survive.astype(float),
+            },
+            metadata=self._catalog_metadata(),
+        )
+
+    def _catalog_metadata(self):
         backend_config = BackendConfig(self.itamae_cosmology, self.itamae_units)
         backend_identifier = (
             backend_config.identifier
@@ -594,107 +649,99 @@ class ItamaeSubhalos(subhalos):
             )
         )
         model_revision = "v6" if self.physics_mode == "consistent" else "v4"
-        return WeightedSubhaloCatalog(
-            columns=columns,
-            weights={
-                "weight_base": weight_base,
-                "weight_concentration": weight_concentration,
-                "weight_survival": survive.astype(float),
-            },
-            metadata=build_migration_metadata(
-                variant="sashimi-w",
-                distribution_name="sashimi-w",
-                module_file=__file__,
-                model_identifier=(
-                    f"sashimi-w:wdm:m_wdm_keV={self.mass_wdm:g}:"
-                    f"physics={self.physics_mode}:"
-                    f"power={self.wdm_power_convention}:"
-                    f"itamae-migration:{model_revision}"
-                ),
-                backend_identifier=backend_identifier,
-                source_identifier="sashimi-w:itamae-migration",
-                physics_mode=self.physics_mode,
-                variance_identifier=(
-                    self._consistent_variance().identifier
-                    if self.physics_mode == "consistent"
-                    else f"sashimi-w:sharp-k:{self.wdm_power_convention}:physics={self.physics_mode}:v1"
-                ),
-                power_identifier=f"sashimi-w:{self.wdm_power_convention}:v1",
-                solver_identifier="sashimi-w:tidal-stripping:nfw:v1",
-                extra={
-                    "mass_wdm_keV": float(self.mass_wdm),
-                    "wdm_power_convention": self.wdm_power_convention,
-                    "wdm_power_formula_role": self.wdm_power_formula_role,
-                    "wdm_power_q": self.wdm_power_q,
-                    "wdm_transfer_nu": float(WDM_TRANSFER_NU),
-                    "half_mode_definition": self.half_mode_definition,
-                    "half_mode_power_ratio": self.half_mode_power_ratio,
-                    "half_mode_wavenumber_h_per_mpc": self.half_mode_wavenumber(),
+        return build_migration_metadata(
+            variant="sashimi-w",
+            distribution_name="sashimi-w",
+            module_file=__file__,
+            model_identifier=(
+                f"sashimi-w:wdm:m_wdm_keV={self.mass_wdm:g}:"
+                f"physics={self.physics_mode}:"
+                f"power={self.wdm_power_convention}:"
+                f"itamae-migration:{model_revision}"
+            ),
+            backend_identifier=backend_identifier,
+            source_identifier="sashimi-w:itamae-migration",
+            physics_mode=self.physics_mode,
+            variance_identifier=(
+                self._consistent_variance().identifier
+                if self.physics_mode == "consistent"
+                else f"sashimi-w:sharp-k:{self.wdm_power_convention}:physics={self.physics_mode}:v1"
+            ),
+            power_identifier=f"sashimi-w:{self.wdm_power_convention}:v1",
+            solver_identifier="sashimi-w:tidal-stripping:nfw:v1",
+            extra={
+                "mass_wdm_keV": float(self.mass_wdm),
+                "wdm_power_convention": self.wdm_power_convention,
+                "wdm_power_formula_role": self.wdm_power_formula_role,
+                "wdm_power_q": self.wdm_power_q,
+                "wdm_transfer_nu": float(WDM_TRANSFER_NU),
+                "half_mode_definition": self.half_mode_definition,
+                "half_mode_power_ratio": self.half_mode_power_ratio,
+                "half_mode_wavenumber_h_per_mpc": self.half_mode_wavenumber(),
+                "omega_m0": float(OmegaM),
+                "omega_lambda0": self.omega_lambda,
+                "cosmology_parameters": {
                     "omega_m0": float(OmegaM),
                     "omega_lambda0": self.omega_lambda,
-                    "cosmology_parameters": {
-                        "omega_m0": float(OmegaM),
-                        "omega_lambda0": self.omega_lambda,
-                        "h": float(h),
-                    },
-                    "growth_normalized_at_z0": self.physics_mode == "consistent",
-                    "variance_growth_power": (2 if self.physics_mode == "consistent" else 1),
-                    "variance_mass_unit": (
-                        "Msun"
-                        if self.physics_mode == "consistent"
-                        else "legacy-raw-Msun-values-on-Msun/h-grid"
-                    ),
-                    "variance_power_units": (
-                        {"wavenumber": "1/Mpc", "power": "Mpc^3", "density": "Msun/Mpc^3"}
-                        if self.physics_mode == "consistent"
-                        else {
-                            "wavenumber": "h/Mpc",
-                            "power": "(Mpc/h)^3",
-                            "density": "(Msun/h)/(Mpc/h)^3",
-                        }
-                    ),
-                    "physical_to_filter_mass": (
-                        "M_filter[Msun/h] = h * M_physical[Msun]"
-                        if self.physics_mode == "consistent"
-                        else "legacy-unconverted-variance-and-concentration-divides-by-h"
-                    ),
-                    "accretion_mass_redshift_mapping": (
-                        "per-redshift-virial-mass-grid"
-                        if self.physics_mode == "consistent"
-                        else "legacy-final-redshift-grid-reused"
-                    ),
-                    "population_weight_contract": (
-                        "nonnegative-corrected-counts"
-                        if self.physics_mode == "consistent"
-                        else "exact-signed-tuple;structured-catalog-requires-nonnegative-grid"
-                    ),
-                    "unit_backend": self.itamae_units.identifier,
-                    "canonical_units": {
-                        "mass": "Msun",
-                        "length": "Mpc",
-                        "density": "Msun/Mpc^3",
-                    },
-                    "legacy_units": {
-                        "mass": "Msun",
-                        "length": "kpc",
-                        "density": "Msun/pc^3",
-                    },
-                    "legacy_weight_excludes_survival": True,
-                    "legacy_mode_known_inconsistencies": (
-                        [
-                            "OmegaM+OmegaL!=1",
-                            "D(0)!=1",
-                            "dS/dM scales as D instead of D^2",
-                            "physical Msun values are passed directly to the Msun/h variance grid",
-                            "conc200 divides physical Msun by h instead of multiplying by h",
-                            "all accretion redshifts reuse the final redshift virial-mass grid",
-                            "fixed-node variance noise can create signed population weights",
-                        ]
-                        if self.physics_mode == "legacy"
-                        else []
-                    ),
+                    "h": float(h),
                 },
-            ),
+                "growth_normalized_at_z0": self.physics_mode == "consistent",
+                "variance_growth_power": (2 if self.physics_mode == "consistent" else 1),
+                "variance_mass_unit": (
+                    "Msun"
+                    if self.physics_mode == "consistent"
+                    else "legacy-raw-Msun-values-on-Msun/h-grid"
+                ),
+                "variance_power_units": (
+                    {"wavenumber": "1/Mpc", "power": "Mpc^3", "density": "Msun/Mpc^3"}
+                    if self.physics_mode == "consistent"
+                    else {
+                        "wavenumber": "h/Mpc",
+                        "power": "(Mpc/h)^3",
+                        "density": "(Msun/h)/(Mpc/h)^3",
+                    }
+                ),
+                "physical_to_filter_mass": (
+                    "M_filter[Msun/h] = h * M_physical[Msun]"
+                    if self.physics_mode == "consistent"
+                    else "legacy-unconverted-variance-and-concentration-divides-by-h"
+                ),
+                "accretion_mass_redshift_mapping": (
+                    "per-redshift-virial-mass-grid"
+                    if self.physics_mode == "consistent"
+                    else "legacy-final-redshift-grid-reused"
+                ),
+                "population_weight_contract": (
+                    "nonnegative-corrected-counts"
+                    if self.physics_mode == "consistent"
+                    else "exact-signed-tuple;structured-catalog-requires-nonnegative-grid"
+                ),
+                "unit_backend": self.itamae_units.identifier,
+                "canonical_units": {
+                    "mass": "Msun",
+                    "length": "Mpc",
+                    "density": "Msun/Mpc^3",
+                },
+                "legacy_units": {
+                    "mass": "Msun",
+                    "length": "kpc",
+                    "density": "Msun/pc^3",
+                },
+                "legacy_weight_excludes_survival": True,
+                "legacy_mode_known_inconsistencies": (
+                    [
+                        "OmegaM+OmegaL!=1",
+                        "D(0)!=1",
+                        "dS/dM scales as D instead of D^2",
+                        "physical Msun values are passed directly to the Msun/h variance grid",
+                        "conc200 divides physical Msun by h instead of multiplying by h",
+                        "all accretion redshifts reuse the final redshift virial-mass grid",
+                        "fixed-node variance noise can create signed population weights",
+                    ]
+                    if self.physics_mode == "legacy"
+                    else []
+                ),
+            },
         )
 
 
