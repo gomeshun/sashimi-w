@@ -46,3 +46,12 @@ The present-day mass function's survival factor is explicit in Eq. (1) and
 Appendix D of [Dekker et al. (2022)](https://arxiv.org/pdf/2111.13137).
 This aggregation correction introduces no new calibration or default change.
 The separate [resolution limits](resolution-and-review.md) remain applicable.
+
+The installed API was also checked against named catalogs for q5/q10 and
+`profile_change=True/False` at the recorded 32-row configuration. All four
+counts and strict cumulative curves agree. See
+`validation/convergence/surviving-observables.json` and
+`python scripts/check_observable_counts.py --output <new-report.json>`.
+Both walkthrough (4 code cells) and scientific notebook (3 code cells) execute
+in fresh kernels. The first local notebook launch required local socket
+permission; the successful runs exercised every cell.
