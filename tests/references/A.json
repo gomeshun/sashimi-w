@@ -1,0 +1,216 @@
+{
+  "schema": "sashimi-family:independent-reference:v1",
+  "role": "A",
+  "repository": "gomeshun/sashimi-w",
+  "source_revision": "99dfc3632eec0126080c0273ddf78f84fe09216c",
+  "module_sha256": "3310d336926fb7701d169e14478cdc76050d1510643b644f24286a70a4802b52",
+  "input_files": [
+    {
+      "path": "WMAP7_camb_matterpower_z0_extrapolated.dat",
+      "sha256": "417a0e8e9feafae8c6afb4b89e63aef80718c9641ae95994d25a6cd97438f8c9",
+      "verified_sha256": "417a0e8e9feafae8c6afb4b89e63aef80718c9641ae95994d25a6cd97438f8c9"
+    }
+  ],
+  "patches": [],
+  "calculation": {
+    "role": "A",
+    "constructor": {
+      "mass_wdm": 2.0
+    },
+    "method": "rs_rhos_calc",
+    "repository": "gomeshun/sashimi-w",
+    "source_revision": "99dfc3632eec0126080c0273ddf78f84fe09216c",
+    "module": "sashimi_w",
+    "class": "subhalos",
+    "parameters": {
+      "M0": 10000000000.0,
+      "N_herm": 2,
+      "N_hermNa": 3,
+      "N_ma": 4,
+      "dz": 0.5,
+      "logmamax": 8.0,
+      "logmamin": 6.0,
+      "profile_change": true,
+      "redshift": 0.0,
+      "sigmafac": 0.0,
+      "sigmalogc": 0.128,
+      "zmax": 1.0
+    },
+    "input_files": [
+      {
+        "path": "WMAP7_camb_matterpower_z0_extrapolated.dat",
+        "sha256": "417a0e8e9feafae8c6afb4b89e63aef80718c9641ae95994d25a6cd97438f8c9"
+      }
+    ],
+    "probes": [
+      {
+        "name": "growth",
+        "method": "growthD",
+        "args": [
+          [
+            0.0,
+            0.5,
+            1.0,
+            2.0,
+            5.0
+          ]
+        ]
+      },
+      {
+        "name": "variance",
+        "method": "sigmaMz",
+        "args": [
+          [
+            10000000.0,
+            100000000.0,
+            1000000000.0
+          ],
+          1.0
+        ]
+      },
+      {
+        "name": "variance_derivative",
+        "method": "dsdm",
+        "args": [
+          [
+            10000000.0,
+            100000000.0,
+            1000000000.0
+          ],
+          1.0
+        ]
+      }
+    ],
+    "environment": {
+      "python": "3.10.20",
+      "dependencies": {
+        "colossus": "1.4.0",
+        "contourpy": "1.2.1",
+        "cycler": "0.12.1",
+        "fonttools": "4.64.0",
+        "kiwisolver": "1.5.1",
+        "matplotlib": "3.7.5",
+        "numpy": "1.22.4",
+        "packaging": "26.3",
+        "pillow": "12.3.0",
+        "pyparsing": "3.3.2",
+        "python-dateutil": "2.9.0.post0",
+        "scipy": "1.10.1",
+        "six": "1.17.0",
+        "tqdm": "4.70.0"
+      }
+    }
+  },
+  "python": "3.10.20 (main, Mar  3 2026, 14:59:16) [Clang 21.1.4 ]",
+  "platform": "linux",
+  "dependencies": {
+    "numpy": "1.22.4",
+    "scipy": "1.10.1",
+    "colossus": "1.4.0",
+    "matplotlib": "3.7.5",
+    "tqdm": "4.70.0"
+  },
+  "worker_sha256": "d4d0adafe611ef240b40c8687ea04671477ea9a24e6edd110512e93926dca46d",
+  "wall_seconds": 5.2070894399657845,
+  "warnings": [
+    "invalid value encountered in power"
+  ],
+  "arrays": {
+    "tuple_0": {
+      "shape": [
+        16
+      ],
+      "dtype": "float64",
+      "nonfinite": 0
+    },
+    "tuple_1": {
+      "shape": [
+        16
+      ],
+      "dtype": "float64",
+      "nonfinite": 0
+    },
+    "tuple_2": {
+      "shape": [
+        16
+      ],
+      "dtype": "float64",
+      "nonfinite": 0
+    },
+    "tuple_3": {
+      "shape": [
+        16
+      ],
+      "dtype": "float64",
+      "nonfinite": 0
+    },
+    "tuple_4": {
+      "shape": [
+        16
+      ],
+      "dtype": "float64",
+      "nonfinite": 0
+    },
+    "tuple_5": {
+      "shape": [
+        16
+      ],
+      "dtype": "float64",
+      "nonfinite": 0
+    },
+    "tuple_6": {
+      "shape": [
+        16
+      ],
+      "dtype": "float64",
+      "nonfinite": 0
+    },
+    "tuple_7": {
+      "shape": [
+        16
+      ],
+      "dtype": "float64",
+      "nonfinite": 0
+    },
+    "tuple_8": {
+      "shape": [
+        16
+      ],
+      "dtype": "float64",
+      "nonfinite": 0
+    },
+    "tuple_9": {
+      "shape": [
+        16
+      ],
+      "dtype": "bool",
+      "nonfinite": 0
+    },
+    "probe_growth": {
+      "shape": [
+        5
+      ],
+      "dtype": "float64",
+      "nonfinite": 0
+    },
+    "probe_variance": {
+      "shape": [
+        3
+      ],
+      "dtype": "float64",
+      "nonfinite": 0
+    },
+    "probe_variance_derivative": {
+      "shape": [
+        3
+      ],
+      "dtype": "float64",
+      "nonfinite": 0
+    }
+  },
+  "artifact_sha256": "af24c7aab9577c11a42521e9b2d169ea558c1cdb2fab9853ff09c6fc4287595d",
+  "source_export_sha256": "728c6d07c835a4c8129a89c1e70b3ce74a633540b47340acebfc6fa5733a931e",
+  "config_sha256": "699e2461a8aef1606c46586317cc759067459739776c6fd61b11bd23c1e28242",
+  "controller_sha256": "53ec01227aebb2ae1981c7db9b708252162db81d40bf52effd06f7d09d3b2192",
+  "independent_process": true
+}
