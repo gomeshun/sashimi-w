@@ -22,8 +22,8 @@ preserved in the [frozen family bundle](https://github.com/gomeshun/sashimi-fami
 | .0125 | 15.93793800 | .01269002232 | 3.98023699 | .00537685086 |
 
 Surviving count is the sum of catalog weight times survival; bound mass fraction
-is sum(m_bound × surviving weight)/M0. These definitions do not resolve the
-separate pending question about the historical satellite-count methods.
+is sum(m_bound × surviving weight)/M0. The subsequently adopted [observable correction](surviving-observables.md)
+uses this same surviving population; the stored convergence catalogs are unchanged.
 
 Changing only dz=.1 to .0125 increases count by 4.940%/5.000% and bound mass
 fraction by 17.199%/17.663% for q5/q10. The final .025→.0125 refinement still

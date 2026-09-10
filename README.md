@@ -40,7 +40,9 @@ m200_acc, z_acc, r_s_acc, rho_s_acc, m_bound, r_s, rho_s, c_t, weight, survive
 
 Tuple radii use kpc, densities Msun/pc³, and tuple `weight` excludes survival.
 Use the named catalog's final weight for the expected surviving population.
-The existing `subhalo_distr`, `N_sat`, and `N_sat_Vthres` functions are retained.
+The existing `subhalo_distr`, `N_sat`, and `N_sat_Vthres` functions now consistently
+count current survivors and forward `profile_change`. The accretion mass display
+uses the same survivors. See [thresholds and cumulative axes](docs/surviving-observables.md).
 Their historical count/survival definition is awaiting a separate user decision;
 that unresolved item prevents declaring release preparation complete.
 
