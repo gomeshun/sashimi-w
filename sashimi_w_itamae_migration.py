@@ -138,8 +138,7 @@ class ItamaeSubhalos(subhalos):
             convention = _WDM_POWER_CONVENTIONS[wdm_power_convention]
         except (KeyError, TypeError) as error:
             raise ValueError(
-                "wdm_power_convention must be one of "
-                f"{sorted(_WDM_POWER_CONVENTIONS)}."
+                f"wdm_power_convention must be one of {sorted(_WDM_POWER_CONVENTIONS)}."
             ) from error
         backend = cosmology_backend or NativeFlatLCDM(omega_m0=float(OmegaM), h=float(h))
         self._validate_cosmology(backend)
@@ -153,8 +152,6 @@ class ItamaeSubhalos(subhalos):
         self.itamae_units = unit_backend or NativeUnits()
         super().__init__(mass_wdm=particle_mass)
         self._consistent_variance_model = None
-        self._consistent_sigma_log_mass = None
-        self._consistent_sigma_z0_values = None
 
     def _wdm_power_ratio(self, k: Any, *, alpha: Any | None = None):
         """Return the explicitly selected WDM-to-CDM power ratio.
@@ -181,9 +178,7 @@ class ItamaeSubhalos(subhalos):
         ``T=0.5``, for which the power ratio is one quarter. Metadata records
         the distinction so identically valued scales cannot be mixed silently.
         """
-        factor = (2.0 ** (WDM_TRANSFER_NU / 5.0) - 1.0) ** (
-            1.0 / (2.0 * WDM_TRANSFER_NU)
-        )
+        factor = (2.0 ** (WDM_TRANSFER_NU / 5.0) - 1.0) ** (1.0 / (2.0 * WDM_TRANSFER_NU))
         return float(factor / self.a)
 
     @staticmethod
@@ -282,44 +277,24 @@ class ItamaeSubhalos(subhalos):
             self._consistent_variance_model = make_integrated_variance_model(self)
         return self._consistent_variance_model
 
-    def _ensure_consistent_sigma_cache(self) -> None:
-        """Cache a monotonic log-mass interpolation of analytic sigma(M, 0)."""
-        if self._consistent_sigma_z0_values is not None:
-            return
-        physical_mass = np.asarray(self.filter_Mass, dtype=float) / float(h)
-        sigma_z0 = np.asarray(self._consistent_variance().sigma(physical_mass, 0.0), dtype=float)
-        if (
-            sigma_z0.shape != physical_mass.shape
-            or not np.all(np.isfinite(sigma_z0))
-            or np.any(sigma_z0 <= 0.0)
-        ):
-            raise ValueError("Canonical sharp-k sigma cache contains invalid values.")
-        # Deep below the WDM cutoff the physical curve is flat and logarithmic
-        # quadrature leaves harmless O(1e-5) fluctuations. Project that
-        # numerical plateau onto the required nonincreasing relation before
-        # interpolation; resolved scales are unchanged.
-        sigma_z0 = np.minimum.accumulate(sigma_z0)
-        self._consistent_sigma_log_mass = np.log(physical_mass)
-        self._consistent_sigma_z0_values = sigma_z0
-
     def sigmaMz(self, mass: Any, z: Any):
-        """Return sigma for legacy raw masses or canonical physical solar masses."""
+        """Evaluate the physical sharp-k integral in the model's mass domain.
+
+        Sigma and dS/dM use the same continuous finite-domain integral; no
+        coarse mass interpolation or monotonic projection is applied.
+        """
         if self.physics_mode == "legacy":
             return super().sigmaMz(mass, z)
-        self._ensure_consistent_sigma_cache()
         mass_array, redshift = np.broadcast_arrays(
             np.asarray(mass, dtype=float),
             np.asarray(z, dtype=float),
         )
         if not np.all(np.isfinite(mass_array)) or np.any(mass_array <= 0.0):
             raise ValueError("Masses must be finite and positive.")
-        log_mass = np.log(mass_array)
-        log_grid = self._consistent_sigma_log_mass
-        sigma_grid = self._consistent_sigma_z0_values
-        if np.any(log_mass < log_grid[0]) or np.any(log_mass > log_grid[-1]):
+        physical_grid = np.asarray(self.filter_Mass, dtype=float) / float(h)
+        if np.any(mass_array < physical_grid[0]) or np.any(mass_array > physical_grid[-1]):
             raise ValueError("Mass lies outside the canonical SASHIMI-W variance grid.")
-        sigma0 = np.interp(log_mass, log_grid, sigma_grid)
-        result = sigma0 * np.asarray(self.growthD(redshift), dtype=float)
+        result = np.asarray(self._consistent_variance().sigma(mass_array, redshift), dtype=float)
         return float(result) if result.ndim == 0 else result
 
     def dsdm(self, mass: Any, z: Any):
@@ -347,11 +322,7 @@ class ItamaeSubhalos(subhalos):
                 final_mass,
             )
         mass_grid = np.asarray(mass_by_redshift, dtype=float)
-        if (
-            mass_grid.ndim != 2
-            or not np.all(np.isfinite(mass_grid))
-            or np.any(mass_grid <= 0.0)
-        ):
+        if mass_grid.ndim != 2 or not np.all(np.isfinite(mass_grid)) or np.any(mass_grid <= 0.0):
             raise ValueError("Accretion mass grid must be finite, positive, and two-dimensional.")
         return mass_grid
 
@@ -622,7 +593,7 @@ class ItamaeSubhalos(subhalos):
                 f"OmegaL={_LEGACY_OMEGA_L:.17g};h={float(h):.17g}"
             )
         )
-        model_revision = "v5" if self.physics_mode == "consistent" else "v4"
+        model_revision = "v6" if self.physics_mode == "consistent" else "v4"
         return WeightedSubhaloCatalog(
             columns=columns,
             weights={
@@ -644,8 +615,9 @@ class ItamaeSubhalos(subhalos):
                 source_identifier="sashimi-w:itamae-migration",
                 physics_mode=self.physics_mode,
                 variance_identifier=(
-                    f"sashimi-w:sharp-k:{self.wdm_power_convention}:"
-                    f"physics={self.physics_mode}:v1"
+                    self._consistent_variance().identifier
+                    if self.physics_mode == "consistent"
+                    else f"sashimi-w:sharp-k:{self.wdm_power_convention}:physics={self.physics_mode}:v1"
                 ),
                 power_identifier=f"sashimi-w:{self.wdm_power_convention}:v1",
                 solver_identifier="sashimi-w:tidal-stripping:nfw:v1",

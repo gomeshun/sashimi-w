@@ -1,0 +1,391 @@
+{
+  "schema": "sashimi-family:independent-reference:v1",
+  "role": "B",
+  "repository": "gomeshun/sashimi-w",
+  "source_revision": "99dfc3632eec0126080c0273ddf78f84fe09216c",
+  "module_sha256": "6c5592984e748d48c4242a7e05dc867be64ada39c5900f253b391690dc033e9b",
+  "input_files": [
+    {
+      "path": "WMAP7_camb_matterpower_z0_extrapolated.dat",
+      "sha256": "417a0e8e9feafae8c6afb4b89e63aef80718c9641ae95994d25a6cd97438f8c9",
+      "verified_sha256": "417a0e8e9feafae8c6afb4b89e63aef80718c9641ae95994d25a6cd97438f8c9"
+    }
+  ],
+  "patches": [
+    {
+      "id": "combined-six",
+      "path": "patches/combined-six.patch",
+      "sha256": "fbb64be78179e49f42dc61f8a4bc84c2c54c9211aa84682bda80b8535940f8a4",
+      "constituent_patches": [
+        {
+          "id": "01-flat-background",
+          "path": "patches/01-flat-background.patch",
+          "sha256": "df63ad4ded2b22fb8ef34fa4efc2eb18440120130b4b06ee03afb8bc2d9a4b33",
+          "reason": "Restore OmegaM+OmegaLambda=1 when radiation is zero; retain WMAP7 matter fraction."
+        },
+        {
+          "id": "02-normalized-growth",
+          "path": "patches/02-normalized-growth.patch",
+          "sha256": "28367104270559be2006755318cfc13d007ffd90beddfc8c4a5fd41e1eae82de",
+          "reason": "Normalize the selected growth approximation to D(0)=1 and scale its derivative by the same constant."
+        },
+        {
+          "id": "03-variance-growth-square",
+          "path": "patches/03-variance-growth-square.patch",
+          "sha256": "b265a6f7c12aebc41cbf7fb86fa15ff120a1c794575d0932505f4c90ed6e5f16",
+          "reason": "Use dS/dM(M,z)=D(z)^2 dS/dM(M,0)."
+        },
+        {
+          "id": "04-physical-variance-mass",
+          "path": "patches/04-physical-variance-mass.patch",
+          "sha256": "3ce1880471f1f065dfa60a70a1e08472d80812f129778029c16c7ff2a401c7fa",
+          "reason": "Map physical solar masses to the numerical Msun/h grid using h*M in sigma and its log-mass slope; derivative remains per physical solar mass."
+        },
+        {
+          "id": "05-physical-concentration-mass",
+          "path": "patches/05-physical-concentration-mass.patch",
+          "sha256": "a1561f97342f0d1f93fea7adffa6fe4887b2d1b21f7888ca1c1157e3349ea200",
+          "reason": "Map a physical CGS input to the numerical Msun/h concentration grid as h*M/Msolar."
+        },
+        {
+          "id": "06-redshift-accretion-grid",
+          "path": "patches/06-redshift-accretion-grid.patch",
+          "sha256": "4844fccff402d00b22b5ff0773139ae85a2080a0d952c21a3f8e702dabf1c3cd",
+          "reason": "Use each redshift virial-mass row both in the accretion rate and its mass integral; do not reuse the final row."
+        }
+      ],
+      "reason": "Nonoverlapping source edits from the six individually evaluated corrections; combined in one patch because adjacent original context lines overlap."
+    },
+    {
+      "id": "independent-quad-helpers",
+      "path": "patches/independent-quad-helpers.patch",
+      "sha256": "40c0ed125bfee8f38d35d60a3327c89eb423c69fce7894a4ee7c5fa5e46f93cd",
+      "reason": "Independent adaptive integrals on original spectrum knots; adding helpers alone changes no calculation."
+    },
+    {
+      "id": "07-continuous-variance",
+      "path": "patches/07-continuous-variance.patch",
+      "sha256": "b8713958bd5eec4809ba25451d366fda44cf0fc4e2b8f4c8a4a0f09dc0449386",
+      "reason": "Replace the old rectangular integration and 100-node sigma interpolation with the exact finite-domain sharp-k integral, keeping the historical sigma8 normalization."
+    },
+    {
+      "id": "08-moving-boundary-derivative",
+      "path": "patches/08-moving-boundary-derivative.patch",
+      "sha256": "4620e8ebdc1b47949fb2c728e070f7fcae752317f475c49a91f74a80eae1a0d8",
+      "reason": "Replace the old coarse table slope with the moving-boundary derivative of the same finite-domain integral."
+    },
+    {
+      "id": "09-analytic-nfw-inverse",
+      "path": "patches/09-analytic-nfw-inverse.patch",
+      "sha256": "c88d62f8c3119b8970181aea5fa01c6f9cdf5749303541ee2f916133c844f63d",
+      "reason": "Evaluate the physical NFW inverse with the principal Lambert-W branch at 50 digits."
+    },
+    {
+      "id": "10-even-sample-quadrature",
+      "path": "patches/10-even-sample-quadrature.patch",
+      "sha256": "0f5df080d5b958f0dffe6dff062eb76f8b3f75ca15a4b5ca6adb3717bee5bc9c",
+      "reason": "Use the last-interval quadratic correction employed by modern Simpson quadrature; retain this independently derived numerical-normalization effect."
+    },
+    {
+      "id": "explicit-power-exponent",
+      "path": "patches/explicit-power-exponent.patch",
+      "sha256": "1e10f44afa9e9566a90d8b4bab84405d56f9f1d1d38d39bfc54fe730c4895aca",
+      "reason": "Allow an explicitly requested q=5 or q=10 power ratio in both sharp-k and top-hat spectra; no default change."
+    }
+  ],
+  "calculation": {
+    "role": "B",
+    "constructor": {
+      "mass_wdm": 2.0,
+      "wdm_power_q": 5
+    },
+    "method": "rs_rhos_calc",
+    "repository": "gomeshun/sashimi-w",
+    "source_revision": "99dfc3632eec0126080c0273ddf78f84fe09216c",
+    "module": "sashimi_w",
+    "class": "subhalos",
+    "parameters": {
+      "M0": 10000000000.0,
+      "N_herm": 2,
+      "N_hermNa": 3,
+      "N_ma": 4,
+      "dz": 0.5,
+      "logmamax": 8.0,
+      "logmamin": 6.0,
+      "profile_change": true,
+      "redshift": 0.0,
+      "sigmafac": 0.0,
+      "sigmalogc": 0.128,
+      "zmax": 1.0
+    },
+    "input_files": [
+      {
+        "path": "WMAP7_camb_matterpower_z0_extrapolated.dat",
+        "sha256": "417a0e8e9feafae8c6afb4b89e63aef80718c9641ae95994d25a6cd97438f8c9"
+      }
+    ],
+    "probes": [
+      {
+        "name": "growth",
+        "method": "growthD",
+        "args": [
+          [
+            0.0,
+            0.5,
+            1.0,
+            2.0,
+            5.0
+          ]
+        ]
+      },
+      {
+        "name": "variance",
+        "method": "sigmaMz",
+        "args": [
+          [
+            10000000.0,
+            100000000.0,
+            1000000000.0
+          ],
+          1.0
+        ]
+      },
+      {
+        "name": "variance_derivative",
+        "method": "dsdm",
+        "args": [
+          [
+            10000000.0,
+            100000000.0,
+            1000000000.0
+          ],
+          1.0
+        ]
+      }
+    ],
+    "environment": {
+      "python": "3.10.20",
+      "dependencies": {
+        "colossus": "1.4.0",
+        "contourpy": "1.2.1",
+        "cycler": "0.12.1",
+        "fonttools": "4.64.0",
+        "kiwisolver": "1.5.1",
+        "matplotlib": "3.7.5",
+        "numpy": "1.22.4",
+        "packaging": "26.3",
+        "pillow": "12.3.0",
+        "pyparsing": "3.3.2",
+        "python-dateutil": "2.9.0.post0",
+        "scipy": "1.10.1",
+        "six": "1.17.0",
+        "tqdm": "4.70.0",
+        "mpmath": "1.3.0"
+      }
+    },
+    "patches": [
+      {
+        "id": "combined-six",
+        "path": "patches/combined-six.patch",
+        "sha256": "fbb64be78179e49f42dc61f8a4bc84c2c54c9211aa84682bda80b8535940f8a4",
+        "constituent_patches": [
+          {
+            "id": "01-flat-background",
+            "path": "patches/01-flat-background.patch",
+            "sha256": "df63ad4ded2b22fb8ef34fa4efc2eb18440120130b4b06ee03afb8bc2d9a4b33",
+            "reason": "Restore OmegaM+OmegaLambda=1 when radiation is zero; retain WMAP7 matter fraction."
+          },
+          {
+            "id": "02-normalized-growth",
+            "path": "patches/02-normalized-growth.patch",
+            "sha256": "28367104270559be2006755318cfc13d007ffd90beddfc8c4a5fd41e1eae82de",
+            "reason": "Normalize the selected growth approximation to D(0)=1 and scale its derivative by the same constant."
+          },
+          {
+            "id": "03-variance-growth-square",
+            "path": "patches/03-variance-growth-square.patch",
+            "sha256": "b265a6f7c12aebc41cbf7fb86fa15ff120a1c794575d0932505f4c90ed6e5f16",
+            "reason": "Use dS/dM(M,z)=D(z)^2 dS/dM(M,0)."
+          },
+          {
+            "id": "04-physical-variance-mass",
+            "path": "patches/04-physical-variance-mass.patch",
+            "sha256": "3ce1880471f1f065dfa60a70a1e08472d80812f129778029c16c7ff2a401c7fa",
+            "reason": "Map physical solar masses to the numerical Msun/h grid using h*M in sigma and its log-mass slope; derivative remains per physical solar mass."
+          },
+          {
+            "id": "05-physical-concentration-mass",
+            "path": "patches/05-physical-concentration-mass.patch",
+            "sha256": "a1561f97342f0d1f93fea7adffa6fe4887b2d1b21f7888ca1c1157e3349ea200",
+            "reason": "Map a physical CGS input to the numerical Msun/h concentration grid as h*M/Msolar."
+          },
+          {
+            "id": "06-redshift-accretion-grid",
+            "path": "patches/06-redshift-accretion-grid.patch",
+            "sha256": "4844fccff402d00b22b5ff0773139ae85a2080a0d952c21a3f8e702dabf1c3cd",
+            "reason": "Use each redshift virial-mass row both in the accretion rate and its mass integral; do not reuse the final row."
+          }
+        ],
+        "reason": "Nonoverlapping source edits from the six individually evaluated corrections; combined in one patch because adjacent original context lines overlap."
+      },
+      {
+        "id": "independent-quad-helpers",
+        "path": "patches/independent-quad-helpers.patch",
+        "sha256": "40c0ed125bfee8f38d35d60a3327c89eb423c69fce7894a4ee7c5fa5e46f93cd",
+        "reason": "Independent adaptive integrals on original spectrum knots; adding helpers alone changes no calculation."
+      },
+      {
+        "id": "07-continuous-variance",
+        "path": "patches/07-continuous-variance.patch",
+        "sha256": "b8713958bd5eec4809ba25451d366fda44cf0fc4e2b8f4c8a4a0f09dc0449386",
+        "reason": "Replace the old rectangular integration and 100-node sigma interpolation with the exact finite-domain sharp-k integral, keeping the historical sigma8 normalization."
+      },
+      {
+        "id": "08-moving-boundary-derivative",
+        "path": "patches/08-moving-boundary-derivative.patch",
+        "sha256": "4620e8ebdc1b47949fb2c728e070f7fcae752317f475c49a91f74a80eae1a0d8",
+        "reason": "Replace the old coarse table slope with the moving-boundary derivative of the same finite-domain integral."
+      },
+      {
+        "id": "09-analytic-nfw-inverse",
+        "path": "patches/09-analytic-nfw-inverse.patch",
+        "sha256": "c88d62f8c3119b8970181aea5fa01c6f9cdf5749303541ee2f916133c844f63d",
+        "reason": "Evaluate the physical NFW inverse with the principal Lambert-W branch at 50 digits."
+      },
+      {
+        "id": "10-even-sample-quadrature",
+        "path": "patches/10-even-sample-quadrature.patch",
+        "sha256": "0f5df080d5b958f0dffe6dff062eb76f8b3f75ca15a4b5ca6adb3717bee5bc9c",
+        "reason": "Use the last-interval quadratic correction employed by modern Simpson quadrature; retain this independently derived numerical-normalization effect."
+      },
+      {
+        "id": "explicit-power-exponent",
+        "path": "patches/explicit-power-exponent.patch",
+        "sha256": "1e10f44afa9e9566a90d8b4bab84405d56f9f1d1d38d39bfc54fe730c4895aca",
+        "reason": "Allow an explicitly requested q=5 or q=10 power ratio in both sharp-k and top-hat spectra; no default change."
+      }
+    ]
+  },
+  "python": "3.10.20 (main, Mar  3 2026, 14:59:16) [Clang 21.1.4 ]",
+  "platform": "linux",
+  "dependencies": {
+    "colossus": "1.4.0",
+    "contourpy": "1.2.1",
+    "cycler": "0.12.1",
+    "fonttools": "4.64.0",
+    "kiwisolver": "1.5.1",
+    "matplotlib": "3.7.5",
+    "mpmath": "1.3.0",
+    "numpy": "1.22.4",
+    "packaging": "26.3",
+    "pillow": "12.3.0",
+    "pyparsing": "3.3.2",
+    "python-dateutil": "2.9.0.post0",
+    "scipy": "1.10.1",
+    "six": "1.17.0",
+    "tqdm": "4.70.0"
+  },
+  "worker_sha256": "f7f33a77b19117f17a5a6ca606c8507d8552e515cb325429c3961c235739798b",
+  "wall_seconds": 5.056963889976032,
+  "warnings": [
+    "invalid value encountered in power"
+  ],
+  "arrays": {
+    "tuple_0": {
+      "shape": [
+        16
+      ],
+      "dtype": "float64",
+      "nonfinite": 0
+    },
+    "tuple_1": {
+      "shape": [
+        16
+      ],
+      "dtype": "float64",
+      "nonfinite": 0
+    },
+    "tuple_2": {
+      "shape": [
+        16
+      ],
+      "dtype": "float64",
+      "nonfinite": 0
+    },
+    "tuple_3": {
+      "shape": [
+        16
+      ],
+      "dtype": "float64",
+      "nonfinite": 0
+    },
+    "tuple_4": {
+      "shape": [
+        16
+      ],
+      "dtype": "float64",
+      "nonfinite": 0
+    },
+    "tuple_5": {
+      "shape": [
+        16
+      ],
+      "dtype": "float64",
+      "nonfinite": 0
+    },
+    "tuple_6": {
+      "shape": [
+        16
+      ],
+      "dtype": "float64",
+      "nonfinite": 0
+    },
+    "tuple_7": {
+      "shape": [
+        16
+      ],
+      "dtype": "float64",
+      "nonfinite": 0
+    },
+    "tuple_8": {
+      "shape": [
+        16
+      ],
+      "dtype": "float64",
+      "nonfinite": 0
+    },
+    "tuple_9": {
+      "shape": [
+        16
+      ],
+      "dtype": "bool",
+      "nonfinite": 0
+    },
+    "probe_growth": {
+      "shape": [
+        5
+      ],
+      "dtype": "float64",
+      "nonfinite": 0
+    },
+    "probe_variance": {
+      "shape": [
+        3
+      ],
+      "dtype": "float64",
+      "nonfinite": 0
+    },
+    "probe_variance_derivative": {
+      "shape": [
+        3
+      ],
+      "dtype": "float64",
+      "nonfinite": 0
+    }
+  },
+  "artifact_sha256": "a5afb85443f622dfac0522ab159aa16f822c29242c34f58e75301ef4c4fcd06c",
+  "source_export_sha256": "728c6d07c835a4c8129a89c1e70b3ce74a633540b47340acebfc6fa5733a931e",
+  "config_sha256": "86a94a0bdc7fcbc549a1e0ceca3fb40fc846ef797740adedcbf9644eed0f9015",
+  "controller_sha256": "bb22d3196573c224f1cb811f211fbf81844737c3b625812addf90ede96b34b85",
+  "independent_process": true
+}

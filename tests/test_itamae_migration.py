@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 
@@ -38,6 +39,17 @@ def _fixture() -> dict:
 
 def _q10_fixture() -> dict:
     return json.loads(_Q10_GOLDEN.read_text())
+
+
+def _corrected_reference(q: int) -> dict:
+    """Load isolated B; historical migration-mode goldens remain unchanged."""
+    path = Path(__file__).parent / "references" / f"B-all-q{q}.npz"
+    provenance = json.loads(path.with_suffix(".json").read_text())
+    assert hashlib.sha256(path.read_bytes()).hexdigest() == provenance["artifact_sha256"]
+    assert provenance["role"] == "B"
+    names = [item[0] for item in _COLUMN_MAPPING.values()] + ["weight", "survive"]
+    with np.load(path) as reference:
+        return {name: reference[f"tuple_{i}"] for i, name in enumerate(names)}
 
 
 def _fixture_mass_wdm(fixture: dict | None = None) -> float:
@@ -88,14 +100,14 @@ def test_golden_fixture_provenance_is_complete() -> None:
         constructor = provenance["constructor_parameters"]
         assert fixture["parameters"]["mass_wdm"] == constructor["mass_wdm"]
         assert constructor["wdm_power_convention"] == convention
-        assert constructor["cosmology_backend"]["identifier"] == (
-            "native-flatlcdm:Om=0.27:h=0.7"
+        assert constructor["cosmology_backend"]["identifier"] == ("native-flatlcdm:Om=0.27:h=0.7")
+        assert (
+            constructor["cosmology_backend"]["parameters"]["omega_m0"]
+            == (provenance["cosmology"]["parameters"]["omega_m0"])
         )
-        assert constructor["cosmology_backend"]["parameters"]["omega_m0"] == (
-            provenance["cosmology"]["parameters"]["omega_m0"]
-        )
-        assert constructor["cosmology_backend"]["parameters"]["h"] == (
-            provenance["cosmology"]["parameters"]["h"]
+        assert (
+            constructor["cosmology_backend"]["parameters"]["h"]
+            == (provenance["cosmology"]["parameters"]["h"])
         )
         assert provenance["cosmology"]["parameters"]["omega_m0"] == 0.27
         assert provenance["cosmology"]["parameters"]["h"] == 0.7
@@ -182,8 +194,7 @@ def test_q5_q10_formulas_half_mode_and_consumers_are_coherent() -> None:
     concentration_k = np.geomspace(0.05, 20.0, 9)
     np.testing.assert_allclose(
         q10.SigmaIntegrand(concentration_k, 0.05),
-        q5.SigmaIntegrand(concentration_k, 0.05)
-        * q5._wdm_power_ratio(concentration_k),
+        q5.SigmaIntegrand(concentration_k, 0.05) * q5._wdm_power_ratio(concentration_k),
         rtol=4.0e-15,
         atol=0.0,
     )
@@ -457,7 +468,9 @@ def test_full_catalog_matches_mode_specific_golden_and_invariants(
 ) -> None:
     """Every compact full-catalog field is pinned for both physics modes."""
     fixture = _fixture()
-    expected = fixture["modes"][physics_mode]
+    expected = (
+        _corrected_reference(5) if physics_mode == "consistent" else fixture["modes"][physics_mode]
+    )
     assert fixture["units"]["catalog_mass"] == "physical Msun"
     constructor = fixture["provenance"]["constructor_parameters"]
     assert _fixture_mass_wdm(fixture) == constructor["mass_wdm"]
@@ -518,33 +531,35 @@ def test_full_catalog_matches_mode_specific_golden_and_invariants(
     assert catalog.metadata["catalog_schema_version"] == "1.0"
     assert catalog.metadata["canonical_unit_schema"] == "1.0"
     convention = constructor["wdm_power_convention"]
-    assert catalog.metadata["variance_identifier"] == (
-        f"sashimi-w:sharp-k:{convention}:physics={physics_mode}:v1"
-    )
+    if physics_mode == "consistent":
+        assert catalog.metadata["variance_identifier"] == model._consistent_variance().identifier
+        assert "integrated-variance:v3" in catalog.metadata["variance_identifier"]
+    else:
+        assert catalog.metadata["variance_identifier"] == (
+            f"sashimi-w:sharp-k:{convention}:physics={physics_mode}:v1"
+        )
     assert catalog.metadata["power_identifier"] == f"sashimi-w:{convention}:v1"
     assert catalog.metadata["solver_identifier"] == "sashimi-w:tidal-stripping:nfw:v1"
-    assert catalog.metadata["backend_identifier"] == (
-        fixture["provenance"]["cosmology"]["backend_identifier"][physics_mode]
+    assert (
+        catalog.metadata["backend_identifier"]
+        == (fixture["provenance"]["cosmology"]["backend_identifier"][physics_mode])
     )
     assert catalog.metadata["cosmology_parameters"] == {
         "omega_m0": fixture["provenance"]["cosmology"]["parameters"]["omega_m0"],
-        "omega_lambda0": fixture["provenance"]["cosmology"]["parameters"][
-            "omega_lambda0"
-        ][physics_mode],
+        "omega_lambda0": fixture["provenance"]["cosmology"]["parameters"]["omega_lambda0"][
+            physics_mode
+        ],
         "h": fixture["provenance"]["cosmology"]["parameters"]["h"],
     }
     assert catalog.metadata["wdm_power_convention"] == PUBLISHED_Q5
     assert catalog.metadata["wdm_power_q"] == 5.0
     assert catalog.metadata["variance_growth_power"] == (2 if physics_mode == "consistent" else 1)
     if physics_mode == "consistent":
-        assert catalog.metadata["model_identifier"].endswith("itamae-migration:v5")
+        assert catalog.metadata["model_identifier"].endswith("itamae-migration:v6")
         assert (
-            catalog.metadata["accretion_mass_redshift_mapping"]
-            == "per-redshift-virial-mass-grid"
+            catalog.metadata["accretion_mass_redshift_mapping"] == "per-redshift-virial-mass-grid"
         )
-        assert catalog.metadata["population_weight_contract"] == (
-            "nonnegative-corrected-counts"
-        )
+        assert catalog.metadata["population_weight_contract"] == ("nonnegative-corrected-counts")
         assert fixture["units"]["consistent_variance_mass"] == "physical Msun"
         assert catalog.metadata["variance_mass_unit"] == "Msun"
         assert catalog.metadata["variance_power_units"] == {
@@ -560,9 +575,7 @@ def test_full_catalog_matches_mode_specific_golden_and_invariants(
         assert catalog.metadata["accretion_mass_redshift_mapping"] == (
             "legacy-final-redshift-grid-reused"
         )
-        assert catalog.metadata["population_weight_contract"].startswith(
-            "exact-signed-tuple"
-        )
+        assert catalog.metadata["population_weight_contract"].startswith("exact-signed-tuple")
         assert "Msun/h grid" in fixture["units"]["legacy_variance_mass"]
         assert "legacy-raw" in catalog.metadata["variance_mass_unit"]
     assert catalog.metadata["itamae_version"] == "0.1.0a4"
@@ -697,7 +710,7 @@ def test_standard_q10_full_catalog_golden_metadata_and_roundtrip(
     assert constructor["physics_mode"] == "consistent"
     model = _model_from_fixture(fixture, constructor["physics_mode"])
     catalog = model.rs_rhos_catalog_calc(**_catalog_parameters(fixture))
-    expected = fixture["catalog"]
+    expected = _corrected_reference(10)
 
     assert catalog.shape == (16,)
     for column, (golden_name, scale) in _COLUMN_MAPPING.items():
@@ -725,26 +738,20 @@ def test_standard_q10_full_catalog_golden_metadata_and_roundtrip(
 
     metadata = catalog.metadata
     assert metadata["wdm_power_convention"] == STANDARD_T2_Q10
-    assert metadata["backend_identifier"] == fixture["provenance"]["cosmology"][
-        "backend_identifier"
-    ]
-    assert metadata["cosmology_parameters"] == fixture["provenance"]["cosmology"][
-        "parameters"
-    ]
+    assert (
+        metadata["backend_identifier"] == fixture["provenance"]["cosmology"]["backend_identifier"]
+    )
+    assert metadata["cosmology_parameters"] == fixture["provenance"]["cosmology"]["parameters"]
     assert metadata["wdm_power_formula_role"] == "viel-transfer-amplitude-squared"
     assert metadata["wdm_power_q"] == 10.0
-    assert metadata["half_mode_definition"] == (
-        "T_WDM/T_CDM=0.5;P_WDM/P_CDM=0.25"
-    )
+    assert metadata["half_mode_definition"] == ("T_WDM/T_CDM=0.5;P_WDM/P_CDM=0.25")
     assert metadata["half_mode_power_ratio"] == 0.25
     assert metadata["half_mode_wavenumber_h_per_mpc"] == pytest.approx(
         model.half_mode_wavenumber(),
     )
     assert "power=standard-t2-q10" in metadata["model_identifier"]
-    assert metadata["model_identifier"].endswith("itamae-migration:v5")
-    assert metadata["accretion_mass_redshift_mapping"] == (
-        "per-redshift-virial-mass-grid"
-    )
+    assert metadata["model_identifier"].endswith("itamae-migration:v6")
+    assert metadata["accretion_mass_redshift_mapping"] == ("per-redshift-virial-mass-grid")
 
     archive = tmp_path / "standard-t2-q10.npz"
     catalog.to_npz(archive)
