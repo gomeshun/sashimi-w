@@ -43,8 +43,8 @@ Use the named catalog's final weight for the expected surviving population.
 The existing `subhalo_distr`, `N_sat`, and `N_sat_Vthres` functions now consistently
 count current survivors and forward `profile_change`. The accretion mass display
 uses the same survivors. See [thresholds and cumulative axes](docs/surviving-observables.md).
-Their historical count/survival definition is awaiting a separate user decision;
-that unresolved item prevents declaring release preparation complete.
+The current-survivor definition was adopted after the independent review on
+2026-09-10 and is verified against complete named catalogs.
 
 ## Power and background specification
 
@@ -116,3 +116,10 @@ Please cite the relevant primary papers:
 - [Dekker et al., SASHIMI-W](https://arxiv.org/abs/2111.13137)
 - [Hiroshima, Ando & Ishiyama](https://arxiv.org/abs/1803.07691)
 - [Ludlow et al., concentration prescription](https://arxiv.org/abs/1601.02624)
+
+## Review candidate
+
+The prepared version is `0.2.0rc1`, with a versioned `sashimi-itamae` dependency.
+See [release preparation](docs/release-preparation.md), [changelog](CHANGELOG.md)
+and [citation metadata](CITATION.cff). The full artifact matrix is recorded in the
+family review handoff after verification; no public upload is implied.
