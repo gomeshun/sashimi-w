@@ -37,28 +37,49 @@ class CustomBuildHook(BuildHookInterface):
         )
         return match.group(1) if match else None
 
-    def _resolve_revision(self) -> str:
-        """Resolve the exact revision used to create the artifact."""
-        revision = _valid_revision(os.environ.get("SASHIMI_W_SOURCE_REVISION"))
-        if revision is None:
-            try:
-                result = subprocess.run(
-                    ["git", "-C", self.root, "rev-parse", "HEAD"],
-                    check=False,
-                    capture_output=True,
-                    text=True,
-                )
-            except OSError:
-                result = None
-            revision = _valid_revision(
-                result.stdout if result is not None and result.returncode == 0 else None
+    def _revision_from_git_checkout(self) -> str | None:
+        """Use Git only when the package root is the repository root."""
+        try:
+            root_result = subprocess.run(
+                ["git", "-C", self.root, "rev-parse", "--show-toplevel"],
+                check=False,
+                capture_output=True,
+                text=True,
             )
+            if root_result.returncode != 0:
+                return None
+            if Path(root_result.stdout.strip()).resolve() != Path(self.root).resolve():
+                return None
+            result = subprocess.run(
+                ["git", "-C", self.root, "rev-parse", "HEAD"],
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+        except OSError:
+            return None
+        return _valid_revision(result.stdout if result.returncode == 0 else None)
+
+    def _resolve_revision(self) -> str:
+        """Preserve archive identity and reject conflicting build overrides."""
+        supplied = os.environ.get("SASHIMI_W_SOURCE_REVISION")
+        explicit = _valid_revision(supplied)
+        if supplied is not None and explicit is None:
+            raise RuntimeError(
+                "SASHIMI_W_SOURCE_REVISION must contain a full 40-character lowercase SHA."
+            )
+        revision = self._revision_from_existing_artifact()
         if revision is None:
-            revision = self._revision_from_existing_artifact()
+            revision = self._revision_from_git_checkout()
+        if revision is not None and explicit is not None and revision != explicit:
+            raise RuntimeError(
+                "Explicit source revision conflicts with the source archive or checkout."
+            )
+        revision = revision or explicit
         if revision is None:
             raise RuntimeError(
                 "SASHIMI-W artifact builds require an exact source revision from "
-                "the source archive, SASHIMI_W_SOURCE_REVISION, or Git."
+                "the source archive, SASHIMI_W_SOURCE_REVISION, or its own Git checkout."
             )
         return revision
 

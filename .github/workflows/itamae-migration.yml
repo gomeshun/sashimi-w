@@ -31,7 +31,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - run: uv venv --python ${{ matrix.python-version }}
       - name: Install migration dependencies
-        run: uv pip install ./.itamae "astropy>=6" "pytest>=8" ruff
+        run: uv pip install ./.itamae "astropy>=6" "pytest>=8" ruff hatchling
       - name: Lint maintained migration modules
         run: uv run --no-sync ruff check sashimi_w.py sashimi_w_physics.py sashimi_w_itamae.py sashimi_w_itamae_migration.py sashimi_w_itamae_components.py sashimi_w_itamae_variance.py tests
       - name: Run ITAMAE migration regression tests

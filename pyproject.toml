@@ -33,6 +33,7 @@ demo = [
   "nbconvert>=7",
 ]
 test = [
+  "hatchling>=1.27",
   "astropy>=6",
   "pytest>=8",
 ]
