@@ -20,7 +20,7 @@ jobs:
       - name: Install candidate and notebook dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install "sashimi-itamae @ git+https://github.com/gomeshun/itamae.git@a601177e7996f6798b9a1f1d109bc6b2837d9cc6"
+          python -m pip install "sashimi-itamae @ git+https://github.com/gomeshun/itamae.git@d752306e62bf295b7a96100b9cc022f8f9c61071"
           python -m pip install . numpy scipy matplotlib astropy colossus h5py numexpr tqdm nbformat nbclient ipykernel
       - name: Execute all cells in a fresh kernel
         run: python scripts/execute_walkthrough.py

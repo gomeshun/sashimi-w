@@ -117,10 +117,7 @@ class WDMPhysics:
             M2 = (np.log(2.0) - 0.5) / (np.log(1.0 + c_array) - c_array / (1.0 + c_array))
             rho_2 = 200.0 * c_array**3 * M2
             rhoc = rho_2 / (200.0 * A)
-            with np.errstate(invalid="ignore"):
-                z2 = (
-                    1.0 / OmegaM * (rhoc * (OmegaM * (1 + z) ** 3 + OmegaL) - OmegaL)
-                ) ** 0.3333 - 1.0
+            c_array, rhoc, z2 = self._real_formation_trials(c_array, rhoc, z)
             delta_sc_z2 = delta_sc / self.linear_growth_factor(OmegaM, OmegaL, z2)
             delta_sc_0_vect = delta_sc / self.linear_growth_factor(OmegaM, 1.0 - OmegaM, z)
             sig2fM_th = splev(self.logM0[index] - 10.0 + np.log10(f), sig2_interp_th)
@@ -141,10 +138,7 @@ class WDMPhysics:
                 M2 = (np.log(2.0) - 0.5) / (np.log(1.0 + c_array) - c_array / (1.0 + c_array))
                 rho_2 = 200.0 * c_array**3 * M2
                 rhoc = rho_2 / (200.0 * A)
-                with np.errstate(invalid="ignore"):
-                    z2 = (
-                        1.0 / OmegaM * (rhoc * (OmegaM * (1 + z) ** 3 + OmegaL) - OmegaL)
-                    ) ** 0.3333 - 1.0
+                c_array, rhoc, z2 = self._real_formation_trials(c_array, rhoc, z)
                 delta_sc_z2 = delta_sc / self.linear_growth_factor(OmegaM, OmegaL, z2)
                 delta_sc_0_vect = delta_sc / self.linear_growth_factor(OmegaM, 1.0 - OmegaM, z)
                 sig2fM_th = splev(self.logM0[index] - 10.0 + np.log10(f), sig2_interp_th)
@@ -168,12 +162,7 @@ class WDMPhysics:
                 M2 = (np.log(2.0) - 0.5) / (np.log(1.0 + c_array) - c_array / (1.0 + c_array))
                 rho_2 = 200.0 * c_array**3 * M2
                 rhoc = rho_2 / (200.0 * A)
-                with np.errstate(invalid="ignore"):
-                    z2 = (
-                        1.0
-                        / OmegaM
-                        * (rhoc * (OmegaM * (1 + z_reshaped[i]) ** 3 + OmegaL) - OmegaL)
-                    ) ** 0.3333 - 1.0
+                c_array, rhoc, z2 = self._real_formation_trials(c_array, rhoc, z_reshaped[i])
                 delta_sc_z2 = delta_sc / self.linear_growth_factor(OmegaM, OmegaL, z2)
                 delta_sc_0_vect = delta_sc / self.linear_growth_factor(
                     OmegaM, 1.0 - OmegaM, z_reshaped[i]
@@ -190,6 +179,27 @@ class WDMPhysics:
                 c_nfw[i] = np.interp(0, arg, c_array)
             c_nfw = np.reshape(c_nfw, np.shape(M))
         return c_nfw
+
+    @staticmethod
+    def _real_formation_trials(concentration, density_ratio, redshift):
+        """Drop the same non-real trials before evaluating background growth.
+
+        The original fractional exponent is preserved. Trials with nonpositive
+        radicand have no supported finite z > -1 and were already discarded as
+        non-finite values by the final concentration interpolation.
+        """
+        omega_lambda = 1.0 - OmegaM
+        radicand = (
+            1.0
+            / OmegaM
+            * (density_ratio * (OmegaM * (1 + redshift) ** 3 + omega_lambda) - omega_lambda)
+        )
+        if not np.all(np.isfinite(radicand)):
+            raise ValueError("Concentration trial radicands must be finite.")
+        valid = radicand > 0.0
+        if not np.any(valid):
+            raise ValueError("No real concentration-formation trials remain.")
+        return concentration[valid], density_ratio[valid], radicand[valid] ** 0.3333 - 1.0
 
     def fc(self, x):
         return np.log(1 + x) - x * pow(1 + x, -1)
