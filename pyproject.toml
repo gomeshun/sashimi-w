@@ -44,6 +44,7 @@ include = [
   "/WMAP7_camb_matterpower_z0_extrapolated.dat",
   "/itamae_migration_demo.ipynb",
   "/sashimi_w_itamae_migration.py",
+  "/sashimi_w_itamae_components.py",
   "/sashimi_w_itamae_variance.py",
   "/sashimi_w.py",
   "/sashimi_w_itamae.py",
@@ -58,6 +59,7 @@ path = "hatch_build.py"
 [tool.hatch.build.targets.wheel.force-include]
 "WMAP7_camb_matterpower_z0_extrapolated.dat" = "WMAP7_camb_matterpower_z0_extrapolated.dat"
 "sashimi_w_itamae_migration.py" = "sashimi_w_itamae_migration.py"
+"sashimi_w_itamae_components.py" = "sashimi_w_itamae_components.py"
 "sashimi_w_itamae_variance.py" = "sashimi_w_itamae_variance.py"
 "sashimi_w.py" = "sashimi_w.py"
 "sashimi_w_itamae.py" = "sashimi_w_itamae.py"
@@ -74,4 +76,4 @@ select = ["E", "F"]
 ignore = ["E501"]
 
 [tool.uv.sources]
-sashimi-itamae = {git = "https://github.com/gomeshun/itamae.git", rev = "ceb38eaf6ee57efb43ccb60005c68c1c4cf044ac"}
+sashimi-itamae = {git = "https://github.com/gomeshun/itamae.git", rev = "a601177e7996f6798b9a1f1d109bc6b2837d9cc6"}
