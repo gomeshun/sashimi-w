@@ -1,0 +1,32 @@
+--- a/sashimi_w.py
++++ b/sashimi_w.py
+@@ -328,7 +328,7 @@
+             *np.power(self.conc200(M200,z) \
+             *xfunc(self.Delc(Oz-1)/200.0*ffunc(1.0/self.conc200(M200,z))),-3.0)
+ 
+-    def growthD(self, z):
++    def _unnormalized_growthD(self, z):
+         Omega_Lz = OmegaL*pow(OmegaL+OmegaM*pow(1+z,3),-1)
+         Omega_Mz = 1-Omega_Lz
+         phiz = pow(Omega_Mz,4.0/7.0)-Omega_Lz+(1+Omega_Mz/2.0)*(1+Omega_Lz/70.0)
+@@ -346,13 +346,19 @@
+     def dOdz(self, z):
+         return -OmegaL*3*OmegaM*pow(1+z,2)*pow(OmegaL+OmegaM*pow(1+z,3),-2)
+ 
+-    def dDdz(self, z):
++    def _unnormalized_dDdz(self, z):
+         Omega_Lz = OmegaL*pow(OmegaL+OmegaM*pow(1+z,3),-1)
+         Omega_Mz = 1-Omega_Lz
+         phiz = pow(Omega_Mz,4.0/7.0)-Omega_Lz+(1+Omega_Mz/2.0)*(1+Omega_Lz/70.0)
+         phi0 = pow(OmegaM,4.0/7.0)-OmegaL+(1+OmegaM/2.0)*(1+OmegaL/70.0)
+         dphidz = self.dOdz(z)*((-4.0/7.0)*pow(Omega_Mz,-3.0/7.0)+(Omega_Mz-Omega_Lz)/140.0+(1.0/70.0)-(3.0/2.0))
+         return (phi0/OmegaM)*(-self.dOdz(z)*pow(phiz*(1+z),-1)-Omega_Mz*(dphidz*(1+z)+phiz)*pow(phiz,-2)*pow(1+z,-2))
++
++    def growthD(self, z):
++        return self._unnormalized_growthD(z)/self._unnormalized_growthD(0.0)
++
++    def dDdz(self, z):
++        return self._unnormalized_dDdz(z)/self._unnormalized_growthD(0.0)
+ 
+     def Mzi(self, M0, z):
+         a = 1.686*np.sqrt(2.0/np.pi)*self.dDdz(0)+1.0

@@ -1,0 +1,22 @@
+--- a/sashimi_w.py
++++ b/sashimi_w.py
+@@ -339,7 +339,7 @@
+         return pow(M*pow((1e+10)*pow(h,-1),-1),-1)
+ 
+     def sigmaMz(self, M, z):
+-        sigmaM0 = self.Sigma_interp(M)
++        sigmaM0 = self.Sigma_interp(h*M)
+         sigmaMz = sigmaM0*self.growthD(z)
+         return sigmaMz
+ 
+@@ -392,8 +392,8 @@
+         return (beta+alpha*pow(1+z-zi,-1))*Mzzivir/Msolar
+ 
+     def dsdm(self, M, z):
+-        sigma0 = self.Sigma_interp(M)
+-        dsdM0 = self.dlnSigmadlnM_interp(np.log(M))*2.*sigma0**2/M
++        sigma0 = self.Sigma_interp(h*M)
++        dsdM0 = self.dlnSigmadlnM_interp(np.log(h*M))*2.*sigma0**2/M
+         dsdMz = dsdM0*self.growthD(z)
+         return dsdMz
+ 

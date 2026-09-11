@@ -1,0 +1,54 @@
+{
+  "notebook": "Examples.ipynb",
+  "source_sha256": "3d152816d6ef6f85bb14504578d95321d11e4dbfe8754304a65f446c4fa8690d",
+  "python": "3.13.12 (main, Mar  3 2026, 15:01:51) [Clang 21.1.4 ]",
+  "grid_overrides": {
+    "N_ma": 32,
+    "N_herm": 3,
+    "N_hermNa": 16,
+    "dz": 0.2,
+    "zmax": 2.0
+  },
+  "cells": [
+    {
+      "index": 0,
+      "status": "passed",
+      "warnings": []
+    },
+    {
+      "index": 2,
+      "status": "passed",
+      "warnings": []
+    },
+    {
+      "index": 4,
+      "status": "passed",
+      "warnings": [
+        "FigureCanvasAgg is non-interactive, and thus cannot be shown"
+      ]
+    },
+    {
+      "index": 6,
+      "status": "passed",
+      "warnings": [
+        "FigureCanvasAgg is non-interactive, and thus cannot be shown"
+      ]
+    },
+    {
+      "index": 8,
+      "status": "passed",
+      "warnings": [
+        "Attempt to set non-positive xlim on a log-scaled axis will be ignored.",
+        "FigureCanvasAgg is non-interactive, and thus cannot be shown"
+      ]
+    }
+  ],
+  "other_overrides": [
+    "NumPy RNG seed 20260911",
+    "F bootstrap repetitions 2",
+    "F diagnostic mass plot 1e6..1e16 Msun"
+  ],
+  "not_executed": [],
+  "passed": true,
+  "itamae_imported": false
+}

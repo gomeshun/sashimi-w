@@ -1,0 +1,11 @@
+--- a/sashimi_w.py
++++ b/sashimi_w.py
+@@ -53,7 +53,7 @@
+ OmegaB        = PS_cosmology[0]
+ OmegaM        = PS_cosmology[1]
+ OmegaC        = OmegaM - OmegaB
+-OmegaL        = Omega0 - OmegaC - Omegar
++OmegaL        = Omega0 - OmegaM - Omegar
+ pOmega        = [OmegaC+OmegaB,Omegar,OmegaL]
+ h             = PS_cosmology[2]
+ H0            = h*100*km/s/Mpc 

@@ -1,0 +1,146 @@
+{
+  "variant": "w",
+  "signed_weights_preserved": true,
+  "cases": [
+    {
+      "file": "ablations/B-01-flat-background-output.npz",
+      "sha256": "4efc8e5afbebe08b9123ee949c8a0b3dc2e6dca4694385cb62f6332e77f44b96",
+      "source_revision": "99dfc3632eec0126080c0273ddf78f84fe09216c",
+      "signed_weight_sum": 0.020025472042620944,
+      "negative_nodes": 0,
+      "survivor_weight_sum": 0.020025472042620944,
+      "mass_relative_change_from_A": 0.02046835185672513,
+      "maximum_weight_absolute_change_from_A": 0.0003993558968996653
+    },
+    {
+      "file": "ablations/B-02-normalized-growth-output.npz",
+      "sha256": "4d829b6254f01987a0564fda57807d98acf278ec5af7a28f2b2399ea1b9f1513",
+      "source_revision": "99dfc3632eec0126080c0273ddf78f84fe09216c",
+      "signed_weight_sum": 0.020185113387523598,
+      "negative_nodes": 0,
+      "survivor_weight_sum": 0.020185113387523598,
+      "mass_relative_change_from_A": 0.0015972199949887411,
+      "maximum_weight_absolute_change_from_A": 0.0003754480634931938
+    },
+    {
+      "file": "ablations/B-03-variance-growth-square-output.npz",
+      "sha256": "73d626fa9a7643de2df742c60e46134124640f10569015aef7f82d0a131e862f",
+      "source_revision": "99dfc3632eec0126080c0273ddf78f84fe09216c",
+      "signed_weight_sum": 0.019572091290052943,
+      "negative_nodes": 0,
+      "survivor_weight_sum": 0.019572091290052943,
+      "mass_relative_change_from_A": 0.0,
+      "maximum_weight_absolute_change_from_A": 0.0003766485747006311
+    },
+    {
+      "file": "ablations/B-04-physical-variance-mass-output.npz",
+      "sha256": "bd494a1adc0e61d1d1d36d0826f6f01fd8015014976264429ae1d42d57b63745",
+      "source_revision": "99dfc3632eec0126080c0273ddf78f84fe09216c",
+      "signed_weight_sum": 0.009380455486642868,
+      "negative_nodes": 4,
+      "survivor_weight_sum": 0.009380455486642868,
+      "mass_relative_change_from_A": 0.002040630791459108,
+      "maximum_weight_absolute_change_from_A": 0.0030396073772463515
+    },
+    {
+      "file": "ablations/B-05-physical-concentration-mass-output.npz",
+      "sha256": "2e9f6f1eaec1fe4e12ca6d1ff28294bdac98557eaee15fa7b929a5f2b0db5e5f",
+      "source_revision": "99dfc3632eec0126080c0273ddf78f84fe09216c",
+      "signed_weight_sum": 0.0210648750128591,
+      "negative_nodes": 0,
+      "survivor_weight_sum": 0.0210648750128591,
+      "mass_relative_change_from_A": 0.010193095567246457,
+      "maximum_weight_absolute_change_from_A": 4.599907869415939e-05
+    },
+    {
+      "file": "ablations/B-06-redshift-accretion-grid-output.npz",
+      "sha256": "b70293bf1534071eafba165df03c0f0812ba4422118e17962f9cabe7b7088430",
+      "source_revision": "99dfc3632eec0126080c0273ddf78f84fe09216c",
+      "signed_weight_sum": 0.021398788827408328,
+      "negative_nodes": 0,
+      "survivor_weight_sum": 0.021398788827408328,
+      "mass_relative_change_from_A": 0.0,
+      "maximum_weight_absolute_change_from_A": 0.00019670124957079163
+    },
+    {
+      "file": "ablations/B-all-q10-output.npz",
+      "sha256": "eadcdc7dc91cb13896d403ebaa49fef6a43c2e6b5c58ed9f50ee24d74d839291",
+      "source_revision": "99dfc3632eec0126080c0273ddf78f84fe09216c",
+      "signed_weight_sum": 2.341293228491032e-06,
+      "negative_nodes": 0,
+      "survivor_weight_sum": 2.341293228491032e-06,
+      "mass_relative_change_from_A": 0.016056019957944923,
+      "maximum_weight_absolute_change_from_A": 0.006029331033878912
+    },
+    {
+      "file": "ablations/B-all-q5-output.npz",
+      "sha256": "a5afb85443f622dfac0522ab159aa16f822c29242c34f58e75301ef4c4fcd06c",
+      "source_revision": "99dfc3632eec0126080c0273ddf78f84fe09216c",
+      "signed_weight_sum": 0.00388924426045393,
+      "negative_nodes": 0,
+      "survivor_weight_sum": 0.00388924426045393,
+      "mass_relative_change_from_A": 0.01805099614916328,
+      "maximum_weight_absolute_change_from_A": 0.004882884977203619
+    },
+    {
+      "file": "ablations/B-continuous-output.npz",
+      "sha256": "c63dd53c1626cadfc271615af62001198763475787064f9ee4fe19ba00a861e4",
+      "source_revision": "99dfc3632eec0126080c0273ddf78f84fe09216c",
+      "signed_weight_sum": 0.0039059500034426655,
+      "negative_nodes": 0,
+      "survivor_weight_sum": 0.0039059500034426655,
+      "mass_relative_change_from_A": 0.01805099614916328,
+      "maximum_weight_absolute_change_from_A": 0.004877955539638249
+    },
+    {
+      "file": "ablations/B-derivative-output.npz",
+      "sha256": "266061f38149375f959a4bfc5bc9cbd832fa1b7c945d80cca9e1c5e6a6f5d9f7",
+      "source_revision": "99dfc3632eec0126080c0273ddf78f84fe09216c",
+      "signed_weight_sum": 0.004954975036907276,
+      "negative_nodes": 0,
+      "survivor_weight_sum": 0.004954975036907276,
+      "mass_relative_change_from_A": 0.016521264630949606,
+      "maximum_weight_absolute_change_from_A": 0.004537516181137253
+    },
+    {
+      "file": "ablations/B-integral-output.npz",
+      "sha256": "9d9c8cee43fa1c4e138f7ba19a3ed9d4b1f1b12fc9788111ab67e89b74f30d07",
+      "source_revision": "99dfc3632eec0126080c0273ddf78f84fe09216c",
+      "signed_weight_sum": 0.007714245760434804,
+      "negative_nodes": 4,
+      "survivor_weight_sum": 0.007714245760434804,
+      "mass_relative_change_from_A": 0.01805099614916328,
+      "maximum_weight_absolute_change_from_A": 0.003567000418296355
+    },
+    {
+      "file": "ablations/B-inverse-output.npz",
+      "sha256": "c80441b4f433a93ddb78469bdd30790d31acbe4dfa33ccecce00195ceea3a0ce",
+      "source_revision": "99dfc3632eec0126080c0273ddf78f84fe09216c",
+      "signed_weight_sum": 0.0039059500034426655,
+      "negative_nodes": 0,
+      "survivor_weight_sum": 0.0039059500034426655,
+      "mass_relative_change_from_A": 0.01805099614916328,
+      "maximum_weight_absolute_change_from_A": 0.004877955539638249
+    },
+    {
+      "file": "ablations/B-quadrature-output.npz",
+      "sha256": "2410c19a160d715ff4137a9305c1b601acf65b0a20554c7377a34a32443616e0",
+      "source_revision": "99dfc3632eec0126080c0273ddf78f84fe09216c",
+      "signed_weight_sum": 0.00388924426045393,
+      "negative_nodes": 0,
+      "survivor_weight_sum": 0.00388924426045393,
+      "mass_relative_change_from_A": 0.01805099614916328,
+      "maximum_weight_absolute_change_from_A": 0.004882884977203619
+    },
+    {
+      "file": "ablations/B-six-output.npz",
+      "sha256": "441f63c992c130aeed5d40e899610ff38590b39f94754a0228a66344ec945c1a",
+      "source_revision": "99dfc3632eec0126080c0273ddf78f84fe09216c",
+      "signed_weight_sum": 0.010126284644495,
+      "negative_nodes": 4,
+      "survivor_weight_sum": 0.010126284644495,
+      "mass_relative_change_from_A": 0.016521264630949606,
+      "maximum_weight_absolute_change_from_A": 0.0027704690195042734
+    }
+  ]
+}
