@@ -1,0 +1,14 @@
+--- a/sashimi_w.py
++++ b/sashimi_w.py
+@@ -399,10 +399,7 @@
+         return (beta+alpha*pow(1+z-zi,-1))*Mzzivir/Msolar
+ 
+     def dsdm(self, M, z):
+-        sigma0 = self.Sigma_interp(h*M)
+-        dsdM0 = self.dlnSigmadlnM_interp(np.log(h*M))*2.*sigma0**2/M
+-        dsdMz = dsdM0*self.growthD(z)**2
+-        return dsdMz
++        return self._reference_moving_boundary(M, z)
+ 
+     def delc_Y11(self,M, z):
+         """ Critical overdensity for collapse for WDM, Benson et al. (2012): Eq.7) """ 

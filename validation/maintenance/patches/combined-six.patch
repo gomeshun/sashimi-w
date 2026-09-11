@@ -1,0 +1,99 @@
+--- a/sashimi_w.py
++++ b/sashimi_w.py
+@@ -53,7 +53,7 @@
+ OmegaB        = PS_cosmology[0]
+ OmegaM        = PS_cosmology[1]
+ OmegaC        = OmegaM - OmegaB
+-OmegaL        = Omega0 - OmegaC - Omegar
++OmegaL        = Omega0 - OmegaM - Omegar
+ pOmega        = [OmegaC+OmegaB,Omegar,OmegaL]
+ h             = PS_cosmology[2]
+ H0            = h*100*km/s/Mpc 
+@@ -183,7 +183,7 @@
+ 
+ 
+     def conc200(self,M,z): 
+-        M = M/Msolar/h
++        M = M/Msolar*h
+ 
+         redshiftvect  = np.linspace(0,7,8) 
+ 
+@@ -328,7 +328,7 @@
+             *np.power(self.conc200(M200,z) \
+             *xfunc(self.Delc(Oz-1)/200.0*ffunc(1.0/self.conc200(M200,z))),-3.0)
+ 
+-    def growthD(self, z):
++    def _unnormalized_growthD(self, z):
+         Omega_Lz = OmegaL*pow(OmegaL+OmegaM*pow(1+z,3),-1)
+         Omega_Mz = 1-Omega_Lz
+         phiz = pow(Omega_Mz,4.0/7.0)-Omega_Lz+(1+Omega_Mz/2.0)*(1+Omega_Lz/70.0)
+@@ -339,20 +339,26 @@
+         return pow(M*pow((1e+10)*pow(h,-1),-1),-1)
+ 
+     def sigmaMz(self, M, z):
+-        sigmaM0 = self.Sigma_interp(M)
++        sigmaM0 = self.Sigma_interp(h*M)
+         sigmaMz = sigmaM0*self.growthD(z)
+         return sigmaMz
+ 
+     def dOdz(self, z):
+         return -OmegaL*3*OmegaM*pow(1+z,2)*pow(OmegaL+OmegaM*pow(1+z,3),-2)
+ 
+-    def dDdz(self, z):
++    def _unnormalized_dDdz(self, z):
+         Omega_Lz = OmegaL*pow(OmegaL+OmegaM*pow(1+z,3),-1)
+         Omega_Mz = 1-Omega_Lz
+         phiz = pow(Omega_Mz,4.0/7.0)-Omega_Lz+(1+Omega_Mz/2.0)*(1+Omega_Lz/70.0)
+         phi0 = pow(OmegaM,4.0/7.0)-OmegaL+(1+OmegaM/2.0)*(1+OmegaL/70.0)
+         dphidz = self.dOdz(z)*((-4.0/7.0)*pow(Omega_Mz,-3.0/7.0)+(Omega_Mz-Omega_Lz)/140.0+(1.0/70.0)-(3.0/2.0))
+         return (phi0/OmegaM)*(-self.dOdz(z)*pow(phiz*(1+z),-1)-Omega_Mz*(dphidz*(1+z)+phiz)*pow(phiz,-2)*pow(1+z,-2))
++
++    def growthD(self, z):
++        return self._unnormalized_growthD(z)/self._unnormalized_growthD(0.0)
++
++    def dDdz(self, z):
++        return self._unnormalized_dDdz(z)/self._unnormalized_growthD(0.0)
+ 
+     def Mzi(self, M0, z):
+         a = 1.686*np.sqrt(2.0/np.pi)*self.dDdz(0)+1.0
+@@ -392,9 +398,9 @@
+         return (beta+alpha*pow(1+z-zi,-1))*Mzzivir/Msolar
+ 
+     def dsdm(self, M, z):
+-        sigma0 = self.Sigma_interp(M)
+-        dsdM0 = self.dlnSigmadlnM_interp(np.log(M))*2.*sigma0**2/M
+-        dsdMz = dsdM0*self.growthD(z)
++        sigma0 = self.Sigma_interp(h*M)
++        dsdM0 = self.dlnSigmadlnM_interp(np.log(h*M))*2.*sigma0**2/M
++        dsdMz = dsdM0*self.growthD(z)**2
+         return dsdMz
+ 
+     def delc_Y11(self,M, z):
+@@ -478,6 +484,7 @@
+         ct_z0 = np.zeros((len(zdist),N_herm,len(ma200)))
+         survive=np.zeros((len(zdist),N_herm,len(ma200)))
+         m0_matrix = np.zeros((len(zdist),N_herm,len(ma200)))
++        ma_by_redshift = np.zeros((len(zdist),len(ma200)))
+         Oz_0 = self.Omegaz(pOmega,redshift)
+ 
+         def Mzvir(z):
+@@ -516,6 +523,7 @@
+ 
+         for iz in range(len(zdist)):
+             ma = self.Mvir_from_M200(ma200*Msolar,zdist[iz])/Msolar
++            ma_by_redshift[iz] = ma
+             Oz = self.Omegaz(pOmega,zdist[iz])
+             zcalc = np.linspace(zdist[iz],redshift,100)
+             sol = odeint(msolve,ma,zcalc)
+@@ -549,9 +557,9 @@
+             survive[iz] = np.where(ct_z0[iz]>0.77,1,0)
+             m0_matrix[iz] = m0*np.ones((N_herm,1))
+ 
+-        Na = self.Na_calc(ma,zdist,M0,z0=0,N_herm=N_hermNa,Nrand=1000,
++        Na = self.Na_calc(ma_by_redshift,zdist,M0,z0=0,N_herm=N_hermNa,Nrand=1000,
+                           sigmafac=sigmafac)
+-        Na_total = integrate.simps(integrate.simps(Na,x=np.log(ma)),x=np.log(1+zdist))
++        Na_total = integrate.simps(integrate.simps(Na,x=np.log(ma_by_redshift)),x=np.log(1+zdist))
+         weight = Na/(1.0+zdist.reshape(np.alen(zdist),1))
+         weight = weight/np.sum(weight)*Na_total
+         weight = (weight.reshape((len(zdist),1,len(ma))))*w1/np.sqrt(np.pi)

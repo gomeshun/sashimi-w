@@ -1,0 +1,11 @@
+--- a/sashimi_w.py
++++ b/sashimi_w.py
+@@ -183,7 +183,7 @@
+ 
+ 
+     def conc200(self,M,z): 
+-        M = M/Msolar/h
++        M = M/Msolar*h
+ 
+         redshiftvect  = np.linspace(0,7,8) 
+ 

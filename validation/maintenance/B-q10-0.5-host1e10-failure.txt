@@ -1,0 +1,35 @@
+Traceback (most recent call last):
+  File "/tmp/sashimi-minor-updates-20260911/sashimi-w/validation/maintenance/tools/reference_worker.py", line 138, in <module>
+    main()
+  File "/tmp/sashimi-minor-updates-20260911/sashimi-w/validation/maintenance/tools/reference_worker.py", line 69, in main
+    arrays = getattr(model, config["method"])(**config["parameters"])
+  File "/tmp/sashimi-reference-s0po4ngc/source/sashimi_w.py", line 527, in rs_rhos_calc
+    sol = odeint(msolve,ma,zcalc)
+  File "/tmp/sashimi-migration-20260910/w-reference-legacy-venv/lib/python3.10/site-packages/scipy/integrate/_odepack_py.py", line 242, in odeint
+    output = _odepack.odeint(func, y0, t, args, Dfun, col_deriv, ml, mu,
+  File "/tmp/sashimi-reference-s0po4ngc/source/sashimi_w.py", line 520, in msolve
+    return AMz(z)*(m/tdynz(z))*pow(m/Mzvir(z),zetaMz(z))*pow(self.Hz(z)*(1+z),-1)
+  File "/tmp/sashimi-reference-s0po4ngc/source/sashimi_w.py", line 510, in AMz
+    log10a=(-0.0019*np.log10(Mzvir(z))+0.045)*z+(0.0097*np.log10(Mzvir(z))-0.313)
+  File "/tmp/sashimi-reference-s0po4ngc/source/sashimi_w.py", line 505, in Mzvir
+    Mvirsolar = self.Mvir_from_M200(Mz200solar,z)
+  File "/tmp/sashimi-reference-s0po4ngc/source/sashimi_w.py", line 309, in Mvir_from_M200
+    c200 = self.conc200(M200,z)
+  File "/tmp/sashimi-reference-s0po4ngc/source/sashimi_w.py", line 233, in conc200
+    conc_interp = interp1d(arg, c_array)
+  File "/tmp/sashimi-migration-20260910/w-reference-legacy-venv/lib/python3.10/site-packages/scipy/interpolate/_interpolate.py", line 529, in __init__
+    self._y = self._reshape_yi(self.y)
+  File "/tmp/sashimi-migration-20260910/w-reference-legacy-venv/lib/python3.10/site-packages/scipy/interpolate/_polyint.py", line 112, in _reshape_yi
+    return yi.reshape((yi.shape[0], -1))
+ValueError: cannot reshape array of size 0 into shape (0,newaxis)
+Traceback (most recent call last):
+  File "/tmp/sashimi-minor-updates-20260911/sashimi-w/validation/maintenance/tools/run_reference.py", line 108, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/tmp/sashimi-minor-updates-20260911/sashimi-w/validation/maintenance/tools/run_reference.py", line 104, in main
+    run(parser.parse_args())
+  File "/tmp/sashimi-minor-updates-20260911/sashimi-w/validation/maintenance/tools/run_reference.py", line 74, in run
+    subprocess.run(
+  File "/home/gomesu/.local/share/uv/python/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/tmp/sashimi-migration-20260910/w-reference-legacy-venv/bin/python', '-I', '/tmp/sashimi-minor-updates-20260911/sashimi-w/validation/maintenance/tools/reference_worker.py', '--source', '/tmp/sashimi-reference-s0po4ngc/source', '--config', '/tmp/sashimi-minor-updates-20260911/sashimi-w/validation/maintenance/B-q10-0.5.json', '--output', '/tmp/sashimi-minor-updates-20260911/sashimi-w/validation/maintenance/B-q10-0.5-reference.npz']' returned non-zero exit status 1.

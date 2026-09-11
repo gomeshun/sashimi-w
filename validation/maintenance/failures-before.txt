@@ -1,0 +1,724 @@
+FFFFFFFFFFFFFFFFF                                                        [100%]
+=================================== FAILURES ===================================
+_______________________ test_flat_background_and_growth ________________________
+
+model = <sashimi_w.subhalos object at 0x72fb3b5b5a10>
+
+    def test_flat_background_and_growth(model):
+>       assert w.OmegaM + w.OmegaL == 1.
+E       assert (0.27 + 0.7768999999999999) == 1.0
+E        +  where 0.27 = w.OmegaM
+E        +  and   0.7768999999999999 = w.OmegaL
+
+test_minor_updates.py:19: AssertionError
+__________ test_variance_is_independent_sharp_k_integral[10000000.0] ___________
+
+model = <sashimi_w.subhalos object at 0x72fb3b5b5a10>, mass = 10000000.0
+
+    @pytest.mark.parametrize("mass", [1e7, 1e9, 1e12])
+    def test_variance_is_independent_sharp_k_integral(model, mass):
+        def raw(m):
+            radius = (3*(m*w.h)/(4*np.pi*model.Rhomean_z))**(1/3)/2.5
+            cutoff = min((9*np.pi/2)**(1/3)/radius, w.k_file[-1])
+            knots = np.log(w.k_file[w.k_file < cutoff])
+            knots = np.r_[knots, np.log(cutoff)]
+            def integrand(logk):
+                k = np.exp(logk)
+                alpha = .049*(1/model.mass_wdm)**1.11*(w.OmegaC/.25)**.11*(w.h/.7)**1.22
+                ratio = (1+(alpha*k)**(2*1.12))**(-10/1.12)
+                return k**3*np.interp(k,w.k_file,w.Pk_file)*ratio/(2*np.pi**2)
+            return sum(quad(integrand,a,b,epsabs=0,epsrel=2e-12)[0] for a,b in zip(knots[:-1],knots[1:]))
+        expected = raw(mass)/raw(model.MassIn8Mpc/w.h)*w.sigma_8**2
+>       np.testing.assert_allclose(model.sigmaMz(mass,0.)**2,expected,rtol=2e-11)
+
+test_minor_updates.py:42: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = (<function assert_allclose.<locals>.compare at 0x72fb28b04220>, array(5.34954578), array(5.43409229))
+kwds = {'err_msg': '', 'verbose': True, 'header': 'Not equal to tolerance rtol=2e-11, atol=0', 'equal_nan': True}
+
+    @wraps(func)
+    def inner(*args, **kwds):
+        with self._recreate_cm():
+>           return func(*args, **kwds)
+                   ^^^^^^^^^^^^^^^^^^^
+E           AssertionError: 
+E           Not equal to tolerance rtol=2e-11, atol=0
+E           
+E           Mismatched elements: 1 / 1 (100%)
+E           Max absolute difference: 0.08454651
+E           Max relative difference: 0.01555853
+E            x: array(5.349546)
+E            y: array(5.434092)
+
+/home/gomesu/.local/share/uv/python/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/contextlib.py:81: AssertionError
+_________ test_variance_is_independent_sharp_k_integral[1000000000.0] __________
+
+model = <sashimi_w.subhalos object at 0x72fb3b5b5a10>, mass = 1000000000.0
+
+    @pytest.mark.parametrize("mass", [1e7, 1e9, 1e12])
+    def test_variance_is_independent_sharp_k_integral(model, mass):
+        def raw(m):
+            radius = (3*(m*w.h)/(4*np.pi*model.Rhomean_z))**(1/3)/2.5
+            cutoff = min((9*np.pi/2)**(1/3)/radius, w.k_file[-1])
+            knots = np.log(w.k_file[w.k_file < cutoff])
+            knots = np.r_[knots, np.log(cutoff)]
+            def integrand(logk):
+                k = np.exp(logk)
+                alpha = .049*(1/model.mass_wdm)**1.11*(w.OmegaC/.25)**.11*(w.h/.7)**1.22
+                ratio = (1+(alpha*k)**(2*1.12))**(-10/1.12)
+                return k**3*np.interp(k,w.k_file,w.Pk_file)*ratio/(2*np.pi**2)
+            return sum(quad(integrand,a,b,epsabs=0,epsrel=2e-12)[0] for a,b in zip(knots[:-1],knots[1:]))
+        expected = raw(mass)/raw(model.MassIn8Mpc/w.h)*w.sigma_8**2
+>       np.testing.assert_allclose(model.sigmaMz(mass,0.)**2,expected,rtol=2e-11)
+
+test_minor_updates.py:42: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = (<function assert_allclose.<locals>.compare at 0x72fb28bf07c0>, array(5.31835059), array(5.4335807))
+kwds = {'err_msg': '', 'verbose': True, 'header': 'Not equal to tolerance rtol=2e-11, atol=0', 'equal_nan': True}
+
+    @wraps(func)
+    def inner(*args, **kwds):
+        with self._recreate_cm():
+>           return func(*args, **kwds)
+                   ^^^^^^^^^^^^^^^^^^^
+E           AssertionError: 
+E           Not equal to tolerance rtol=2e-11, atol=0
+E           
+E           Mismatched elements: 1 / 1 (100%)
+E           Max absolute difference: 0.11523011
+E           Max relative difference: 0.02120703
+E            x: array(5.318351)
+E            y: array(5.433581)
+
+/home/gomesu/.local/share/uv/python/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/contextlib.py:81: AssertionError
+________ test_variance_is_independent_sharp_k_integral[1000000000000.0] ________
+
+model = <sashimi_w.subhalos object at 0x72fb3b5b5a10>, mass = 1000000000000.0
+
+    @pytest.mark.parametrize("mass", [1e7, 1e9, 1e12])
+    def test_variance_is_independent_sharp_k_integral(model, mass):
+        def raw(m):
+            radius = (3*(m*w.h)/(4*np.pi*model.Rhomean_z))**(1/3)/2.5
+            cutoff = min((9*np.pi/2)**(1/3)/radius, w.k_file[-1])
+            knots = np.log(w.k_file[w.k_file < cutoff])
+            knots = np.r_[knots, np.log(cutoff)]
+            def integrand(logk):
+                k = np.exp(logk)
+                alpha = .049*(1/model.mass_wdm)**1.11*(w.OmegaC/.25)**.11*(w.h/.7)**1.22
+                ratio = (1+(alpha*k)**(2*1.12))**(-10/1.12)
+                return k**3*np.interp(k,w.k_file,w.Pk_file)*ratio/(2*np.pi**2)
+            return sum(quad(integrand,a,b,epsabs=0,epsrel=2e-12)[0] for a,b in zip(knots[:-1],knots[1:]))
+        expected = raw(mass)/raw(model.MassIn8Mpc/w.h)*w.sigma_8**2
+>       np.testing.assert_allclose(model.sigmaMz(mass,0.)**2,expected,rtol=2e-11)
+
+test_minor_updates.py:42: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = (<function assert_allclose.<locals>.compare at 0x72fb28bf0ea0>, array(2.2954101), array(2.81889518))
+kwds = {'err_msg': '', 'verbose': True, 'header': 'Not equal to tolerance rtol=2e-11, atol=0', 'equal_nan': True}
+
+    @wraps(func)
+    def inner(*args, **kwds):
+        with self._recreate_cm():
+>           return func(*args, **kwds)
+                   ^^^^^^^^^^^^^^^^^^^
+E           AssertionError: 
+E           Not equal to tolerance rtol=2e-11, atol=0
+E           
+E           Mismatched elements: 1 / 1 (100%)
+E           Max absolute difference: 0.52348507
+E           Max relative difference: 0.18570576
+E            x: array(2.29541)
+E            y: array(2.818895)
+
+/home/gomesu/.local/share/uv/python/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/contextlib.py:81: AssertionError
+__________________ test_variance_derivative_and_growth_square __________________
+
+model = <sashimi_w.subhalos object at 0x72fb3b5b5a10>
+
+    def test_variance_derivative_and_growth_square(model):
+        mass = np.logspace(8,14,21)
+        step = 1e-4
+        fd = (model.sigmaMz(mass*np.exp(step),0.)**2-model.sigmaMz(mass*np.exp(-step),0.)**2)/(2*step*mass)
+>       np.testing.assert_allclose(model.dsdm(mass,0.),fd,rtol=2e-5,atol=0.)
+
+test_minor_updates.py:49: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = (<function assert_allclose.<locals>.compare at 0x72fb28bf16c0>, array([-1.52427975e-11, -3.64581585e-11, -6.88627455e-..., -1.15197779e-13,
+       -5.12484836e-14, -2.25920268e-14, -9.86727284e-15, -4.26782805e-15,
+       -1.82677329e-15]))
+kwds = {'err_msg': '', 'verbose': True, 'header': 'Not equal to tolerance rtol=2e-05, atol=0', 'equal_nan': True}
+
+    @wraps(func)
+    def inner(*args, **kwds):
+        with self._recreate_cm():
+>           return func(*args, **kwds)
+                   ^^^^^^^^^^^^^^^^^^^
+E           AssertionError: 
+E           Not equal to tolerance rtol=2e-05, atol=0
+E           
+E           Mismatched elements: 21 / 21 (100%)
+E           Max absolute difference: 5.00884827e-11
+E           Max relative difference: 2.82094295
+E            x: array([-1.524280e-11, -3.645816e-11, -6.886275e-11, -9.975277e-11,
+E                  -1.114610e-10, -9.876430e-11, -7.216494e-11, -4.540335e-11,
+E                  -2.561736e-11, -1.340655e-11, -6.671272e-12, -3.210303e-12,...
+E            y: array([-3.989276e-12, -1.195301e-11, -2.757189e-11, -4.966429e-11,
+E                  -6.651261e-11, -6.734042e-11, -5.363588e-11, -3.552434e-11,
+E                  -2.060289e-11, -1.092168e-11, -5.455910e-12, -2.622150e-12,...
+
+/home/gomesu/.local/share/uv/python/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/contextlib.py:81: AssertionError
+_________________ test_top_hat_and_sharp_k_both_use_power_q10 __________________
+
+model = <sashimi_w.subhalos object at 0x72fb3b5b5a10>
+
+    def test_top_hat_and_sharp_k_both_use_power_q10(model):
+        k = np.array([.01, 1., 30.])
+        ratio = (1+(model.a*k)**(2*1.12))**(-10/1.12)
+>       np.testing.assert_allclose(model.SigmaIntegrand(k,1.)/(k*k*w.Pk_interp(k)*model.TopHat(k,1.)**2),ratio,rtol=2e-14)
+
+test_minor_updates.py:57: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = (<function assert_allclose.<locals>.compare at 0x72fb28bf18a0>, array([0.99999997, 0.99909866, 0.21483094]), array([0.99999994, 0.99819813, 0.04615233]))
+kwds = {'err_msg': '', 'verbose': True, 'header': 'Not equal to tolerance rtol=2e-14, atol=0', 'equal_nan': True}
+
+    @wraps(func)
+    def inner(*args, **kwds):
+        with self._recreate_cm():
+>           return func(*args, **kwds)
+                   ^^^^^^^^^^^^^^^^^^^
+E           AssertionError: 
+E           Not equal to tolerance rtol=2e-14, atol=0
+E           
+E           Mismatched elements: 3 / 3 (100%)
+E           Max absolute difference: 0.16867861
+E           Max relative difference: 3.65482306
+E            x: array([1.      , 0.999099, 0.214831])
+E            y: array([1.      , 0.998198, 0.046152])
+
+/home/gomesu/.local/share/uv/python/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/contextlib.py:81: AssertionError
+_______________ test_concentration_trials_keep_real_future_times _______________
+
+model = <sashimi_w.subhalos object at 0x72fb3b5b5a10>
+
+    def test_concentration_trials_keep_real_future_times(model):
+        with np.errstate(invalid="raise"):
+>           c,r,z = model._real_formation_trials(np.array([1.,2.,3.]),np.array([.5,.9,2.]),0.)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: 'subhalos' object has no attribute '_real_formation_trials'
+
+test_minor_updates.py:64: AttributeError
+___________________________ test_exact_nfw_boundary ____________________________
+
+model = <sashimi_w.subhalos object at 0x72fb3b5b5a10>
+
+    def test_exact_nfw_boundary(model):
+>       from sashimi_w_numerics import invert_nfw_mass_function
+E       ModuleNotFoundError: No module named 'sashimi_w_numerics'
+
+test_minor_updates.py:71: ModuleNotFoundError
+_______ test_survivor_counts_exact_cumulative_and_forwarding[alive0-7.0] _______
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x72fb2dda2b50>
+alive = (True, False, True), total = 7.0
+
+    @pytest.mark.parametrize("alive,total", [((True,False,True),7.),((False,False,False),0.),((True,False,False),2.)])
+    def test_survivor_counts_exact_cumulative_and_forwarding(monkeypatch,alive,total):
+        model=w.subhalos(2.)
+        arrays=synthetic_catalog(alive); originals=tuple(x.copy() for x in arrays)
+        def fake(*args,**kwargs):
+            assert kwargs.get('profile_change', args[-1] if args else None) is False
+            return arrays
+        monkeypatch.setattr(model,'rs_rhos_calc',fake)
+>       count,x,curve=model.N_sat(1e12,profile_change=False)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test_minor_updates.py:93: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+sashimi_w.py:616: in N_sat
+    ma200, z_a, rs_a, rhos_a, m0, rs0, rhos0, ct0, weight, survive = self.rs_rhos_calc(M0, redshift, dz, zmax, N_ma, sigmalogc,N_herm, logmamin, \
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = (1000000000000.0, 0.0, 0.1, 7.0, 500, 0.128, ...)
+kwargs = {'profile_change': True}
+
+    def fake(*args,**kwargs):
+>       assert kwargs.get('profile_change', args[-1] if args else None) is False
+E       AssertionError: assert True is False
+E        +  where True = <built-in method get of dict object at 0x72fb28b73180>('profile_change', 200)
+E        +    where <built-in method get of dict object at 0x72fb28b73180> = {'profile_change': True}.get
+
+test_minor_updates.py:90: AssertionError
+_______ test_survivor_counts_exact_cumulative_and_forwarding[alive1-0.0] _______
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x72fb28b66dd0>
+alive = (False, False, False), total = 0.0
+
+    @pytest.mark.parametrize("alive,total", [((True,False,True),7.),((False,False,False),0.),((True,False,False),2.)])
+    def test_survivor_counts_exact_cumulative_and_forwarding(monkeypatch,alive,total):
+        model=w.subhalos(2.)
+        arrays=synthetic_catalog(alive); originals=tuple(x.copy() for x in arrays)
+        def fake(*args,**kwargs):
+            assert kwargs.get('profile_change', args[-1] if args else None) is False
+            return arrays
+        monkeypatch.setattr(model,'rs_rhos_calc',fake)
+>       count,x,curve=model.N_sat(1e12,profile_change=False)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test_minor_updates.py:93: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+sashimi_w.py:616: in N_sat
+    ma200, z_a, rs_a, rhos_a, m0, rs0, rhos0, ct0, weight, survive = self.rs_rhos_calc(M0, redshift, dz, zmax, N_ma, sigmalogc,N_herm, logmamin, \
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = (1000000000000.0, 0.0, 0.1, 7.0, 500, 0.128, ...)
+kwargs = {'profile_change': True}
+
+    def fake(*args,**kwargs):
+>       assert kwargs.get('profile_change', args[-1] if args else None) is False
+E       AssertionError: assert True is False
+E        +  where True = <built-in method get of dict object at 0x72fb28b6d500>('profile_change', 200)
+E        +    where <built-in method get of dict object at 0x72fb28b6d500> = {'profile_change': True}.get
+
+test_minor_updates.py:90: AssertionError
+_______ test_survivor_counts_exact_cumulative_and_forwarding[alive2-2.0] _______
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x72fb28b43110>
+alive = (True, False, False), total = 2.0
+
+    @pytest.mark.parametrize("alive,total", [((True,False,True),7.),((False,False,False),0.),((True,False,False),2.)])
+    def test_survivor_counts_exact_cumulative_and_forwarding(monkeypatch,alive,total):
+        model=w.subhalos(2.)
+        arrays=synthetic_catalog(alive); originals=tuple(x.copy() for x in arrays)
+        def fake(*args,**kwargs):
+            assert kwargs.get('profile_change', args[-1] if args else None) is False
+            return arrays
+        monkeypatch.setattr(model,'rs_rhos_calc',fake)
+>       count,x,curve=model.N_sat(1e12,profile_change=False)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test_minor_updates.py:93: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+sashimi_w.py:616: in N_sat
+    ma200, z_a, rs_a, rhos_a, m0, rs0, rhos0, ct0, weight, survive = self.rs_rhos_calc(M0, redshift, dz, zmax, N_ma, sigmalogc,N_herm, logmamin, \
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = (1000000000000.0, 0.0, 0.1, 7.0, 500, 0.128, ...)
+kwargs = {'profile_change': True}
+
+    def fake(*args,**kwargs):
+>       assert kwargs.get('profile_change', args[-1] if args else None) is False
+E       AssertionError: assert True is False
+E        +  where True = <built-in method get of dict object at 0x72fb28b279c0>('profile_change', 200)
+E        +    where <built-in method get of dict object at 0x72fb28b279c0> = {'profile_change': True}.get
+
+test_minor_updates.py:90: AssertionError
+_______________________ test_cumulative_empty_and_single _______________________
+
+    def test_cumulative_empty_and_single():
+>       from sashimi_w import _cumulative_above
+E       ImportError: cannot import name '_cumulative_above' from 'sashimi_w' (/tmp/sashimi-minor-updates-20260911/sashimi-w/sashimi_w.py)
+
+test_minor_updates.py:108: ImportError
+___________ test_eps_shape_support_and_finite_default_low_masses[1] ____________
+
+model = <sashimi_w.subhalos object at 0x72fb3b5b5a10>, order = 1
+
+    @pytest.mark.parametrize('order',[1,4,64,200])
+    def test_eps_shape_support_and_finite_default_low_masses(model,order):
+        z=np.array([.25,.5,1.])
+        mass=np.broadcast_to(np.logspace(1,11,5),(3,5))
+        with np.errstate(invalid='raise',divide='raise',over='raise'):
+>           result=model.Na_calc(mass,z,1e12,N_herm=order)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test_minor_updates.py:121: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+sashimi_w.py:419: in Na_calc
+    zacc_2d = zacc.reshape(np.alen(zacc),1)
+                           ^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+attr = 'alen'
+
+    def __getattr__(attr):
+        # Warn for expired attributes, and return a dummy function
+        # that always raises an exception.
+        import warnings
+        import math
+        try:
+            msg = __expired_functions__[attr]
+        except KeyError:
+            pass
+        else:
+            warnings.warn(msg, DeprecationWarning, stacklevel=2)
+    
+            def _expired(*args, **kwds):
+                raise RuntimeError(msg)
+    
+            return _expired
+    
+        # Emit warnings for deprecated attributes
+        try:
+            val, msg = __deprecated_attrs__[attr]
+        except KeyError:
+            pass
+        else:
+            warnings.warn(msg, DeprecationWarning, stacklevel=2)
+            return val
+    
+        if attr in __future_scalars__:
+            # And future warnings for those that will change, but also give
+            # the AttributeError
+            warnings.warn(
+                f"In the future `np.{attr}` will be defined as the "
+                "corresponding NumPy scalar.", FutureWarning, stacklevel=2)
+    
+        if attr in __former_attrs__:
+            raise AttributeError(__former_attrs__[attr])
+    
+        if attr == 'testing':
+            import numpy.testing as testing
+            return testing
+        elif attr == 'Tester':
+            "Removed in NumPy 1.25.0"
+            raise RuntimeError("Tester was removed in NumPy 1.25.")
+    
+>       raise AttributeError("module {!r} has no attribute "
+                             "{!r}".format(__name__, attr))
+E       AttributeError: module 'numpy' has no attribute 'alen'
+
+../venv/lib/python3.11/site-packages/numpy/__init__.py:333: AttributeError
+___________ test_eps_shape_support_and_finite_default_low_masses[4] ____________
+
+model = <sashimi_w.subhalos object at 0x72fb3b5b5a10>, order = 4
+
+    @pytest.mark.parametrize('order',[1,4,64,200])
+    def test_eps_shape_support_and_finite_default_low_masses(model,order):
+        z=np.array([.25,.5,1.])
+        mass=np.broadcast_to(np.logspace(1,11,5),(3,5))
+        with np.errstate(invalid='raise',divide='raise',over='raise'):
+>           result=model.Na_calc(mass,z,1e12,N_herm=order)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test_minor_updates.py:121: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+sashimi_w.py:419: in Na_calc
+    zacc_2d = zacc.reshape(np.alen(zacc),1)
+                           ^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+attr = 'alen'
+
+    def __getattr__(attr):
+        # Warn for expired attributes, and return a dummy function
+        # that always raises an exception.
+        import warnings
+        import math
+        try:
+            msg = __expired_functions__[attr]
+        except KeyError:
+            pass
+        else:
+            warnings.warn(msg, DeprecationWarning, stacklevel=2)
+    
+            def _expired(*args, **kwds):
+                raise RuntimeError(msg)
+    
+            return _expired
+    
+        # Emit warnings for deprecated attributes
+        try:
+            val, msg = __deprecated_attrs__[attr]
+        except KeyError:
+            pass
+        else:
+            warnings.warn(msg, DeprecationWarning, stacklevel=2)
+            return val
+    
+        if attr in __future_scalars__:
+            # And future warnings for those that will change, but also give
+            # the AttributeError
+            warnings.warn(
+                f"In the future `np.{attr}` will be defined as the "
+                "corresponding NumPy scalar.", FutureWarning, stacklevel=2)
+    
+        if attr in __former_attrs__:
+            raise AttributeError(__former_attrs__[attr])
+    
+        if attr == 'testing':
+            import numpy.testing as testing
+            return testing
+        elif attr == 'Tester':
+            "Removed in NumPy 1.25.0"
+            raise RuntimeError("Tester was removed in NumPy 1.25.")
+    
+>       raise AttributeError("module {!r} has no attribute "
+                             "{!r}".format(__name__, attr))
+E       AttributeError: module 'numpy' has no attribute 'alen'
+
+../venv/lib/python3.11/site-packages/numpy/__init__.py:333: AttributeError
+___________ test_eps_shape_support_and_finite_default_low_masses[64] ___________
+
+model = <sashimi_w.subhalos object at 0x72fb3b5b5a10>, order = 64
+
+    @pytest.mark.parametrize('order',[1,4,64,200])
+    def test_eps_shape_support_and_finite_default_low_masses(model,order):
+        z=np.array([.25,.5,1.])
+        mass=np.broadcast_to(np.logspace(1,11,5),(3,5))
+        with np.errstate(invalid='raise',divide='raise',over='raise'):
+>           result=model.Na_calc(mass,z,1e12,N_herm=order)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test_minor_updates.py:121: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+sashimi_w.py:419: in Na_calc
+    zacc_2d = zacc.reshape(np.alen(zacc),1)
+                           ^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+attr = 'alen'
+
+    def __getattr__(attr):
+        # Warn for expired attributes, and return a dummy function
+        # that always raises an exception.
+        import warnings
+        import math
+        try:
+            msg = __expired_functions__[attr]
+        except KeyError:
+            pass
+        else:
+            warnings.warn(msg, DeprecationWarning, stacklevel=2)
+    
+            def _expired(*args, **kwds):
+                raise RuntimeError(msg)
+    
+            return _expired
+    
+        # Emit warnings for deprecated attributes
+        try:
+            val, msg = __deprecated_attrs__[attr]
+        except KeyError:
+            pass
+        else:
+            warnings.warn(msg, DeprecationWarning, stacklevel=2)
+            return val
+    
+        if attr in __future_scalars__:
+            # And future warnings for those that will change, but also give
+            # the AttributeError
+            warnings.warn(
+                f"In the future `np.{attr}` will be defined as the "
+                "corresponding NumPy scalar.", FutureWarning, stacklevel=2)
+    
+        if attr in __former_attrs__:
+            raise AttributeError(__former_attrs__[attr])
+    
+        if attr == 'testing':
+            import numpy.testing as testing
+            return testing
+        elif attr == 'Tester':
+            "Removed in NumPy 1.25.0"
+            raise RuntimeError("Tester was removed in NumPy 1.25.")
+    
+>       raise AttributeError("module {!r} has no attribute "
+                             "{!r}".format(__name__, attr))
+E       AttributeError: module 'numpy' has no attribute 'alen'
+
+../venv/lib/python3.11/site-packages/numpy/__init__.py:333: AttributeError
+__________ test_eps_shape_support_and_finite_default_low_masses[200] ___________
+
+model = <sashimi_w.subhalos object at 0x72fb3b5b5a10>, order = 200
+
+    @pytest.mark.parametrize('order',[1,4,64,200])
+    def test_eps_shape_support_and_finite_default_low_masses(model,order):
+        z=np.array([.25,.5,1.])
+        mass=np.broadcast_to(np.logspace(1,11,5),(3,5))
+        with np.errstate(invalid='raise',divide='raise',over='raise'):
+>           result=model.Na_calc(mass,z,1e12,N_herm=order)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test_minor_updates.py:121: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+sashimi_w.py:419: in Na_calc
+    zacc_2d = zacc.reshape(np.alen(zacc),1)
+                           ^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+attr = 'alen'
+
+    def __getattr__(attr):
+        # Warn for expired attributes, and return a dummy function
+        # that always raises an exception.
+        import warnings
+        import math
+        try:
+            msg = __expired_functions__[attr]
+        except KeyError:
+            pass
+        else:
+            warnings.warn(msg, DeprecationWarning, stacklevel=2)
+    
+            def _expired(*args, **kwds):
+                raise RuntimeError(msg)
+    
+            return _expired
+    
+        # Emit warnings for deprecated attributes
+        try:
+            val, msg = __deprecated_attrs__[attr]
+        except KeyError:
+            pass
+        else:
+            warnings.warn(msg, DeprecationWarning, stacklevel=2)
+            return val
+    
+        if attr in __future_scalars__:
+            # And future warnings for those that will change, but also give
+            # the AttributeError
+            warnings.warn(
+                f"In the future `np.{attr}` will be defined as the "
+                "corresponding NumPy scalar.", FutureWarning, stacklevel=2)
+    
+        if attr in __former_attrs__:
+            raise AttributeError(__former_attrs__[attr])
+    
+        if attr == 'testing':
+            import numpy.testing as testing
+            return testing
+        elif attr == 'Tester':
+            "Removed in NumPy 1.25.0"
+            raise RuntimeError("Tester was removed in NumPy 1.25.")
+    
+>       raise AttributeError("module {!r} has no attribute "
+                             "{!r}".format(__name__, attr))
+E       AttributeError: module 'numpy' has no attribute 'alen'
+
+../venv/lib/python3.11/site-packages/numpy/__init__.py:333: AttributeError
+_________________ test_redshift_grid_passes_each_evolved_mass __________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x72fb1e5ea190>
+model = <sashimi_w.subhalos object at 0x72fb3b5b5a10>
+
+    def test_redshift_grid_passes_each_evolved_mass(monkeypatch,model):
+        observed=[]; original=model.Na_calc
+        def spy(ma,z,*args,**kwargs):
+            observed.append((np.array(ma),np.array(z),original(ma,z,*args,**kwargs)))
+            return observed[-1][2]
+        monkeypatch.setattr(model,'Na_calc',spy)
+        options=dict(M0=1e10,dz=.5,N_ma=4,logmamin=6.,logmamax=8.,N_herm=2,N_hermNa=3)
+>       model.rs_rhos_calc(zmax=1.,**options)
+
+test_minor_updates.py:133: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+sashimi_w.py:530: in rs_rhos_calc
+    x1 = x1.reshape(np.alen(x1),1)
+                    ^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+attr = 'alen'
+
+    def __getattr__(attr):
+        # Warn for expired attributes, and return a dummy function
+        # that always raises an exception.
+        import warnings
+        import math
+        try:
+            msg = __expired_functions__[attr]
+        except KeyError:
+            pass
+        else:
+            warnings.warn(msg, DeprecationWarning, stacklevel=2)
+    
+            def _expired(*args, **kwds):
+                raise RuntimeError(msg)
+    
+            return _expired
+    
+        # Emit warnings for deprecated attributes
+        try:
+            val, msg = __deprecated_attrs__[attr]
+        except KeyError:
+            pass
+        else:
+            warnings.warn(msg, DeprecationWarning, stacklevel=2)
+            return val
+    
+        if attr in __future_scalars__:
+            # And future warnings for those that will change, but also give
+            # the AttributeError
+            warnings.warn(
+                f"In the future `np.{attr}` will be defined as the "
+                "corresponding NumPy scalar.", FutureWarning, stacklevel=2)
+    
+        if attr in __former_attrs__:
+            raise AttributeError(__former_attrs__[attr])
+    
+        if attr == 'testing':
+            import numpy.testing as testing
+            return testing
+        elif attr == 'Tester':
+            "Removed in NumPy 1.25.0"
+            raise RuntimeError("Tester was removed in NumPy 1.25.")
+    
+>       raise AttributeError("module {!r} has no attribute "
+                             "{!r}".format(__name__, attr))
+E       AttributeError: module 'numpy' has no attribute 'alen'
+
+../venv/lib/python3.11/site-packages/numpy/__init__.py:333: AttributeError
+=============================== warnings summary ===============================
+../venv/lib/python3.11/site-packages/matplotlib/_fontconfig_pattern.py:88
+../venv/lib/python3.11/site-packages/matplotlib/_fontconfig_pattern.py:88
+../venv/lib/python3.11/site-packages/matplotlib/_fontconfig_pattern.py:88
+../venv/lib/python3.11/site-packages/matplotlib/_fontconfig_pattern.py:88
+../venv/lib/python3.11/site-packages/matplotlib/_fontconfig_pattern.py:88
+../venv/lib/python3.11/site-packages/matplotlib/_fontconfig_pattern.py:88
+  /tmp/sashimi-minor-updates-20260911/venv/lib/python3.11/site-packages/matplotlib/_fontconfig_pattern.py:88: PyparsingDeprecationWarning: 'parseString' deprecated - use 'parse_string'
+    parse = parser.parseString(pattern)
+
+../venv/lib/python3.11/site-packages/matplotlib/_fontconfig_pattern.py:92
+../venv/lib/python3.11/site-packages/matplotlib/_fontconfig_pattern.py:92
+../venv/lib/python3.11/site-packages/matplotlib/_fontconfig_pattern.py:92
+../venv/lib/python3.11/site-packages/matplotlib/_fontconfig_pattern.py:92
+../venv/lib/python3.11/site-packages/matplotlib/_fontconfig_pattern.py:92
+../venv/lib/python3.11/site-packages/matplotlib/_fontconfig_pattern.py:92
+  /tmp/sashimi-minor-updates-20260911/venv/lib/python3.11/site-packages/matplotlib/_fontconfig_pattern.py:92: PyparsingDeprecationWarning: 'resetCache' deprecated - use 'reset_cache'
+    parser.resetCache()
+
+../venv/lib/python3.11/site-packages/matplotlib/_mathtext.py:45
+  /tmp/sashimi-minor-updates-20260911/venv/lib/python3.11/site-packages/matplotlib/_mathtext.py:45: PyparsingDeprecationWarning: 'enablePackrat' deprecated - use 'enable_packrat'
+    ParserElement.enablePackrat()
+
+test_minor_updates.py::test_redshift_grid_passes_each_evolved_mass
+  /tmp/sashimi-minor-updates-20260911/sashimi-w/sashimi_w.py:242: RuntimeWarning: invalid value encountered in power
+    z2          = (1. / OmegaM *(rhoc* (OmegaM*(1+z)**3 + OmegaL) - OmegaL))**0.3333 - 1.
+
+test_minor_updates.py::test_redshift_grid_passes_each_evolved_mass
+  /tmp/sashimi-minor-updates-20260911/sashimi-w/sashimi_w.py:217: RuntimeWarning: invalid value encountered in power
+    z2          = (1. / OmegaM *(rhoc* (OmegaM*(1+z)**3 + OmegaL) - OmegaL))**0.3333 - 1.
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED test_minor_updates.py::test_flat_background_and_growth - assert (0.27 ...
+FAILED test_minor_updates.py::test_variance_is_independent_sharp_k_integral[10000000.0]
+FAILED test_minor_updates.py::test_variance_is_independent_sharp_k_integral[1000000000.0]
+FAILED test_minor_updates.py::test_variance_is_independent_sharp_k_integral[1000000000000.0]
+FAILED test_minor_updates.py::test_variance_derivative_and_growth_square - As...
+FAILED test_minor_updates.py::test_top_hat_and_sharp_k_both_use_power_q10 - A...
+FAILED test_minor_updates.py::test_concentration_trials_keep_real_future_times
+FAILED test_minor_updates.py::test_exact_nfw_boundary - ModuleNotFoundError: ...
+FAILED test_minor_updates.py::test_survivor_counts_exact_cumulative_and_forwarding[alive0-7.0]
+FAILED test_minor_updates.py::test_survivor_counts_exact_cumulative_and_forwarding[alive1-0.0]
+FAILED test_minor_updates.py::test_survivor_counts_exact_cumulative_and_forwarding[alive2-2.0]
+FAILED test_minor_updates.py::test_cumulative_empty_and_single - ImportError:...
+FAILED test_minor_updates.py::test_eps_shape_support_and_finite_default_low_masses[1]
+FAILED test_minor_updates.py::test_eps_shape_support_and_finite_default_low_masses[4]
+FAILED test_minor_updates.py::test_eps_shape_support_and_finite_default_low_masses[64]
+FAILED test_minor_updates.py::test_eps_shape_support_and_finite_default_low_masses[200]
+FAILED test_minor_updates.py::test_redshift_grid_passes_each_evolved_mass - A...
+17 failed, 3 deselected, 15 warnings in 3.93s

@@ -1,0 +1,11 @@
+--- a/sashimi_w.py
++++ b/sashimi_w.py
+@@ -394,7 +394,7 @@
+     def dsdm(self, M, z):
+         sigma0 = self.Sigma_interp(M)
+         dsdM0 = self.dlnSigmadlnM_interp(np.log(M))*2.*sigma0**2/M
+-        dsdMz = dsdM0*self.growthD(z)
++        dsdMz = dsdM0*self.growthD(z)**2
+         return dsdMz
+ 
+     def delc_Y11(self,M, z):
