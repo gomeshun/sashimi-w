@@ -1,0 +1,13 @@
+--- a/sashimi_w.py
++++ b/sashimi_w.py
+@@ -340,9 +340,7 @@
+         return pow(M*pow((1e+10)*pow(h,-1),-1),-1)
+ 
+     def sigmaMz(self, M, z):
+-        sigmaM0 = self.Sigma_interp(h*M)
+-        sigmaMz = sigmaM0*self.growthD(z)
+-        return sigmaMz
++        return self._reference_sigma0(M)*self.growthD(z)
+ 
+     def dOdz(self, z):
+         return -OmegaL*3*OmegaM*pow(1+z,2)*pow(OmegaL+OmegaM*pow(1+z,3),-2)

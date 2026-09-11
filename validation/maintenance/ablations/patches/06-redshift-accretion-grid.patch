@@ -1,0 +1,30 @@
+--- a/sashimi_w.py
++++ b/sashimi_w.py
+@@ -478,6 +478,7 @@
+         ct_z0 = np.zeros((len(zdist),N_herm,len(ma200)))
+         survive=np.zeros((len(zdist),N_herm,len(ma200)))
+         m0_matrix = np.zeros((len(zdist),N_herm,len(ma200)))
++        ma_by_redshift = np.zeros((len(zdist),len(ma200)))
+         Oz_0 = self.Omegaz(pOmega,redshift)
+ 
+         def Mzvir(z):
+@@ -516,6 +517,7 @@
+ 
+         for iz in range(len(zdist)):
+             ma = self.Mvir_from_M200(ma200*Msolar,zdist[iz])/Msolar
++            ma_by_redshift[iz] = ma
+             Oz = self.Omegaz(pOmega,zdist[iz])
+             zcalc = np.linspace(zdist[iz],redshift,100)
+             sol = odeint(msolve,ma,zcalc)
+@@ -549,9 +551,9 @@
+             survive[iz] = np.where(ct_z0[iz]>0.77,1,0)
+             m0_matrix[iz] = m0*np.ones((N_herm,1))
+ 
+-        Na = self.Na_calc(ma,zdist,M0,z0=0,N_herm=N_hermNa,Nrand=1000,
++        Na = self.Na_calc(ma_by_redshift,zdist,M0,z0=0,N_herm=N_hermNa,Nrand=1000,
+                           sigmafac=sigmafac)
+-        Na_total = integrate.simps(integrate.simps(Na,x=np.log(ma)),x=np.log(1+zdist))
++        Na_total = integrate.simps(integrate.simps(Na,x=np.log(ma_by_redshift)),x=np.log(1+zdist))
+         weight = Na/(1.0+zdist.reshape(np.alen(zdist),1))
+         weight = weight/np.sum(weight)*Na_total
+         weight = (weight.reshape((len(zdist),1,len(ma))))*w1/np.sqrt(np.pi)

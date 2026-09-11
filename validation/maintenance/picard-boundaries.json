@@ -1,0 +1,323 @@
+{
+  "variant": "w",
+  "cases": [
+    {
+      "catalog": "picard-accepted-catalog.json",
+      "boundaries": [
+        {
+          "name": "survival",
+          "threshold": 0.0,
+          "changed_weight_fraction": 0.0,
+          "changed_nodes": [],
+          "nearest_positive_weight_nodes": [
+            {
+              "index": 34559,
+              "ma_msun": 9111627.561154887,
+              "z_acc": 7.0,
+              "reference": 0.7153423707169507,
+              "picard": 0.7153423545586951,
+              "weight": 8.416542305025308e-265
+            },
+            {
+              "index": 34059,
+              "ma_msun": 9111627.561154887,
+              "z_acc": 6.9,
+              "reference": 0.7154778757846088,
+              "picard": 0.715477859183283,
+              "weight": 2.3561242830275903e-258
+            },
+            {
+              "index": 33559,
+              "ma_msun": 9111627.561154887,
+              "z_acc": 6.8,
+              "reference": 0.7156186096888042,
+              "picard": 0.7156185927161623,
+              "weight": 4.359726867347431e-252
+            },
+            {
+              "index": 33059,
+              "ma_msun": 9111627.561154887,
+              "z_acc": 6.7,
+              "reference": 0.7157649491301349,
+              "picard": 0.7157649309551788,
+              "weight": 8.10195012029906e-246
+            },
+            {
+              "index": 32559,
+              "ma_msun": 9111627.561154887,
+              "z_acc": 6.6,
+              "reference": 0.7159172960817108,
+              "picard": 0.7159172771490413,
+              "weight": 1.2242935405520702e-239
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "catalog": "picard-final-catalog.json",
+      "boundaries": [
+        {
+          "name": "survival",
+          "threshold": 0.0,
+          "changed_weight_fraction": 0.0,
+          "changed_nodes": [],
+          "nearest_positive_weight_nodes": [
+            {
+              "index": 34559,
+              "ma_msun": 9111627.561154887,
+              "z_acc": 7.0,
+              "reference": 0.7153423712365659,
+              "picard": 0.7153423545586951,
+              "weight": 8.416542305025308e-265
+            },
+            {
+              "index": 34059,
+              "ma_msun": 9111627.561154887,
+              "z_acc": 6.9,
+              "reference": 0.715477876343085,
+              "picard": 0.715477859183283,
+              "weight": 2.3561242830275903e-258
+            },
+            {
+              "index": 33559,
+              "ma_msun": 9111627.561154887,
+              "z_acc": 6.8,
+              "reference": 0.7156186102893116,
+              "picard": 0.7156185927161623,
+              "weight": 4.359726867347431e-252
+            },
+            {
+              "index": 33059,
+              "ma_msun": 9111627.561154887,
+              "z_acc": 6.7,
+              "reference": 0.7157649497761318,
+              "picard": 0.7157649309551788,
+              "weight": 8.10195012029906e-246
+            },
+            {
+              "index": 32559,
+              "ma_msun": 9111627.561154887,
+              "z_acc": 6.6,
+              "reference": 0.7159172968972615,
+              "picard": 0.7159172771490413,
+              "weight": 1.2242935405520702e-239
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "catalog": "picard-grid-refinement-result.json",
+      "boundaries": [
+        {
+          "name": "survival",
+          "threshold": 0.0,
+          "changed_weight_fraction": 0.0,
+          "changed_nodes": [],
+          "nearest_positive_weight_nodes": [
+            {
+              "index": 13775,
+              "ma_msun": 100000000.0,
+              "z_acc": 3.0000000000000004,
+              "reference": 0.8546343261274498,
+              "picard": 0.854634166763799,
+              "weight": 4.873531669147175e-10
+            },
+            {
+              "index": 13776,
+              "ma_msun": 106315294.04309843,
+              "z_acc": 3.0000000000000004,
+              "reference": 0.8546360311598442,
+              "picard": 0.8546358715673121,
+              "weight": 6.515872981531355e-10
+            },
+            {
+              "index": 13777,
+              "ma_msun": 113029417.4747048,
+              "z_acc": 3.0000000000000004,
+              "reference": 0.8546377376358757,
+              "picard": 0.8546375778142347,
+              "weight": 8.685470814235721e-10
+            },
+            {
+              "index": 13778,
+              "ma_msun": 120167557.54343417,
+              "z_acc": 3.0000000000000004,
+              "reference": 0.8546394455563888,
+              "picard": 0.8546392855054082,
+              "weight": 1.1539036892821766e-09
+            },
+            {
+              "index": 13779,
+              "ma_msun": 127756492.14671156,
+              "z_acc": 3.0000000000000004,
+              "reference": 0.8546411549222266,
+              "picard": 0.854640994641678,
+              "weight": 1.5279097090779857e-09
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "catalog": "picard-scenario-0.5-result.json",
+      "boundaries": [
+        {
+          "name": "survival",
+          "threshold": 0.0,
+          "changed_weight_fraction": 0.0,
+          "changed_nodes": [],
+          "nearest_positive_weight_nodes": [
+            {
+              "index": 1754,
+              "ma_msun": 2415342501.0859466,
+              "z_acc": 2.6000000000000005,
+              "reference": 1.029717054872076,
+              "picard": 1.029716598978512,
+              "weight": 2.7082536518905286e-305
+            },
+            {
+              "index": 1609,
+              "ma_msun": 2136914933.3415644,
+              "z_acc": 2.4000000000000004,
+              "reference": 1.0404100763477542,
+              "picard": 1.0404099076158362,
+              "weight": 9.428382311277169e-305
+            },
+            {
+              "index": 1610,
+              "ma_msun": 2415342501.0859466,
+              "z_acc": 2.4000000000000004,
+              "reference": 1.040419540123724,
+              "picard": 1.0404193711963614,
+              "weight": 1.1089034768789427e-264
+            },
+            {
+              "index": 2044,
+              "ma_msun": 3085756852.7160535,
+              "z_acc": 3.0000000000000004,
+              "reference": 1.0428677874895587,
+              "picard": 1.0428676168558515,
+              "weight": 2.8308276459737e-311
+            },
+            {
+              "index": 2045,
+              "ma_msun": 3487812995.31074,
+              "z_acc": 3.0000000000000004,
+              "reference": 1.0428731754605154,
+              "picard": 1.0428730045483625,
+              "weight": 3.477109697547256e-280
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "catalog": "picard-scenario-2.0-result.json",
+      "boundaries": [
+        {
+          "name": "survival",
+          "threshold": 0.0,
+          "changed_weight_fraction": 0.0,
+          "changed_nodes": [],
+          "nearest_positive_weight_nodes": [
+            {
+              "index": 2016,
+              "ma_msun": 100000000.0,
+              "z_acc": 3.0000000000000004,
+              "reference": 1.1585914958814012,
+              "picard": 1.1585913342271474,
+              "weight": 2.7416832177563873e-08
+            },
+            {
+              "index": 2017,
+              "ma_msun": 113029417.4747048,
+              "z_acc": 3.0000000000000004,
+              "reference": 1.1585965529174642,
+              "picard": 1.1585963910239911,
+              "weight": 4.8861505754551166e-08
+            },
+            {
+              "index": 2018,
+              "ma_msun": 127756492.14671156,
+              "z_acc": 3.0000000000000004,
+              "reference": 1.1586016185216235,
+              "picard": 1.1586014563887157,
+              "weight": 8.595500536388405e-08
+            },
+            {
+              "index": 2019,
+              "ma_msun": 144402418.85954505,
+              "z_acc": 3.0000000000000004,
+              "reference": 1.158606692703904,
+              "picard": 1.158606530331344,
+              "weight": 1.4919381300975829e-07
+            },
+            {
+              "index": 1872,
+              "ma_msun": 100000000.0,
+              "z_acc": 2.8000000000000003,
+              "reference": 1.173221981691253,
+              "picard": 1.1732218015896063,
+              "weight": 3.103639309586115e-08
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "catalog": "picard-scenario-5.0-result.json",
+      "boundaries": [
+        {
+          "name": "survival",
+          "threshold": 0.0,
+          "changed_weight_fraction": 0.0,
+          "changed_nodes": [],
+          "nearest_positive_weight_nodes": [
+            {
+              "index": 2016,
+              "ma_msun": 100000000.0,
+              "z_acc": 3.0000000000000004,
+              "reference": 1.6258504884339162,
+              "picard": 1.6258502471742429,
+              "weight": 0.0028722436578306875
+            },
+            {
+              "index": 2017,
+              "ma_msun": 113029417.4747048,
+              "z_acc": 3.0000000000000004,
+              "reference": 1.625858397995067,
+              "picard": 1.6258581563987051,
+              "weight": 0.0033899544201264607
+            },
+            {
+              "index": 2018,
+              "ma_msun": 127756492.14671156,
+              "z_acc": 3.0000000000000004,
+              "reference": 1.6258663209508821,
+              "picard": 1.6258660790175752,
+              "weight": 0.003933543134367872
+            },
+            {
+              "index": 2019,
+              "ma_msun": 144402418.85954505,
+              "z_acc": 3.0000000000000004,
+              "reference": 1.6258742573170457,
+              "picard": 1.6258740150465352,
+              "weight": 0.004489850406405671
+            },
+            {
+              "index": 1872,
+              "ma_msun": 100000000.0,
+              "z_acc": 2.8000000000000003,
+              "reference": 1.6698877201705493,
+              "picard": 1.6698874348768267,
+              "weight": 0.003300208549944126
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

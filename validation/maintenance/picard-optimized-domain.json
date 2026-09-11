@@ -1,0 +1,373 @@
+{
+  "variant": "w",
+  "particle": 2.0,
+  "gates": "standalone-picard-gates-2026-09-11-v1",
+  "source_sha256": {
+    "sashimi_w.py": "b1604ce8c0b09289729ffa6b1e77ffb85b351dacf151125876b9ef5fbeb73371",
+    "picard_tidal_stripping.py": "a861df71091c2b0b51374cc27851485b05bdfdf1ed4767d0acc6d7c264a99d87"
+  },
+  "cases": [
+    {
+      "host": 100000000.0,
+      "target": 0.0,
+      "acc": 0.0,
+      "reference_refinement_max": 0.0,
+      "mass_relative_max": 0.0,
+      "refined_candidate_relative_max": 0.0,
+      "warnings": []
+    },
+    {
+      "host": 1000000000000.0,
+      "target": 0.0,
+      "acc": 0.0,
+      "reference_refinement_max": 0.0,
+      "mass_relative_max": 0.0,
+      "refined_candidate_relative_max": 0.0,
+      "warnings": []
+    },
+    {
+      "host": 1000000000000.0,
+      "target": 0.0,
+      "acc": 0.001,
+      "reference_refinement_max": 0.0,
+      "mass_relative_max": 4.3137027641027e-06,
+      "refined_candidate_relative_max": 6.767605453816827e-07,
+      "warnings": [
+        "Picard fallback to log-mass DOP853: outside validated redshift or mass-ratio domain; 1 masses.",
+        "Picard fallback to log-mass DOP853: outside validated redshift or mass-ratio domain; 1 masses."
+      ]
+    },
+    {
+      "host": 1000000000000.0,
+      "target": 0.0,
+      "acc": 0.5,
+      "reference_refinement_max": 3.0455424848696566e-09,
+      "mass_relative_max": 7.604650369641419e-06,
+      "refined_candidate_relative_max": 1.081096339750065e-05,
+      "warnings": []
+    },
+    {
+      "host": 1000000000000.0,
+      "target": 0.0,
+      "acc": 2.0,
+      "reference_refinement_max": 2.7856070894394236e-08,
+      "mass_relative_max": 3.076066550045109e-05,
+      "refined_candidate_relative_max": 1.4216343281359123e-05,
+      "warnings": []
+    },
+    {
+      "host": 1000000000000.0,
+      "target": 0.0,
+      "acc": 5.0,
+      "reference_refinement_max": 2.4362013144596517e-06,
+      "mass_relative_max": 0.0002703245701791701,
+      "refined_candidate_relative_max": 0.0001269787323804339,
+      "warnings": []
+    },
+    {
+      "host": 1000000000000.0,
+      "target": 0.5,
+      "acc": 0.5,
+      "reference_refinement_max": 0.0,
+      "mass_relative_max": 0.0,
+      "refined_candidate_relative_max": 0.0,
+      "warnings": []
+    },
+    {
+      "host": 1000000000000.0,
+      "target": 0.5,
+      "acc": 0.501,
+      "reference_refinement_max": 0.0,
+      "mass_relative_max": 1.0890305746080742e-07,
+      "refined_candidate_relative_max": 8.017270480831229e-08,
+      "warnings": []
+    },
+    {
+      "host": 1000000000000.0,
+      "target": 0.5,
+      "acc": 1.0,
+      "reference_refinement_max": 4.08942923968425e-09,
+      "mass_relative_max": 5.9783626735754325e-06,
+      "refined_candidate_relative_max": 8.954081708312245e-06,
+      "warnings": []
+    },
+    {
+      "host": 1000000000000.0,
+      "target": 0.5,
+      "acc": 2.5,
+      "reference_refinement_max": 6.364282456594594e-08,
+      "mass_relative_max": 1.953206205573821e-05,
+      "refined_candidate_relative_max": 3.32402031292256e-05,
+      "warnings": [
+        "Picard fallback to log-mass DOP853: outside validated redshift or mass-ratio domain; 1 masses.",
+        "Picard fallback to log-mass DOP853: outside validated redshift or mass-ratio domain; 1 masses."
+      ]
+    },
+    {
+      "host": 1000000000000.0,
+      "target": 0.5,
+      "acc": 5.5,
+      "reference_refinement_max": 7.802727763905892e-08,
+      "mass_relative_max": 0.00016882799795647774,
+      "refined_candidate_relative_max": 3.9195836085137437e-05,
+      "warnings": []
+    },
+    {
+      "host": 1000000000000.0,
+      "target": 2.0,
+      "acc": 2.0,
+      "reference_refinement_max": 0.0,
+      "mass_relative_max": 0.0,
+      "refined_candidate_relative_max": 0.0,
+      "warnings": []
+    },
+    {
+      "host": 1000000000000.0,
+      "target": 2.0,
+      "acc": 2.001,
+      "reference_refinement_max": 0.0,
+      "mass_relative_max": 3.974541185058911e-08,
+      "refined_candidate_relative_max": 4.9819492975444746e-09,
+      "warnings": []
+    },
+    {
+      "host": 1000000000000.0,
+      "target": 2.0,
+      "acc": 2.5,
+      "reference_refinement_max": 8.484659641538883e-10,
+      "mass_relative_max": 1.8513555055665876e-07,
+      "refined_candidate_relative_max": 4.244945250864163e-08,
+      "warnings": [
+        "Picard fallback to log-mass DOP853: outside validated redshift or mass-ratio domain; 1 masses.",
+        "Picard fallback to log-mass DOP853: outside validated redshift or mass-ratio domain; 1 masses."
+      ]
+    },
+    {
+      "host": 1000000000000.0,
+      "target": 2.0,
+      "acc": 4.0,
+      "reference_refinement_max": 3.0934387940106944e-08,
+      "mass_relative_max": 6.984166343149134e-06,
+      "refined_candidate_relative_max": 1.624736497451984e-06,
+      "warnings": [
+        "Picard fallback to log-mass DOP853: outside validated redshift or mass-ratio domain; 1 masses.",
+        "Picard fallback to log-mass DOP853: outside validated redshift or mass-ratio domain; 1 masses."
+      ]
+    },
+    {
+      "host": 1000000000000.0,
+      "target": 2.0,
+      "acc": 7.0,
+      "reference_refinement_max": 6.376582972755784e-08,
+      "mass_relative_max": 5.717725772214077e-05,
+      "refined_candidate_relative_max": 1.4244407943397874e-05,
+      "warnings": []
+    },
+    {
+      "host": 1000000000000000.0,
+      "target": 0.0,
+      "acc": 0.0,
+      "reference_refinement_max": 0.0,
+      "mass_relative_max": 0.0,
+      "refined_candidate_relative_max": 0.0,
+      "warnings": []
+    },
+    {
+      "host": 1000000000000000.0,
+      "target": 0.0,
+      "acc": 0.001,
+      "reference_refinement_max": 0.0,
+      "mass_relative_max": 4.567344393580086e-06,
+      "refined_candidate_relative_max": 7.544379470036944e-07,
+      "warnings": [
+        "Picard fallback to log-mass DOP853: outside validated redshift or mass-ratio domain; 1 masses.",
+        "Picard fallback to log-mass DOP853: outside validated redshift or mass-ratio domain; 1 masses."
+      ]
+    },
+    {
+      "host": 1000000000000000.0,
+      "target": 0.0,
+      "acc": 0.5,
+      "reference_refinement_max": 7.094599539514412e-06,
+      "mass_relative_max": 4.809974349928581e-06,
+      "refined_candidate_relative_max": 2.25055323808121e-05,
+      "warnings": []
+    },
+    {
+      "host": 1000000000000000.0,
+      "target": 0.0,
+      "acc": 2.0,
+      "reference_refinement_max": 4.359432397960106e-06,
+      "mass_relative_max": 3.217390442500356e-05,
+      "refined_candidate_relative_max": 3.919272239683025e-05,
+      "warnings": []
+    },
+    {
+      "host": 1000000000000000.0,
+      "target": 0.0,
+      "acc": 5.0,
+      "reference_refinement_max": 6.1434199949417234e-09,
+      "mass_relative_max": 0.0002716402107217908,
+      "refined_candidate_relative_max": 0.00010972294914457503,
+      "warnings": []
+    },
+    {
+      "host": 1000000000000000.0,
+      "target": 0.5,
+      "acc": 0.5,
+      "reference_refinement_max": 0.0,
+      "mass_relative_max": 0.0,
+      "refined_candidate_relative_max": 0.0,
+      "warnings": []
+    },
+    {
+      "host": 1000000000000000.0,
+      "target": 0.5,
+      "acc": 0.501,
+      "reference_refinement_max": 0.0,
+      "mass_relative_max": 1.2780764935271804e-07,
+      "refined_candidate_relative_max": 4.280097931630422e-08,
+      "warnings": []
+    },
+    {
+      "host": 1000000000000000.0,
+      "target": 0.5,
+      "acc": 1.0,
+      "reference_refinement_max": 2.375375601548768e-06,
+      "mass_relative_max": 5.777249136751372e-06,
+      "refined_candidate_relative_max": 9.485199670478117e-06,
+      "warnings": []
+    },
+    {
+      "host": 1000000000000000.0,
+      "target": 0.5,
+      "acc": 2.5,
+      "reference_refinement_max": 2.5893794711739915e-06,
+      "mass_relative_max": 1.7189084593582926e-05,
+      "refined_candidate_relative_max": 2.4125515299622258e-05,
+      "warnings": [
+        "Picard fallback to log-mass DOP853: outside validated redshift or mass-ratio domain; 1 masses.",
+        "Picard fallback to log-mass DOP853: outside validated redshift or mass-ratio domain; 1 masses."
+      ]
+    },
+    {
+      "host": 1000000000000000.0,
+      "target": 0.5,
+      "acc": 5.5,
+      "reference_refinement_max": 8.327155165410716e-08,
+      "mass_relative_max": 0.0001654943466392611,
+      "refined_candidate_relative_max": 4.02908562991966e-05,
+      "warnings": []
+    },
+    {
+      "host": 1000000000000000.0,
+      "target": 2.0,
+      "acc": 2.0,
+      "reference_refinement_max": 0.0,
+      "mass_relative_max": 0.0,
+      "refined_candidate_relative_max": 0.0,
+      "warnings": []
+    },
+    {
+      "host": 1000000000000000.0,
+      "target": 2.0,
+      "acc": 2.001,
+      "reference_refinement_max": 0.0,
+      "mass_relative_max": 5.422541038413442e-08,
+      "refined_candidate_relative_max": 8.132315709730165e-09,
+      "warnings": []
+    },
+    {
+      "host": 1000000000000000.0,
+      "target": 2.0,
+      "acc": 2.5,
+      "reference_refinement_max": 1.2245493508089567e-09,
+      "mass_relative_max": 4.1976182529879225e-08,
+      "refined_candidate_relative_max": 1.0135442418679474e-07,
+      "warnings": [
+        "Picard fallback to log-mass DOP853: outside validated redshift or mass-ratio domain; 1 masses.",
+        "Picard fallback to log-mass DOP853: outside validated redshift or mass-ratio domain; 1 masses."
+      ]
+    },
+    {
+      "host": 1000000000000000.0,
+      "target": 2.0,
+      "acc": 4.0,
+      "reference_refinement_max": 5.5354121286654845e-09,
+      "mass_relative_max": 6.7077510299551335e-06,
+      "refined_candidate_relative_max": 1.657185039194431e-06,
+      "warnings": [
+        "Picard fallback to log-mass DOP853: outside validated redshift or mass-ratio domain; 1 masses.",
+        "Picard fallback to log-mass DOP853: outside validated redshift or mass-ratio domain; 1 masses."
+      ]
+    },
+    {
+      "host": 1000000000000000.0,
+      "target": 2.0,
+      "acc": 7.0,
+      "reference_refinement_max": 9.584106908100409e-08,
+      "mass_relative_max": 5.806564023524974e-05,
+      "refined_candidate_relative_max": 1.4530924823175084e-05,
+      "warnings": []
+    }
+  ],
+  "domain_failures": [
+    {
+      "host": 100000000.0,
+      "error": "ValueError('Concentration requires finite M>0 and z>-1.')",
+      "traceback": "Traceback (most recent call last):\n  File \"/tmp/sashimi-minor-updates-20260911/sashimi-w/validation/maintenance/tools/validate_candidate.py\", line 43, in main\n    actual=helper.endpoint_mass(solver,mass,acc,target)[None,:]\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/sashimi-minor-updates-20260911/sashimi-w/picard_tidal_stripping.py\", line 360, in endpoint_mass\n    selected_output[use] = _fallback(solver,m[use],start,target,'outside validated redshift or mass-ratio domain')\n                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/sashimi-minor-updates-20260911/sashimi-w/picard_tidal_stripping.py\", line 206, in _fallback\n    return direct_log_mass(solver, ma, za, z)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/sashimi-minor-updates-20260911/sashimi-w/picard_tidal_stripping.py\", line 190, in direct_log_mass\n    result = solve_ivp(rhs, (za,float(times[-1])), np.log(mass.ravel()),\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/sashimi-minor-updates-20260911/venv/lib/python3.11/site-packages/scipy/integrate/_ivp/ivp.py\", line 621, in solve_ivp\n    solver = method(fun, t0, y0, tf, vectorized=vectorized, **options)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/sashimi-minor-updates-20260911/venv/lib/python3.11/site-packages/scipy/integrate/_ivp/rk.py\", line 505, in __init__\n    super().__init__(fun, t0, y0, t_bound, max_step, rtol, atol,\n  File \"/tmp/sashimi-minor-updates-20260911/venv/lib/python3.11/site-packages/scipy/integrate/_ivp/rk.py\", line 96, in __init__\n    self.h_abs = select_initial_step(\n                 ^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/sashimi-minor-updates-20260911/venv/lib/python3.11/site-packages/scipy/integrate/_ivp/common.py\", line 115, in select_initial_step\n    f1 = fun(t0 + h0 * direction, y1)\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/sashimi-minor-updates-20260911/venv/lib/python3.11/site-packages/scipy/integrate/_ivp/base.py\", line 154, in fun\n    return self.fun_single(t, y)\n           ^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/sashimi-minor-updates-20260911/venv/lib/python3.11/site-packages/scipy/integrate/_ivp/base.py\", line 23, in fun_wrapped\n    return np.asarray(fun(t, y), dtype=dtype)\n                      ^^^^^^^^^\n  File \"/tmp/sashimi-minor-updates-20260911/sashimi-w/picard_tidal_stripping.py\", line 187, in rhs\n    return solver.Phi(redshift)*np.exp(solver.zetaMz(redshift)*(log_mass-np.log(solver.Mzvir(redshift))))\n           ^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/sashimi-minor-updates-20260911/sashimi-w/sashimi_w.py\", line 777, in Phi\n    return self.AMz(z)/self.tdynz(z)/self.model.Hz(z)/(1+z)\n           ^^^^^^^^^^^\n  File \"/tmp/sashimi-minor-updates-20260911/sashimi-w/sashimi_w.py\", line 765, in AMz\n    loghost = np.log10(self.Mzvir(z))\n                       ^^^^^^^^^^^^^\n  File \"/tmp/sashimi-minor-updates-20260911/sashimi-w/sashimi_w.py\", line 746, in Mzvir\n    return cached_host_mass(self, z)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/sashimi-minor-updates-20260911/sashimi-w/picard_tidal_stripping.py\", line 105, in cached_host_mass\n    value = solver._Mzvir_uncached(z)\n            ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/sashimi-minor-updates-20260911/sashimi-w/sashimi_w.py\", line 762, in _Mzvir_uncached\n    return self.model.Mvir_from_M200(Mz200*Msolar,z)/Msolar\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/sashimi-minor-updates-20260911/sashimi-w/sashimi_w.py\", line 275, in Mvir_from_M200\n    c200 = self.conc200(M200,z)\n           ^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/sashimi-minor-updates-20260911/sashimi-w/sashimi_w.py\", line 198, in conc200\n    raise ValueError(\"Concentration requires finite M>0 and z>-1.\")\nValueError: Concentration requires finite M>0 and z>-1.\n"
+    }
+  ],
+  "maximum_mass_relative_error": 0.0002716402107217908,
+  "maximum_reference_refinement_error": 7.094599539514412e-06,
+  "fallbacks": [
+    {
+      "reason": "outside validated redshift or mass-ratio domain",
+      "mass_count": 1,
+      "z_acc": 0.001,
+      "z_final": 0.0
+    },
+    {
+      "reason": "outside validated redshift or mass-ratio domain",
+      "mass_count": 1,
+      "z_acc": 0.001,
+      "z_final": 0.0
+    },
+    {
+      "reason": "outside validated redshift or mass-ratio domain",
+      "mass_count": 1,
+      "z_acc": 2.5,
+      "z_final": 0.5
+    },
+    {
+      "reason": "outside validated redshift or mass-ratio domain",
+      "mass_count": 1,
+      "z_acc": 2.5,
+      "z_final": 0.5
+    },
+    {
+      "reason": "outside validated redshift or mass-ratio domain",
+      "mass_count": 1,
+      "z_acc": 2.5,
+      "z_final": 2.0
+    },
+    {
+      "reason": "outside validated redshift or mass-ratio domain",
+      "mass_count": 1,
+      "z_acc": 2.5,
+      "z_final": 2.0
+    },
+    {
+      "reason": "outside validated redshift or mass-ratio domain",
+      "mass_count": 1,
+      "z_acc": 4.0,
+      "z_final": 2.0
+    },
+    {
+      "reason": "outside validated redshift or mass-ratio domain",
+      "mass_count": 1,
+      "z_acc": 4.0,
+      "z_final": 2.0
+    }
+  ]
+}

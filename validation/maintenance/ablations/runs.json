@@ -1,0 +1,62 @@
+{
+  "variant": "w",
+  "source": "hash-verified independent patches to the same frozen main",
+  "runs": [
+    {
+      "config": "B-01-flat-background.json",
+      "exit_code": 0
+    },
+    {
+      "config": "B-02-normalized-growth.json",
+      "exit_code": 0
+    },
+    {
+      "config": "B-03-variance-growth-square.json",
+      "exit_code": 0
+    },
+    {
+      "config": "B-04-physical-variance-mass.json",
+      "exit_code": 0
+    },
+    {
+      "config": "B-05-physical-concentration-mass.json",
+      "exit_code": 0
+    },
+    {
+      "config": "B-06-redshift-accretion-grid.json",
+      "exit_code": 0
+    },
+    {
+      "config": "B-six.json",
+      "exit_code": 0
+    },
+    {
+      "config": "B-integral.json",
+      "exit_code": 0
+    },
+    {
+      "config": "B-derivative.json",
+      "exit_code": 0
+    },
+    {
+      "config": "B-continuous.json",
+      "exit_code": 0
+    },
+    {
+      "config": "B-inverse.json",
+      "exit_code": 0
+    },
+    {
+      "config": "B-quadrature.json",
+      "exit_code": 0
+    },
+    {
+      "config": "B-all-q5.json",
+      "exit_code": 0
+    },
+    {
+      "config": "B-all-q10.json",
+      "exit_code": 0
+    }
+  ]
+}

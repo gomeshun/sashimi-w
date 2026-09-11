@@ -1,0 +1,2 @@
+{"role": "B", "repository": "gomeshun/sashimi-w", "output": "/tmp/sashimi-minor-updates-20260911/sashimi-w/validation/maintenance/ablations/B-03-variance-growth-square-output.npz", "seconds": 6.2072888819966465}
+Matplotlib created a temporary cache directory at /tmp/matplotlib-g3ffhjwq because the default path (/home/gomesu/.config/matplotlib) is not a writable directory; it is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory, in particular to speed up the import of Matplotlib and to better support multiprocessing.

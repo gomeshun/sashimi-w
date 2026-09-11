@@ -1,0 +1,134 @@
+{
+  "variant": "w",
+  "gate_specification": "standalone-picard-gates-2026-09-11-v1",
+  "passed": true,
+  "checks": [
+    {
+      "name": "independent mass accuracy",
+      "passed": true,
+      "details": 0.0002668832334972171
+    },
+    {
+      "name": "independent reference convergence",
+      "passed": true,
+      "details": 3.1891893570445973e-09
+    },
+    {
+      "name": "frozen supported domain completed",
+      "passed": true,
+      "details": {
+        "cases": 31,
+        "domain_failures": [
+          {
+            "host": 100000000.0,
+            "error": "ValueError('Concentration requires finite M>0 and z>-1.')",
+            "traceback": "Traceback (most recent call last):\n  File \"/tmp/sashimi-minor-updates-20260911/sashimi-w/validation/maintenance/tools/validate_candidate.py\", line 50, in main\n    actual=helper.endpoint_mass(solver,mass,acc,target)[None,:]\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/sashimi-minor-updates-20260911/sashimi-w/picard_tidal_stripping.py\", line 360, in endpoint_mass\n    selected_output[use] = _fallback(solver,m[use],start,target,'outside validated redshift or mass-ratio domain')\n                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/sashimi-minor-updates-20260911/sashimi-w/picard_tidal_stripping.py\", line 206, in _fallback\n    return direct_log_mass(solver, ma, za, z)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/sashimi-minor-updates-20260911/sashimi-w/picard_tidal_stripping.py\", line 190, in direct_log_mass\n    result = solve_ivp(rhs, (za,float(times[-1])), np.log(mass.ravel()),\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/sashimi-minor-updates-20260911/venv/lib/python3.11/site-packages/scipy/integrate/_ivp/ivp.py\", line 621, in solve_ivp\n    solver = method(fun, t0, y0, tf, vectorized=vectorized, **options)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/sashimi-minor-updates-20260911/venv/lib/python3.11/site-packages/scipy/integrate/_ivp/rk.py\", line 505, in __init__\n    super().__init__(fun, t0, y0, t_bound, max_step, rtol, atol,\n  File \"/tmp/sashimi-minor-updates-20260911/venv/lib/python3.11/site-packages/scipy/integrate/_ivp/rk.py\", line 96, in __init__\n    self.h_abs = select_initial_step(\n                 ^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/sashimi-minor-updates-20260911/venv/lib/python3.11/site-packages/scipy/integrate/_ivp/common.py\", line 115, in select_initial_step\n    f1 = fun(t0 + h0 * direction, y1)\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/sashimi-minor-updates-20260911/venv/lib/python3.11/site-packages/scipy/integrate/_ivp/base.py\", line 154, in fun\n    return self.fun_single(t, y)\n           ^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/sashimi-minor-updates-20260911/venv/lib/python3.11/site-packages/scipy/integrate/_ivp/base.py\", line 23, in fun_wrapped\n    return np.asarray(fun(t, y), dtype=dtype)\n                      ^^^^^^^^^\n  File \"/tmp/sashimi-minor-updates-20260911/sashimi-w/picard_tidal_stripping.py\", line 187, in rhs\n    return solver.Phi(redshift)*np.exp(solver.zetaMz(redshift)*(log_mass-np.log(solver.Mzvir(redshift))))\n           ^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/sashimi-minor-updates-20260911/sashimi-w/sashimi_w.py\", line 777, in Phi\n    return self.AMz(z)/self.tdynz(z)/self.model.Hz(z)/(1+z)\n           ^^^^^^^^^^^\n  File \"/tmp/sashimi-minor-updates-20260911/sashimi-w/sashimi_w.py\", line 765, in AMz\n    loghost = np.log10(self.Mzvir(z))\n                       ^^^^^^^^^^^^^\n  File \"/tmp/sashimi-minor-updates-20260911/sashimi-w/sashimi_w.py\", line 746, in Mzvir\n    return cached_host_mass(self, z)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/sashimi-minor-updates-20260911/sashimi-w/picard_tidal_stripping.py\", line 105, in cached_host_mass\n    value = solver._Mzvir_uncached(z)\n            ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/sashimi-minor-updates-20260911/sashimi-w/sashimi_w.py\", line 762, in _Mzvir_uncached\n    return self.model.Mvir_from_M200(Mz200*Msolar,z)/Msolar\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/sashimi-minor-updates-20260911/sashimi-w/sashimi_w.py\", line 275, in Mvir_from_M200\n    c200 = self.conc200(M200,z)\n           ^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/sashimi-minor-updates-20260911/sashimi-w/sashimi_w.py\", line 198, in conc200\n    raise ValueError(\"Concentration requires finite M>0 and z>-1.\")\nValueError: Concentration requires finite M>0 and z>-1.\n"
+          }
+        ]
+      }
+    },
+    {
+      "name": "whole catalog median speedup",
+      "passed": true,
+      "details": 2.9206991482159297
+    },
+    {
+      "name": "three process repetitions",
+      "passed": true,
+      "details": 3
+    },
+    {
+      "name": "ordinary catalog has no fallback",
+      "passed": true,
+      "details": [
+        [],
+        [],
+        []
+      ]
+    },
+    {
+      "name": "picard-scenario-2.0-result.json completed",
+      "passed": true,
+      "details": []
+    },
+    {
+      "name": "picard-scenario-2.0-result.json mass function",
+      "passed": true,
+      "details": 0.0
+    },
+    {
+      "name": "picard-scenario-0.5-result.json completed",
+      "passed": true,
+      "details": []
+    },
+    {
+      "name": "picard-scenario-0.5-result.json mass function",
+      "passed": true,
+      "details": 0.0
+    },
+    {
+      "name": "picard-scenario-5.0-result.json completed",
+      "passed": true,
+      "details": []
+    },
+    {
+      "name": "picard-scenario-5.0-result.json mass function",
+      "passed": true,
+      "details": 0.0
+    },
+    {
+      "name": "picard-grid-refinement-result.json completed",
+      "passed": true,
+      "details": []
+    },
+    {
+      "name": "picard-grid-refinement-result.json mass function",
+      "passed": true,
+      "details": 0.0007263703520603514
+    },
+    {
+      "name": "picard-accepted-catalog.json completed",
+      "passed": true,
+      "details": []
+    },
+    {
+      "name": "picard-accepted-catalog.json mass function",
+      "passed": true,
+      "details": 3.472681339372553e-18
+    },
+    {
+      "name": "catalog mass error",
+      "passed": true,
+      "details": 0.00044431252991450343
+    },
+    {
+      "name": "smooth catalog observables",
+      "passed": true,
+      "details": 1.4960457900124982e-05
+    },
+    {
+      "name": "survival masks",
+      "passed": true,
+      "details": 0.0
+    },
+    {
+      "name": "explicit survival and collapse boundary audit",
+      "passed": true,
+      "details": {
+        "catalogs": 6,
+        "changed_nodes": 0
+      }
+    },
+    {
+      "name": "standalone numerical helper present",
+      "passed": true,
+      "details": "005643cd500fbdab74896933bdb7779bca8ca73feca0c27b7bd3956e09a745e1"
+    }
+  ],
+  "source_sha256": {
+    "picard_tidal_stripping.py": "005643cd500fbdab74896933bdb7779bca8ca73feca0c27b7bd3956e09a745e1",
+    "sashimi_w.py": "91433e3fbfe221df3e4e48a1b225706398cb7dfe6b35bbba94a5e8f53b157d0a",
+    "sashimi_w_numerics.py": "b87fc361fd1a74890c987a960787702e79844e68db810e7c78fb28dfebafe578"
+  },
+  "limits": "Numerical agreement and runtime evidence only. No simulation calibration, downstream inference, main merge, or publication."
+}

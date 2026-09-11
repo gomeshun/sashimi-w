@@ -1,0 +1,97 @@
+{
+  "role": "B",
+  "constructor": {
+    "mass_wdm": 2.0
+  },
+  "method": "rs_rhos_calc",
+  "repository": "gomeshun/sashimi-w",
+  "source_revision": "99dfc3632eec0126080c0273ddf78f84fe09216c",
+  "module": "sashimi_w",
+  "class": "subhalos",
+  "parameters": {
+    "M0": 10000000000.0,
+    "N_herm": 2,
+    "N_hermNa": 3,
+    "N_ma": 4,
+    "dz": 0.5,
+    "logmamax": 8.0,
+    "logmamin": 6.0,
+    "profile_change": true,
+    "redshift": 0.0,
+    "sigmafac": 0.0,
+    "sigmalogc": 0.128,
+    "zmax": 1.0
+  },
+  "input_files": [
+    {
+      "path": "WMAP7_camb_matterpower_z0_extrapolated.dat",
+      "sha256": "417a0e8e9feafae8c6afb4b89e63aef80718c9641ae95994d25a6cd97438f8c9"
+    }
+  ],
+  "probes": [
+    {
+      "name": "growth",
+      "method": "growthD",
+      "args": [
+        [
+          0.0,
+          0.5,
+          1.0,
+          2.0,
+          5.0
+        ]
+      ]
+    },
+    {
+      "name": "variance",
+      "method": "sigmaMz",
+      "args": [
+        [
+          10000000.0,
+          100000000.0,
+          1000000000.0
+        ],
+        1.0
+      ]
+    },
+    {
+      "name": "variance_derivative",
+      "method": "dsdm",
+      "args": [
+        [
+          10000000.0,
+          100000000.0,
+          1000000000.0
+        ],
+        1.0
+      ]
+    }
+  ],
+  "environment": {
+    "python": "3.10.20",
+    "dependencies": {
+      "colossus": "1.4.0",
+      "contourpy": "1.2.1",
+      "cycler": "0.12.1",
+      "fonttools": "4.64.0",
+      "kiwisolver": "1.5.1",
+      "matplotlib": "3.7.5",
+      "numpy": "1.22.4",
+      "packaging": "26.3",
+      "pillow": "12.3.0",
+      "pyparsing": "3.3.2",
+      "python-dateutil": "2.9.0.post0",
+      "scipy": "1.10.1",
+      "six": "1.17.0",
+      "tqdm": "4.70.0"
+    }
+  },
+  "patches": [
+    {
+      "id": "06-redshift-accretion-grid",
+      "path": "patches/06-redshift-accretion-grid.patch",
+      "sha256": "4844fccff402d00b22b5ff0773139ae85a2080a0d952c21a3f8e702dabf1c3cd",
+      "reason": "Use each redshift virial-mass row both in the accretion rate and its mass integral; do not reuse the final row."
+    }
+  ]
+}
