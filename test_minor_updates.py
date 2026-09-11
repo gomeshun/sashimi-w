@@ -52,6 +52,9 @@ def test_variance_derivative_and_growth_square(model):
     assert np.all(np.abs(model.dsdm(mass,0.)-fd) <= 2e-5*np.abs(fd)+roundoff)
     np.testing.assert_allclose(model.dsdm(mass,2.),model.dsdm(mass,0.)*model.growthD(2.)**2,rtol=2e-14)
     assert np.all(model.dsdm(mass,0.) < 0)
+    np.testing.assert_array_equal(
+        model.dlnSigmadlnM_interp(M=np.log(mass*w.h)),
+        model.dlnSigmadlnM_interp(np.log(mass*w.h)))
 
 
 def test_top_hat_and_sharp_k_both_use_power_q10(model):

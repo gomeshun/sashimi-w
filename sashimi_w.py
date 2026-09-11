@@ -135,8 +135,9 @@ class subhalos:
         return np.sqrt(self.power_ratio(k))
 
 
-    def dlnSigmadlnM_interp(self, log_mass_in_msun_over_h):
-        mass = np.exp(np.asarray(log_mass_in_msun_over_h))/h
+    def dlnSigmadlnM_interp(self, M):
+        """Retain M as the log-mass coordinate in numerical Msun/h units."""
+        mass = np.exp(np.asarray(M))/h
         return self.dsdm(mass, 0.)*mass/(2*self.sigmaMz(mass, 0.)**2)
     def TopHat(self,k, r):
         return 3.0/(k*r)**2 * (np.sin(k*r)/(k*r) - np.cos(k*r))  
