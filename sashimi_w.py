@@ -12,7 +12,6 @@ from scipy.special import cbrt, gammainc, erf, erfc, hyp2f1
 from scipy.interpolate import interp1d, UnivariateSpline, splrep, splev
 from numpy.polynomial.hermite import hermgauss
 import warnings
-warnings.filterwarnings("ignore", category = RuntimeWarning, append = 1)
 
 
 
@@ -411,8 +410,13 @@ class subhalos:
         z_eq = 3600*(OmegaM*pow(h,2)/0.15)-1
         Mj = 3.06*10**8* pow((1+z_eq)/3000,1.5) * pow((OmegaM*pow(h,2)/0.15),0.5)* pow(gx/1.5,-1) * pow(self.mass_wdm,-4) 
         x = np.log(M/Mj)
-        hh = 1./(1+np.exp((x+2.4)/0.1))        
-        return 1.686*pow(self.growthD(z),-1) * (hh*(0.04/np.exp(2.3*x))+(1-hh)*np.exp(0.31687/np.exp(0.809*x)))
+        hh = special.expit(-(x+2.4)/0.1)
+        # The discarded (1-hh)=0 branch overflows below the WDM cutoff.
+        x, hh = np.broadcast_arrays(x, hh)
+        correction = hh*(0.04/np.exp(2.3*x))
+        active = hh != 1.
+        correction[active] += (1-hh[active])*np.exp(0.31687/np.exp(0.809*x[active]))
+        return 1.686/self.growthD(z)*correction
 
     def s_Y11(self, M):
         return pow(self.sigmaMz(M,0),2)
@@ -424,14 +428,14 @@ class subhalos:
 
     def Na_calc(self, ma, zacc, Mhost, z0=0, N_herm=200, Nrand=1000, sigmafac=0):
         """ Returns Na, Eq. (3) of Yang et al. (2011) """ 
-        zacc_2d = zacc.reshape(len(zacc),1)
+        zacc_2d = np.asarray(zacc).reshape(-1,1)
         M200_0 = self.Mzzi(Mhost,zacc_2d,z0)
         logM200_0 = np.log10(M200_0)
         if N_herm==1:
             sigmalogM200_0 = 0.12+0.15*np.log10(Mhost/M200_0)
-            sigmalogM200_1 = sigmalogM200_0[zacc_2d>1.][0] \
-                /np.log10(M200_0[zacc_2d>1.][0]/Mhost) \
-                *np.log10(M200_0/Mhost)
+            Mz1 = self.Mzzi(Mhost, 1., z0)
+            sigma1 = 0.12-0.15*np.log10(Mz1/Mhost)
+            sigmalogM200_1 = sigma1/np.log10(Mz1/Mhost)*np.log10(M200_0/Mhost)
             sigmalogM200 = np.where(zacc_2d>1.,sigmalogM200_0,sigmalogM200_1)
             logM200=logM200_0+sigmafac*sigmalogM200
             M200=10**logM200
@@ -445,6 +449,7 @@ class subhalos:
             sigmalogM200 = 0.12-0.15*np.log10(M200_0/Mhost)
             logM200 = np.sqrt(2)*sigmalogM200*xxi+logM200_0
             M200 = 10**logM200
+        M200 = np.asarray(M200).reshape(N_herm, len(zacc_2d), 1)
         mmax=np.minimum(M200,Mhost/2.0)
         Mmax=np.minimum(M200_0+mmax,Mhost)
         zlist = zacc_2d*np.linspace(1,0,Nrand)
@@ -453,17 +458,38 @@ class subhalos:
         z_Max_3d = z_Max.reshape(N_herm,len(zlist),1)
         delcM = self.delc_Y11(Mmax,z_Max_3d)
         delca = self.delc_Y11(ma,zacc_2d)
-        sM = self.s_Y11(Mmax)
-        sa = self.s_Y11(ma)
-        xmax = pow((delca-delcM),2)*pow((2*(self.s_Y11(mmax)-sM)),-1)
-        normB = special.gamma(0.5)*special.gammainc(0.5,xmax)/np.sqrt(np.pi)
-        """ those reside in the exponential part of eq.14 """ 
-        Phi = self.Ffunc_Yang(delcM,delca,sM,sa)/normB*np.heaviside(mmax-ma,0)
-        if N_herm==1:
-            F2t = np.nan_to_num(Phi)
-            F2=F2t.reshape((len(zacc_2d),len(ma)))
-        else:
-            F2 = np.sum(np.nan_to_num(Phi)*wwi/np.sqrt(np.pi),axis=0)
+        d1,d2,small,big,minimum,allowed = np.broadcast_arrays(
+            delcM,delca,ma,Mmax,mmax,mmax>ma)
+        Phi = np.zeros(allowed.shape)
+        # Integrate variance gaps directly; subtracting two saturated WDM
+        # variances loses the positive support in high-order host tails.
+        ds = self._variance.gap(small[allowed],big[allowed])
+        dsmin = self._variance.gap(minimum[allowed],big[allowed])
+        gap = d2[allowed]-d1[allowed]
+        if np.any(gap < 0) or np.any(ds <= 0) or np.any(dsmin <= 0):
+            raise ValueError("WDM EPS requires nonnegative barrier and positive variance gaps.")
+        # Both erf factors vanish at zero barrier gap, leaving this limit.
+        ratio = gap/np.sqrt(2*dsmin)
+        values = np.empty_like(gap)
+        small_gap = ratio < 1e-4
+        t = ratio[small_gap]**2
+        values[small_gap] = (np.sqrt(dsmin[small_gap])/(2*ds[small_gap]**1.5)
+                            * np.exp(-gap[small_gap]**2/(2*ds[small_gap]))
+                            /(1-t/3+t*t/10-t*t*t/42))
+        regular = ~small_gap
+        exponent = gap[regular]/np.sqrt(ds[regular])
+        # Evaluate the complete kernel in log space. Only omit exponents
+        # whose square cannot affect any representable floating-point rate.
+        active = exponent < 1e150
+        ordinary = np.zeros(exponent.shape)
+        ordinary[active] = np.exp(np.log(gap[regular][active])
+            -1.5*np.log(ds[regular][active])-.5*np.log(2*np.pi)
+            -.5*exponent[active]**2-np.log(special.erf(ratio[regular][active])))
+        values[regular] = ordinary
+        Phi[allowed] = values
+        if not np.all(np.isfinite(Phi)):
+            raise ValueError("Non-finite WDM EPS kernel in the active domain.")
+        F2 = Phi[0] if N_herm==1 else np.sum(Phi*wwi/np.sqrt(np.pi),axis=0)
         Na = F2*self.dsdm(ma,0)*self.dMdz(Mhost,zacc_2d,z0,sigmafac)*(1+zacc_2d)
         return Na
 
