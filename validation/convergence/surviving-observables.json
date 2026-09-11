@@ -1,0 +1,46 @@
+{
+  "source_revision": "d4edc8feeb075d6b69e585d4f58c7e347af648a6",
+  "itamae_source_revision": "c2d7b9afb9773bc8cb5b2ee142d70d95cc3afe3b",
+  "parameters": {
+    "M0": 10000000000.0,
+    "redshift": 0.0,
+    "dz": 0.5,
+    "zmax": 1.0,
+    "N_ma": 8,
+    "N_herm": 2,
+    "logmamin": 5.0,
+    "logmamax": 8.0,
+    "N_hermNa": 3
+  },
+  "checks": [
+    {
+      "convention": "published-q5",
+      "profile_change": true,
+      "count": 0.0030565193698000002,
+      "velocity_count": 0.0030565193698000002,
+      "rows": 32
+    },
+    {
+      "convention": "published-q5",
+      "profile_change": false,
+      "count": 0.0018891115873415393,
+      "velocity_count": 0.0018891115873415393,
+      "rows": 32
+    },
+    {
+      "convention": "standard-t2-q10",
+      "profile_change": true,
+      "count": 1.5083701334616217e-06,
+      "velocity_count": 1.5083701334616217e-06,
+      "rows": 32
+    },
+    {
+      "convention": "standard-t2-q10",
+      "profile_change": false,
+      "count": 1.5081908708352858e-06,
+      "velocity_count": 1.5081908708352858e-06,
+      "rows": 32
+    }
+  ],
+  "script_sha256": "8c6f472c108849a8e41059b604210d367943db2c5743f6eaba8c516d9a24affb"
+}

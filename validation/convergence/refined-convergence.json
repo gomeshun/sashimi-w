@@ -1,0 +1,146 @@
+{
+  "sources": {
+    "product": "dcc4379186174a016924d88b362fbe40d1ac8f88",
+    "core": "d752306e62bf295b7a96100b9cc022f8f9c61071"
+  },
+  "one_factor_at_a_time": true,
+  "status": "redshift refinement still required",
+  "metrics": {
+    "q5": {
+      "base": {
+        "count_surviving": 12.099723335301316,
+        "bound_mass_fraction": 0.005005381028818666,
+        "count_above_1e7": 10.153046661111263,
+        "removed_weight": 0.0
+      },
+      "dz010": {
+        "count_surviving": 15.187644488920753,
+        "bound_mass_fraction": 0.010827764821427102,
+        "count_above_1e7": 13.00644797103074,
+        "removed_weight": 0.0
+      },
+      "dz005": {
+        "count_surviving": 15.616004647417098,
+        "bound_mass_fraction": 0.011862027421647185,
+        "count_above_1e7": 13.404025271798881,
+        "removed_weight": 0.0
+      },
+      "mass64": {
+        "count_surviving": 12.060664067912466,
+        "bound_mass_fraction": 0.004205107830863961,
+        "count_above_1e7": 9.9567315317559,
+        "removed_weight": 0.0
+      },
+      "mass128": {
+        "count_surviving": 12.071078869233244,
+        "bound_mass_fraction": 0.004087400870876828,
+        "count_above_1e7": 9.970458134486105,
+        "removed_weight": 0.0
+      },
+      "mass256": {
+        "count_surviving": 12.071800225825278,
+        "bound_mass_fraction": 0.004030316629141031,
+        "count_above_1e7": 9.942774800984573,
+        "removed_weight": 0.0
+      },
+      "mass500": {
+        "count_surviving": 12.070222677392158,
+        "bound_mass_fraction": 0.004001129130787749,
+        "count_above_1e7": 9.935775751105467,
+        "removed_weight": 0.0
+      },
+      "host16": {
+        "count_surviving": 12.062667483790518,
+        "bound_mass_fraction": 0.0050287037017552865,
+        "count_above_1e7": 10.109648963433612,
+        "removed_weight": 0.0
+      },
+      "host32": {
+        "count_surviving": 12.062250076683142,
+        "bound_mass_fraction": 0.005030478426753279,
+        "count_above_1e7": 10.111498820799474,
+        "removed_weight": 0.0
+      },
+      "host64": {
+        "count_surviving": 12.067224987439234,
+        "bound_mass_fraction": 0.005028487084484307,
+        "count_above_1e7": 10.115111141027757,
+        "removed_weight": 0.0
+      },
+      "host200": {
+        "count_surviving": 12.072196952609199,
+        "bound_mass_fraction": 0.005026095223988651,
+        "count_above_1e7": 10.128972312079618,
+        "removed_weight": 0.0
+      }
+    },
+    "q10": {
+      "base": {
+        "count_surviving": 2.994779711141783,
+        "bound_mass_fraction": 0.002072145007605432,
+        "count_above_1e7": 2.7675332194346214,
+        "removed_weight": 0.0
+      },
+      "dz010": {
+        "count_surviving": 3.7907166730294883,
+        "bound_mass_fraction": 0.004569699984323441,
+        "count_above_1e7": 3.559886760302502,
+        "removed_weight": 0.0
+      },
+      "dz005": {
+        "count_surviving": 3.898289451716156,
+        "bound_mass_fraction": 0.005016058152534867,
+        "count_above_1e7": 3.670889905542498,
+        "removed_weight": 0.0
+      },
+      "mass64": {
+        "count_surviving": 3.022729555097692,
+        "bound_mass_fraction": 0.0017395106226605161,
+        "count_above_1e7": 2.7941329515174855,
+        "removed_weight": 0.0
+      },
+      "mass128": {
+        "count_surviving": 3.0261058142587403,
+        "bound_mass_fraction": 0.0016853663770462345,
+        "count_above_1e7": 2.794306948467641,
+        "removed_weight": 0.0
+      },
+      "mass256": {
+        "count_surviving": 3.0272863372278302,
+        "bound_mass_fraction": 0.0016567515013012628,
+        "count_above_1e7": 2.785846442952497,
+        "removed_weight": 0.0
+      },
+      "mass500": {
+        "count_surviving": 3.0252569536567995,
+        "bound_mass_fraction": 0.0016422918838883192,
+        "count_above_1e7": 2.7807194552616656,
+        "removed_weight": 0.0
+      },
+      "host16": {
+        "count_surviving": 2.970935401116953,
+        "bound_mass_fraction": 0.002068831244841363,
+        "count_above_1e7": 2.7768146606267115,
+        "removed_weight": 0.0
+      },
+      "host32": {
+        "count_surviving": 2.9998236623977377,
+        "bound_mass_fraction": 0.002076725914180363,
+        "count_above_1e7": 2.7822757138009893,
+        "removed_weight": 0.0
+      },
+      "host64": {
+        "count_surviving": 2.992616905013462,
+        "bound_mass_fraction": 0.0020758096156020273,
+        "count_above_1e7": 2.7883324614063643,
+        "removed_weight": 0.0
+      },
+      "host200": {
+        "count_surviving": 2.9867822529044217,
+        "bound_mass_fraction": 0.002073871112072099,
+        "count_above_1e7": 2.781595512949091,
+        "removed_weight": 0.0
+      }
+    }
+  }
+}

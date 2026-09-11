@@ -1,0 +1,70 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "sashimi-w"
+version = "0.2.0rc1"
+description = "Semi-Analytical SubHalo Inference ModelIng for warm dark matter"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [
+  {name = "Ariane Dekker"},
+  {name = "Shin'ichiro Ando"},
+  {name = "Camila A. Correa"},
+  {name = "Kenny C. Y. Ng"},
+]
+dependencies = [
+  "sashimi-itamae>=0.2.0rc1,<0.3",
+  "numpy>=1.26",
+  "scipy>=1.11",
+]
+
+[project.urls]
+Repository = "https://github.com/gomeshun/sashimi-w"
+Issues = "https://github.com/gomeshun/sashimi-w/issues"
+
+[project.optional-dependencies]
+astropy = ["astropy>=6"]
+demo = [
+  "ipykernel>=6",
+  "matplotlib>=3.8",
+  "nbconvert>=7",
+]
+test = [
+  "hatchling>=1.27",
+  "astropy>=6",
+  "pytest>=8",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/sashimi_w"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"src/sashimi_w_itamae_variance.py" = "sashimi_w_itamae_variance.py"
+"src/sashimi_w_itamae.py" = "sashimi_w_itamae.py"
+"src/sashimi_w_itamae_components.py" = "sashimi_w_itamae_components.py"
+"src/sashimi_w_itamae_migration.py" = "sashimi_w_itamae_migration.py"
+"src/sashimi_w_physics.py" = "sashimi_w_physics.py"
+
+[tool.hatch.build.hooks.custom]
+path = "hatch_build.py"
+
+[tool.hatch.build.targets.sdist]
+include = ["/src", "/notebooks", "/tests", "/scripts", "/docs", "/validation", "/pyproject.toml", "/hatch_build.py", "/README.md", "/CHANGELOG.md", "/CITATION.cff", "/LICENSE"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers --strict-config"
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F"]
+ignore = ["E501"]
+
+[tool.uv.sources]
+sashimi-itamae = {git = "https://github.com/gomeshun/itamae.git", rev = "23d01e8758a88b061b87de9e488c38ec89fd8e4f"}
