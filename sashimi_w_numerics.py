@@ -170,5 +170,37 @@ def invert_nfw_mass_function(y):
         root = brentq(residual, lower, upper, xtol=5.0e-14, rtol=4.0 * np.finfo(float).eps)
         return float(np.exp(root))
 
-    out = np.vectorize(one, otypes=[float])(y)
+    # A safeguarded vector Newton solve avoids a Python/Brent call for every
+    # catalog node. The scalar log-radius solver remains the fallback for
+    # extreme floating-point values or any unconverged element.
+    out = np.zeros_like(y)
+    active = (y >= 1e-200) & (y <= 600.)
+    values = y[active]
+    if values.size:
+        lower = .5*(np.log(2.)+np.log(values))-np.log(2.)
+        upper = values+1.
+        radius_guess = np.sqrt(2*values)+4*values/3
+        log_radius = np.where(values<.5,np.log(radius_guess),upper)
+        converged = np.zeros(values.shape,dtype=bool)
+        for _ in range(30):
+            radius = np.exp(log_radius)
+            residual = nfw_mass_function(radius)-values
+            derivative = (radius/(1+radius))**2
+            correction = residual/derivative
+            converged |= np.abs(correction) <= 2e-13
+            if np.all(converged):
+                break
+            lower = np.where(residual<0,log_radius,lower)
+            upper = np.where(residual>0,log_radius,upper)
+            proposed = log_radius-correction
+            inside = (proposed>lower) & (proposed<upper)
+            proposed = np.where(inside,proposed,.5*(lower+upper))
+            log_radius = np.where(converged,log_radius,proposed)
+        solved = np.exp(log_radius)
+        if np.any(~converged):
+            solved[~converged] = [one(float(value)) for value in values[~converged]]
+        out[active] = solved
+    extreme = (y>0) & ~active
+    if np.any(extreme):
+        out[extreme] = [one(float(value)) for value in y[extreme]]
     return float(out) if out.ndim == 0 else out

@@ -1,5 +1,6 @@
 import numpy as np
 from pathlib import Path
+from picard_tidal_stripping import endpoint_mass, direct_log_mass, cached_host_mass
 from sashimi_w_numerics import SharpKVariance, invert_nfw_mass_function
 import matplotlib.pyplot as plt
 from scipy import integrate
@@ -187,93 +188,51 @@ class subhalos:
 
 
     def conc200(self, M, z):
-        M = np.asarray(M) / Msolar * h
-        redshiftvect = np.linspace(0, 7, 8)
-        R_th = cbrt(self.filter_Mass / (4 / 3 * np.pi * self.Rhomean_z))
-        Sigma_Sq_th = np.zeros(len(self.filter_Mass))
-        Sigma_Sq_th = self.integratePk_th(k_min, k_max, R_th)
-        Sigma_th = np.sqrt(Sigma_Sq_th)
-        sig_interp_th = interp1d(self.filter_Mass, Sigma_th)
-        MassIn8Mpc = 4 / 3 * np.pi * 8**3 * self.Rhomean_z
-        sig_8_th = sig_interp_th(MassIn8Mpc)
-        normalise_th = sig_8_th / sigma_8
-        Sigma_th /= normalise_th
-        Sigma_Sq_th = Sigma_th**2
-        " free model parameters, Ludlow et al. (2016) "
-        A = 650.0 / 200
-        f = 0.02
-        delta_sc = 1.686
-        delta_sc_0_vect = delta_sc / self.linear_growth_factor(OmegaM, 1.0 - OmegaM, redshiftvect)
-        OmegaL = 1.0 - OmegaM
-        sig2_interp_th = splrep(self.logM0 - 10.0, Sigma_Sq_th, k=1)
-        if np.shape(M) == ():
-            index = np.abs(10**self.logM0 - M).argmin()
-            c_array = 10 ** (np.arange(100) * 4.0 / 99.0)
-            M2 = (np.log(2.0) - 0.5) / (np.log(1.0 + c_array) - c_array / (1.0 + c_array))
-            rho_2 = 200.0 * c_array**3 * M2
-            rhoc = rho_2 / (200.0 * A)
-            c_array, rhoc, z2 = self._real_formation_trials(c_array, rhoc, z)
-            delta_sc_z2 = delta_sc / self.linear_growth_factor(OmegaM, OmegaL, z2)
-            delta_sc_0_vect = delta_sc / self.linear_growth_factor(OmegaM, 1.0 - OmegaM, z)
-            sig2fM_th = splev(self.logM0[index] - 10.0 + np.log10(f), sig2_interp_th)
-            sig2M_th = Sigma_Sq_th[index]
-            arg = A * rhoc / c_array**3 - (
-                1.0 - erf((delta_sc_z2 - delta_sc_0_vect) / np.sqrt(2.0 * (sig2fM_th - sig2M_th)))
-            )
-            mask = np.isinf(arg) | np.isnan(arg)
-            arg = arg[~mask]
-            c_array = c_array[~mask]
-            c_nfw = np.interp(0, arg, c_array)
-        elif M.ndim == 1:
-            M_reshaped = M.flatten()
-            c_nfw = np.zeros(len(M_reshaped))
-            for i in range(len(M_reshaped)):
-                index = np.abs(10**self.logM0 - M_reshaped[i]).argmin()
-                c_array = 10 ** (np.arange(100) * 4.0 / 99.0)
-                M2 = (np.log(2.0) - 0.5) / (np.log(1.0 + c_array) - c_array / (1.0 + c_array))
-                rho_2 = 200.0 * c_array**3 * M2
-                rhoc = rho_2 / (200.0 * A)
-                c_array, rhoc, z2 = self._real_formation_trials(c_array, rhoc, z)
-                delta_sc_z2 = delta_sc / self.linear_growth_factor(OmegaM, OmegaL, z2)
-                delta_sc_0_vect = delta_sc / self.linear_growth_factor(OmegaM, 1.0 - OmegaM, z)
-                sig2fM_th = splev(self.logM0[index] - 10.0 + np.log10(f), sig2_interp_th)
-                sig2M_th = Sigma_Sq_th[index]
-                arg = A * rhoc / c_array**3 - (
-                    1.0
-                    - erf((delta_sc_z2 - delta_sc_0_vect) / np.sqrt(2.0 * (sig2fM_th - sig2M_th)))
-                )
-                mask = np.isinf(arg) | np.isnan(arg)
-                arg = arg[~mask]
-                c_array = c_array[~mask]
-                c_nfw[i] = np.interp(0, arg, c_array)
-            c_nfw = np.reshape(c_nfw, np.shape(M))
-        elif M.ndim == 2:
-            M_reshaped = M.flatten()
-            z_reshaped = z.flatten()
-            c_nfw = np.zeros(len(M_reshaped))
-            for i in range(len(M_reshaped)):
-                index = np.abs(10**self.logM0 - M_reshaped[i]).argmin()
-                c_array = 10 ** (np.arange(100) * 4.0 / 99.0)
-                M2 = (np.log(2.0) - 0.5) / (np.log(1.0 + c_array) - c_array / (1.0 + c_array))
-                rho_2 = 200.0 * c_array**3 * M2
-                rhoc = rho_2 / (200.0 * A)
-                c_array, rhoc, z2 = self._real_formation_trials(c_array, rhoc, z_reshaped[i])
-                delta_sc_z2 = delta_sc / self.linear_growth_factor(OmegaM, OmegaL, z2)
-                delta_sc_0_vect = delta_sc / self.linear_growth_factor(
-                    OmegaM, 1.0 - OmegaM, z_reshaped[i]
-                )
-                sig2fM_th = splev(self.logM0[index] - 10.0 + np.log10(f), sig2_interp_th)
-                sig2M_th = Sigma_Sq_th[index]
-                arg = A * rhoc / c_array**3 - (
-                    1.0
-                    - erf((delta_sc_z2 - delta_sc_0_vect) / np.sqrt(2.0 * (sig2fM_th - sig2M_th)))
-                )
-                mask = np.isinf(arg) | np.isnan(arg)
-                arg = arg[~mask]
-                c_array = c_array[~mask]
-                c_nfw[i] = np.interp(0, arg, c_array)
-            c_nfw = np.reshape(c_nfw, np.shape(M))
-        return c_nfw
+        """Ludlow concentration on the unchanged 100-mass top-hat table.
+
+        Cache only the spectrum integral. Evaluate all real formation trials
+        in arrays, retaining the original nearest-mass and c interpolation.
+        """
+        mass, redshift = np.broadcast_arrays(np.asarray(M)/Msolar*h,np.asarray(z))
+        if np.any(~np.isfinite(mass)) or np.any(mass<=0) or np.any(~np.isfinite(redshift)) or np.any(redshift<=-1):
+            raise ValueError("Concentration requires finite M>0 and z>-1.")
+        if mass.size==0:
+            return np.empty(mass.shape)
+        cache_key=(float(self.mass_wdm),OmegaM,OmegaL,h,sigma_8,self.filter_Mass.tobytes())
+        if getattr(self,'_concentration_key',None)!=cache_key:
+            radius=cbrt(self.filter_Mass/(4/3*np.pi*self.Rhomean_z))
+            sigma=np.sqrt(self.integratePk_th(k_min,k_max,radius))
+            normalization=interp1d(self.filter_Mass,sigma)(self.MassIn8Mpc)/sigma_8
+            variance=(sigma/normalization)**2
+            self._concentration_variance=variance
+            self._concentration_spline=splrep(self.logM0-10.,variance,k=1)
+            self._concentration_key=cache_key
+        variance=self._concentration_variance
+        spline=self._concentration_spline
+        index=np.argmin(np.abs(self.filter_Mass[:,None]-mass.ravel()[None,:]),axis=0)
+        gap=splev(self.logM0[index]-10.+np.log10(.02),spline)-variance[index]
+        c=10**(np.arange(100)*4./99.)
+        fraction=(np.log(2.)-.5)/(np.log(1.+c)-c/(1.+c))
+        rho_2=200.*c**3*fraction
+        ratio=rho_2/(200.*(650./200.))
+        radicand=(ratio[None,:]*(OmegaM*(1+redshift.ravel()[:,None])**3+OmegaL)-OmegaL)/OmegaM
+        valid=radicand>0
+        delta_formation=np.zeros_like(radicand)
+        z2=radicand[valid]**.3333-1.
+        # Pointwise growth avoids the public two-element interval convention.
+        delta_formation[valid]=1.686/self.growthD(z2)
+        delta_now=1.686/self.growthD(redshift.ravel())
+        if np.any(gap<=0):
+            raise ValueError("Native top-hat concentration has no positive variance gap at this mass.")
+        arg=(650./200.)*ratio[None,:]/c[None,:]**3-(1.-erf((delta_formation-delta_now[:,None])/np.sqrt(2*gap[:,None])))
+        valid &= np.isfinite(arg)
+        result=np.empty(mass.size)
+        for i in range(mass.size):
+            if not np.any(valid[i]):
+                raise ValueError("No finite real concentration-formation trials remain.")
+            result[i]=np.interp(0.,arg[i,valid[i]],c[valid[i]])
+        result=result.reshape(mass.shape)
+        return float(result) if result.ndim==0 else result
 
     @staticmethod
     def _real_formation_trials(concentration, density_ratio, redshift):
@@ -322,6 +281,21 @@ class subhalos:
         rvir = optimize.fsolve(lambda r: 3.*(rs/r)**3*self.fc(r/rs)*rhos-Dc*rhocrit0*gz,r200)
         Mvir = 4*np.pi*rs**3*rhos*self.fc(rvir/rs)
         return Mvir
+
+    def _Mvir_from_M200_grid(self, M200, z):
+        """Solve the same NFW density equation independently for each halo."""
+        mass, redshift=np.broadcast_arrays(np.asarray(M200),np.asarray(z))
+        concentration=self.conc200(mass,redshift)
+        overdensity=self.Delc(self.Omegaz(pOmega,redshift)-1.)
+        c200=np.broadcast_to(concentration,mass.shape).ravel()
+        target=(overdensity/200.*self.fc(concentration)/np.asarray(concentration)**3).ravel()
+        cvir=np.empty_like(c200)
+        for i,(c0,density) in enumerate(zip(c200,target)):
+            lower,upper=c0/10.,c0*10.
+            cvir[i]=optimize.brentq(lambda x:self.fc(x)/x**3-density,
+                                     lower,upper,xtol=1e-13,rtol=1e-13)
+        result=mass*self.fc(cvir.reshape(mass.shape))/self.fc(concentration)
+        return float(result) if result.ndim==0 else result
 
     def Mvir_from_M200_fit(self, M200, z):
         a1 = 0.5116
@@ -499,7 +473,7 @@ class subhalos:
 
     def rs_rhos_calc(self, M0, redshift=0.0, dz=0.1, zmax=7.0, N_ma=100, sigmalogc=0.128,
                      N_herm=5, logmamin=1, logmamax=None, sigmafac=0,
-                     N_hermNa=200, profile_change=True):
+                     N_hermNa=200, profile_change=True, method="odeint", **kwargs):
 
         zdist = np.arange(redshift+dz,zmax+dz,dz)
         if logmamax==None:
@@ -514,39 +488,8 @@ class subhalos:
         m0_matrix = np.zeros((len(zdist),N_herm,len(ma200)))
         Oz_0 = self.Omegaz(pOmega,redshift)
 
-        def Mzvir(z):
-            Mz200 = self.Mzzi(M0,z,0)
-            if N_hermNa==1:
-                logM200_0 = np.log10(Mz200)
-                sigmalogM200_0 = 0.12-0.15*np.log10(Mz200/M0)
-                Mz1 = self.Mzzi(M0,1.,0.)
-                sigma1 = 0.12-0.15*np.log10(Mz1/M0)
-                sigmalogM200_1 = sigma1/np.log10(Mz1/M0)*np.log10(Mz200/M0)
-                sigmalogM200 = np.where(z>1.,sigmalogM200_0,sigmalogM200_1)
-                logM200 = logM200_0+sigmafac*sigmalogM200
-                M200 = 10**logM200
-                if(sigmafac>0.):
-                    M200 = np.where(M200<M0,M200,M0)
-                Mz200solar = M200*Msolar
-                Mvirsolar = self.Mvir_from_M200(Mz200solar,z)
-            else:
-                Mz200solar = Mz200*Msolar
-                Mvirsolar = self.Mvir_from_M200(Mz200solar,z)
-            return Mvirsolar/Msolar
-
-        """ Fitting functions for A, zeta """
-        def AMz(z):
-            log10a=(-0.0019*np.log10(Mzvir(z))+0.045)*z+(0.0097*np.log10(Mzvir(z))-0.313)
-            return pow(10,log10a)
-        def zetaMz(z):
-            return (-5.55e-5*np.log10(Mzvir(z))+1.43e-03)*z+(3.34e-04*np.log10(Mzvir(z))-8.11e-03)        
-
-        def tdynz(z):
-            Oz_z = self.Omegaz(pOmega,z)
-            return 1.628*pow(h,-1)*pow(self.Delc(Oz_z-1)/178.0,-0.5)*pow(self.Hz(z)/H0,-1)*(86400*365*(1e+9))
-
-        def msolve(m, z):
-            return AMz(z)*(m/tdynz(z))*pow(m/Mzvir(z),zetaMz(z))*pow(self.Hz(z)*(1+z),-1)
+        solver = TidalStrippingSolver(self, M0, redshift, zmax, N_hermNa, sigmafac)
+        self.stripping_solver = solver
 
         ma_by_redshift = np.stack([
             self.Mvir_from_M200(ma200*Msolar,z)/Msolar for z in zdist
@@ -554,9 +497,7 @@ class subhalos:
         for iz in range(len(zdist)):
             ma = ma_by_redshift[iz]
             Oz = self.Omegaz(pOmega,zdist[iz])
-            zcalc = np.linspace(zdist[iz],redshift,100)
-            sol = odeint(msolve,ma,zcalc)
-            m0 = sol[-1]
+            m0 = solver.subhalo_mass_stripped(ma,zdist[iz],redshift,method=method,**kwargs)
             c200sub = self.conc200(ma200*Msolar,zdist[iz])
             rvirsub = pow(3*ma*Msolar*pow(rhocrit0*self.g(zdist[iz]) \
                 *self.Delc(Oz-1)*4*np.pi,-1),1.0/3.0)
@@ -639,6 +580,8 @@ class subhalos:
         sigmafac=0,
         N_hermNa=200,
         profile_change=True,
+        method="odeint",
+        **kwargs,
     ):
         """Return dN/dm of current survivors using bound or accretion mass.
 
@@ -659,6 +602,8 @@ class subhalos:
             sigmafac,
             N_hermNa,
             profile_change=profile_change,
+            method=method,
+            **kwargs,
         )
         selected = np.array(survive, dtype=bool, copy=True)
         mass = ma200 if accretion else m0
@@ -694,6 +639,8 @@ class subhalos:
         sigmafac=0,
         N_hermNa=200,
         profile_change=True,
+        method="odeint",
+        **kwargs,
     ):
         """Return survivor count and N(ma200 > x), with x in Msun.
 
@@ -714,6 +661,8 @@ class subhalos:
             sigmafac,
             N_hermNa,
             profile_change=profile_change,
+            method=method,
+            **kwargs,
         )
         selected = np.array(survive, dtype=bool, copy=True)
         if Mpeak_thres:
@@ -742,6 +691,8 @@ class subhalos:
         sigmafac=0,
         N_hermNa=200,
         profile_change=True,
+        method="odeint",
+        **kwargs,
     ):
         """Return survivor count and N(Vmax > x), with x in km/s.
 
@@ -762,6 +713,8 @@ class subhalos:
             sigmafac,
             N_hermNa,
             profile_change=profile_change,
+            method=method,
+            **kwargs,
         )
         rs_a = rs_a * kpc
         rs0 = rs0 * kpc
@@ -772,3 +725,65 @@ class subhalos:
         selected = np.array(survive, dtype=bool, copy=True)
         selected &= (Vpeak if Vpeak_thres else Vmax) > Vpeak_max
         return _cumulative_above(Vmax[selected], weight[selected])
+
+
+class TidalStrippingSolver:
+    """Standalone WDM coefficients and host history for either tidal solver.
+
+    M0 and returned masses use physical Msun. The original W coefficients,
+    host-quantile setting, dynamical time, and exact virial conversion remain
+    the provider for both direct odeint and Picard.
+    """
+    def __init__(self, model, M0, z_min=0., z_max=7., N_hermNa=200, sigmafac=0.):
+        self.model, self.M0 = model, float(M0)
+        self.z_min, self.z_max = float(z_min), float(z_max)
+        self.N_hermNa, self.sigmafac = N_hermNa, sigmafac
+
+    def picard_physics_key(self):
+        return (self.model.mass_wdm, OmegaM, OmegaB, OmegaL, h, H0, rhocrit0, sigma_8)
+
+    def Mzvir(self, z):
+        return cached_host_mass(self, z)
+
+
+    def _Mzvir_uncached(self, z):
+        z = np.asarray(z, dtype=float)
+        Mz200 = self.model.Mzzi(self.M0,z,0.)
+        if self.N_hermNa==1:
+            sig0 = .12-.15*np.log10(Mz200/self.M0)
+            Mz1 = self.model.Mzzi(self.M0,1.,0.)
+            sigma1 = .12-.15*np.log10(Mz1/self.M0)
+            sig1 = sigma1/np.log10(Mz1/self.M0)*np.log10(Mz200/self.M0)
+            Mz200 = 10**(np.log10(Mz200)+self.sigmafac*np.where(z>1.,sig0,sig1))
+            if self.sigmafac>0:
+                Mz200 = np.minimum(Mz200,self.M0)
+        if z.ndim>0 and z.size>1:
+            return self.model._Mvir_from_M200_grid(Mz200*Msolar,z)/Msolar
+        return self.model.Mvir_from_M200(Mz200*Msolar,z)/Msolar
+
+    def AMz(self, z):
+        loghost = np.log10(self.Mzvir(z))
+        return 10**((-.0019*loghost+.045)*z+(.0097*loghost-.313))
+
+    def zetaMz(self, z):
+        loghost = np.log10(self.Mzvir(z))
+        return (-5.55e-5*loghost+1.43e-3)*z+(3.34e-4*loghost-8.11e-3)
+
+    def tdynz(self, z):
+        omega = self.model.Omegaz(pOmega,z)
+        return 1.628/h*(self.model.Delc(omega-1)/178.)**-.5/(self.model.Hz(z)/H0)*(86400*365*1e9)
+
+    def Phi(self, z):
+        return self.AMz(z)/self.tdynz(z)/self.model.Hz(z)/(1+z)
+
+    def msolve(self, m, z):
+        return self.AMz(z)*(m/self.tdynz(z))*(m/self.Mzvir(z))**self.zetaMz(z)/(self.model.Hz(z)*(1+z))
+
+    def subhalo_mass_stripped(self, ma, za, z, method="odeint", **kwargs):
+        if method=="picard_table":
+            return endpoint_mass(self,ma,za,z,**kwargs)
+        if method=="dop853":
+            return direct_log_mass(self,ma,za,z,**kwargs)
+        if method=="odeint":
+            return odeint(self.msolve,ma,np.linspace(za,z,100),**kwargs)[-1]
+        raise ValueError(f"Invalid stripping method: {method}")
