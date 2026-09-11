@@ -25,7 +25,7 @@ Msolar = 1.988435e33 * gram
 GeV = 1.7827e-24 * gram
 keV = 1e-06 * GeV
 " WMAP7 "
-filename_PS = Path(__file__).resolve().with_name("WMAP7_camb_matterpower_z0_extrapolated.dat")
+filename_PS = Path(__file__).resolve().parent / "data" / "WMAP7_camb_matterpower_z0_extrapolated.dat"
 PowerSpectrum = np.genfromtxt(filename_PS, skip_header=5)
 Pk_file, k_file = (PowerSpectrum[:, 0], PowerSpectrum[:, 1])
 k_min = k_file.min() * 1.15

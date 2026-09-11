@@ -10,8 +10,8 @@ from itamae.provenance import build_calculation_metadata
 from itamae.protocols import CosmologyBackend
 from itamae.types import WeightedSubhaloCatalog
 from itamae.units import NativeUnits
-import sashimi_w_physics as _physics
-from sashimi_w_physics import OmegaM, WDM_TRANSFER_NU, h, WDMPhysics
+from . import _physics as _physics
+from ._physics import OmegaM, WDM_TRANSFER_NU, h, WDMPhysics
 
 _CANONICAL_SCALE = {"Msun": 1.0, "kpc": 0.001, "Msun/pc3": 1e18, "dimensionless": 1.0}
 _CANONICAL_ASTROPY_UNIT = {"mass": "Msun", "length": "Mpc", "density": "Msun / Mpc3"}
@@ -199,7 +199,7 @@ class Subhalos(WDMPhysics):
     def variance_model(self):
         """Lazily construct the canonical-unit analytic sharp-k variance."""
         if self._variance_model is None:
-            from sashimi_w_itamae_variance import make_integrated_variance_model
+            from ._itamae_variance import make_integrated_variance_model
 
             self._variance_model = make_integrated_variance_model(self)
         return self._variance_model
@@ -339,7 +339,7 @@ class Subhalos(WDMPhysics):
     def _execute_population(self, parameters):
         from scipy.integrate import simpson
         from itamae.execution import PopulationComponents
-        from sashimi_w_itamae_components import (
+        from ._itamae_components import (
             WDMAccretionSlices,
             WDMCatalogColumns,
             WDMHostHistory,

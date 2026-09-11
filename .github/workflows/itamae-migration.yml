@@ -20,7 +20,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: gomeshun/itamae
-          ref: dfa083d0d46181c376947ac7b2da829facaf2e8b
+          ref: 23d01e8758a88b061b87de9e488c38ec89fd8e4f
           path: .itamae
       - name: Export migration provenance revisions
         run: |
@@ -33,7 +33,7 @@ jobs:
       - name: Install migration dependencies
         run: uv pip install ./.itamae "astropy>=6" "pytest>=8" ruff hatchling
       - name: Lint maintained migration modules
-        run: uv run --no-sync ruff check sashimi_w.py sashimi_w_physics.py sashimi_w_itamae.py sashimi_w_itamae_migration.py sashimi_w_itamae_components.py sashimi_w_itamae_variance.py tests
+        run: uv run --no-sync ruff check src/sashimi_w/__init__.py src/sashimi_w/_physics.py src/sashimi_w/_itamae.py src/sashimi_w/_itamae_migration.py src/sashimi_w/_itamae_components.py src/sashimi_w/_itamae_variance.py tests
       - name: Run ITAMAE migration regression tests
         run: uv run --no-sync python -m pytest -q --junitxml=test-results.xml
       - name: Upload migration test diagnostics
@@ -51,7 +51,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: gomeshun/itamae
-          ref: dfa083d0d46181c376947ac7b2da829facaf2e8b
+          ref: 23d01e8758a88b061b87de9e488c38ec89fd8e4f
           path: .itamae
       - uses: astral-sh/setup-uv@v6
         with:

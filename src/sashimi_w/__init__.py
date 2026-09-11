@@ -1,6 +1,6 @@
 """Standard public WDM API. Select the power convention explicitly."""
 
-from sashimi_w_physics import (
+from ._physics import (
     Pk_file as Pk_file,
     k_file as k_file,
     cm as cm,
@@ -35,7 +35,7 @@ from sashimi_w_physics import (
     WDM_TRANSFER_NU as WDM_TRANSFER_NU,
     PUBLISHED_WDM_POWER_Q as PUBLISHED_WDM_POWER_Q,
 )
-from sashimi_w_itamae_migration import Subhalos, STANDARD_T2_Q10
+from ._itamae_migration import Subhalos, STANDARD_T2_Q10
 
 subhalos = Subhalos
 __all__ = ["Subhalos", "subhalos", "STANDARD_T2_Q10"]

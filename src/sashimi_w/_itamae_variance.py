@@ -18,8 +18,8 @@ from itamae.power import (
     TransferModifiedPowerSpectrum,
 )
 from itamae.variance import CallableVarianceModel, IntegratedVarianceModel
-from sashimi_w_itamae_migration import ItamaeSubhalos, STANDARD_T2_Q10, CALCULATION_SPECIFICATION
-from sashimi_w_physics import Pk_file, WDM_TRANSFER_NU, h, k_file, sigma_8
+from ._itamae_migration import ItamaeSubhalos, STANDARD_T2_Q10, CALCULATION_SPECIFICATION
+from ._physics import Pk_file, WDM_TRANSFER_NU, h, k_file, sigma_8
 
 
 _SHARP_K_MASS_ASSIGNMENT = 2.5

@@ -12,7 +12,7 @@ import numpy as np
 from itamae.evolution import solve_evolution
 from itamae.measure import build_accretion_batch
 from itamae.numerics import gauss_hermite_lognormal
-from sashimi_w_physics import G, H0, Msolar, h, kpc, pOmega, rhocrit0
+from ._physics import G, H0, Msolar, h, kpc, pOmega, rhocrit0
 
 _MPC = 1000.0 * kpc
 _DENSITY = Msolar / _MPC**3

@@ -7,6 +7,13 @@ This migration candidate provides one standard ITAMAE-backed calculation.
 The explicit WDM power choice, WMAP7 calibration, tidal prescriptions and
 survival threshold belong to W; shared numerical mechanisms belong to ITAMAE.
 
+## Physical walkthrough
+
+The [executed physical walkthrough](notebooks/usage_walkthrough.ipynb) computes
+subhalo mass functions and weighted Vmax–rmax distributions for a Milky Way scale
+host, together with satellite observables and a joint grid refinement. See
+[package layout and setup](docs/package-layout.md) for the `src/` structure.
+
 ## Standard API
 
 ```python
