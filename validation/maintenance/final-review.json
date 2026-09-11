@@ -1,30 +1,30 @@
 {
   "variant": "w",
-  "source_commit": "ec256c6adc013bb7448adc637f2b8e360a8bb3af",
+  "source_commit": "1cd1741400881b8a09dd4c6837d9de04e0a3a1b0",
   "tests": [
     {
       "python": "310",
       "passed": 42,
       "log": "tests-python310.txt",
-      "log_sha256": "751009fd51c461dbe8805387e742f9479304ec6dc72becf7e740940960883ed0"
+      "log_sha256": "a1ba24686026e313e7c712b1025ae62a782a319cb92d052a730fb9d017fa67e9"
     },
     {
       "python": "311",
       "passed": 42,
       "log": "tests-python311.txt",
-      "log_sha256": "663e11bb4a5602f5e6b3b550b545a51f00c7c705534ca512030e06b980240480"
+      "log_sha256": "99cf6968b3f5e299850885b17348000464adabe3aa769d351353f2f502d5bc42"
     },
     {
       "python": "312",
       "passed": 42,
       "log": "tests-python312.txt",
-      "log_sha256": "341f6c096680ffacaa59440e84dab4bb7960c44d9f28befdb495b4ad97ec7dfc"
+      "log_sha256": "366217e003fd24e0cda5006b2c91d69253e0f22130809e9a85d5772fb2eb41cd"
     },
     {
       "python": "313",
       "passed": 42,
       "log": "tests-python313.txt",
-      "log_sha256": "a45660324a213fb3717d8df9812c38a79274583fb07e3e943245dfcfafbef9e1"
+      "log_sha256": "34a3f07ca142e1d8c41201fbe77ef6372880c1a076bce332f9f2219740a4d678"
     }
   ],
   "example_passed": true,
@@ -42,5 +42,11 @@
     "Numerical and runtime acceptance is not physical calibration.",
     "Original unmodified C EPS/NFW issues remain outside this scoped change.",
     "No downstream prior or likelihood campaign was run."
-  ]
+  ],
+  "post_validation_compatibility": {
+    "prior_numerical_source_commit": "ec256c6adc013bb7448adc637f2b8e360a8bb3af",
+    "change": "Restore the original dlnSigmadlnM_interp(M=...) keyword and document its log-mass coordinate.",
+    "arithmetic_ast_identical_after_argument_rename_and_docstring_removal": true,
+    "validation": "All four local Python suites rerun; numerical benchmark and independent arrays retain their original source provenance."
+  }
 }
