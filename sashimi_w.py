@@ -64,6 +64,22 @@ sigma_8       = PS_cosmology[4]
 
 
 
+def _cumulative_above(values, weights, bins=10000):
+    """Return total weight and exact N(value > x) at histogram right edges.
+
+    Bins select display thresholds only; totals and the strict cumulative counts
+    are evaluated from the selected samples, so no first-bin count is lost.
+    Empty selections retain a finite zero curve on NumPy's default [0, 1] grid.
+    """
+    values, weights = np.asarray(values), np.asarray(weights)
+    thresholds = np.histogram_bin_edges(values, bins=bins)[1:]
+    order = np.argsort(values, kind="stable")
+    sorted_values, sorted_weights = values[order], weights[order]
+    tail = np.concatenate((np.cumsum(sorted_weights[::-1])[::-1], [0.0]))
+    above = np.searchsorted(sorted_values, thresholds, side="right")
+    return float(np.sum(weights)), thresholds, tail[above]
+
+
 class subhalos:
 
     def __init__(self, mass_wdm=1.5):
@@ -583,25 +599,51 @@ class subhalos:
     # Input: M0 in units [M_solar]. Optional: Distribution at accretion (accretion=True) instead of at present (redshift = 0)
     # Output: subhalo masses in units [M_solar], subhalo distribution dN/dm
     #################################################################################
-    def subhalo_distr(self,M0, accretion=False, redshift=0.0, dz=0.1, zmax=7.0, N_ma=500, sigmalogc=0.128, N_herm=5, logmamin=1, logmamax=None, \
-        sigmafac=0, N_hermNa=200, profile_change=True):
-            
-        ma200, z_a, rs_a, rhos_a, m0, rs0, rhos0, ct0, weight, survive = self.rs_rhos_calc(M0, redshift, dz, zmax, N_ma, sigmalogc,N_herm, \
-            logmamin, logmamax, sigmafac,N_hermNa, profile_change=True)
+    def subhalo_distr(
+        self,
+        M0,
+        accretion=False,
+        redshift=0.0,
+        dz=0.1,
+        zmax=7.0,
+        N_ma=500,
+        sigmalogc=0.128,
+        N_herm=5,
+        logmamin=1,
+        logmamax=None,
+        sigmafac=0,
+        N_hermNa=200,
+        profile_change=True,
+    ):
+        """Return dN/dm of current survivors using bound or accretion mass.
 
-        if accretion == False:
-            N,lnm_edges = np.histogram(np.log(m0),weights=weight,bins=100)
-        else:
-            N,lnm_edges = np.histogram(np.log(ma200),weights=weight,bins=100)
-
-        lnm = (lnm_edges[1:]+lnm_edges[:-1])/2.
-        dlnm = lnm_edges[1:]-lnm_edges[:-1]
-
+        Both displays apply tidal evolution and survival at the observation
+        redshift. accretion=True changes the mass coordinate to ma200 only.
+        Returned m is the logarithmic bin center in Msun.
+        """
+        ma200, z_a, rs_a, rhos_a, m0, rs0, rhos0, ct0, weight, survive = self.rs_rhos_calc(
+            M0,
+            redshift,
+            dz,
+            zmax,
+            N_ma,
+            sigmalogc,
+            N_herm,
+            logmamin,
+            logmamax,
+            sigmafac,
+            N_hermNa,
+            profile_change=profile_change,
+        )
+        selected = np.array(survive, dtype=bool, copy=True)
+        mass = ma200 if accretion else m0
+        N, lnm_edges = np.histogram(np.log(mass[selected]), weights=weight[selected], bins=100)
+        lnm = (lnm_edges[1:] + lnm_edges[:-1]) / 2.0
+        dlnm = lnm_edges[1:] - lnm_edges[:-1]
         m = np.exp(lnm)
-        dNdlnm = N/dlnm
-        dNdm   = dNdlnm/m
-
-        return m, dNdm
+        dNdlnm = N / dlnm
+        dNdm = dNdlnm / m
+        return (m, dNdm)
 
 
 
@@ -611,22 +653,47 @@ class subhalos:
     # Optional: Satellite forming condition with threshold on subhalo peak mass, Mpeak, in units [M_solar] (Mpeak_thres=True)
     # Output: Total number of satellites, subhalo masses [M_solar], cumulative distribution subhalo mass
     #################################################################################
-    def N_sat(self,M0, Mpeak=None,Mpeak_thres=False,redshift=0.0, dz=0.1, zmax=7.0, N_ma=500, sigmalogc=0.128, N_herm=5, logmamin=1, logmamax=None, \
-        sigmafac=0, N_hermNa=200, profile_change=True):
-            
-        ma200, z_a, rs_a, rhos_a, m0, rs0, rhos0, ct0, weight, survive = self.rs_rhos_calc(M0, redshift, dz, zmax, N_ma, sigmalogc,N_herm, logmamin, \
-            logmamax, sigmafac,N_hermNa, profile_change=True)
+    def N_sat(
+        self,
+        M0,
+        Mpeak=None,
+        Mpeak_thres=False,
+        redshift=0.0,
+        dz=0.1,
+        zmax=7.0,
+        N_ma=500,
+        sigmalogc=0.128,
+        N_herm=5,
+        logmamin=1,
+        logmamax=None,
+        sigmafac=0,
+        N_hermNa=200,
+        profile_change=True,
+    ):
+        """Return survivor count and N(ma200 > x), with x in Msun.
 
-        if Mpeak_thres == True:
-            N,x_edges = np.histogram(ma200[ma200>Mpeak],weights=weight[ma200>Mpeak],bins=10000)
-        else:
-            N,x_edges = np.histogram(ma200,weights=weight,bins=10000)
-
-        x = (x_edges[1:]+x_edges[:-1])/2.
-        Ncum = np.cumsum(N)
-        Ncum = Ncum[-1]-Ncum
-
-        return Ncum[0], x, Ncum
+        Optional Mpeak selection is strict ma200 > Mpeak. x contains the
+        10000 histogram right edges; cumulative counts are exact sample sums.
+        The total counts all selected weights, including the first bin.
+        """
+        ma200, z_a, rs_a, rhos_a, m0, rs0, rhos0, ct0, weight, survive = self.rs_rhos_calc(
+            M0,
+            redshift,
+            dz,
+            zmax,
+            N_ma,
+            sigmalogc,
+            N_herm,
+            logmamin,
+            logmamax,
+            sigmafac,
+            N_hermNa,
+            profile_change=profile_change,
+        )
+        selected = np.array(survive, dtype=bool, copy=True)
+        if Mpeak_thres:
+            selected &= ma200 > Mpeak
+        return _cumulative_above(ma200[selected], weight[selected])
 
 
     #################################################################################
@@ -634,32 +701,51 @@ class subhalos:
     # Input: M0 in units [M_solar], Vpeak/Vmax in units [km/s]
     # Output: Total number of satellites, subhalo Vmax or Vpeak [km/s], cumulative distribution subhalo Vmax or Vpeak
     #################################################################################
-    def N_sat_Vthres(self,M0, Vpeak_max,Vpeak_thres=True,redshift=0.0, dz=0.1, zmax=7.0, N_ma=500, sigmalogc=0.128, N_herm=5, logmamin=1, logmamax=None, \
-        sigmafac=0, N_hermNa=200, profile_change=True):
-            
-        ma200, z_a, rs_a, rhos_a, m0, rs0, rhos0, ct0, weight, survive = self.rs_rhos_calc(M0, redshift, dz, zmax, N_ma, sigmalogc,N_herm, logmamin, \
-            logmamax, sigmafac,N_hermNa, profile_change=True)
+    def N_sat_Vthres(
+        self,
+        M0,
+        Vpeak_max,
+        Vpeak_thres=True,
+        redshift=0.0,
+        dz=0.1,
+        zmax=7.0,
+        N_ma=500,
+        sigmalogc=0.128,
+        N_herm=5,
+        logmamin=1,
+        logmamax=None,
+        sigmafac=0,
+        N_hermNa=200,
+        profile_change=True,
+    ):
+        """Return survivor count and N(Vmax > x), with x in km/s.
 
-        ma200  *= Msolar
-        m0     *= Msolar
-        rs_a   *= kpc
-        rs0    *= kpc
-        rhos_a *= Msolar/pc**3
-        rhos0  *= Msolar/pc**3
-        rpeak = 2.163*rs_a
-        rmax  = 2.163*rs0
-        Vpeak = np.sqrt(4.*np.pi*G*rhos_a/4.625)*rs_a
-        Vmax  = np.sqrt(4.*np.pi*G*rhos0/4.625)*rs0
-        
-        if Vpeak_thres == True:
-            N,x_edges = np.histogram(Vmax[Vpeak>Vpeak_max*km/s]/(km/s),weights=weight[Vpeak>Vpeak_max*km/s],bins=10000)
-        else:
-            N,x_edges = np.histogram(Vmax[Vmax>Vpeak_max*km/s]/(km/s),weights=weight[Vmax>Vpeak_max*km/s],bins=10000)
-
-        x = (x_edges[1:]+x_edges[:-1])/2.
-        Ncum = np.cumsum(N)
-        Ncum = Ncum[-1]-Ncum
-
-        return Ncum[0], x, Ncum
+        The strict selection uses accretion Vpeak when Vpeak_thres=True,
+        otherwise current Vmax. The curve always uses current Vmax and
+        10000 histogram right-edge thresholds, with exact sample sums.
+        """
+        ma200, z_a, rs_a, rhos_a, m0, rs0, rhos0, ct0, weight, survive = self.rs_rhos_calc(
+            M0,
+            redshift,
+            dz,
+            zmax,
+            N_ma,
+            sigmalogc,
+            N_herm,
+            logmamin,
+            logmamax,
+            sigmafac,
+            N_hermNa,
+            profile_change=profile_change,
+        )
+        rs_a = rs_a * kpc
+        rs0 = rs0 * kpc
+        rhos_a = rhos_a * (Msolar / pc**3)
+        rhos0 = rhos0 * (Msolar / pc**3)
+        Vpeak = np.sqrt(4.0 * np.pi * G * rhos_a / 4.625) * rs_a / (km / s)
+        Vmax = np.sqrt(4.0 * np.pi * G * rhos0 / 4.625) * rs0 / (km / s)
+        selected = np.array(survive, dtype=bool, copy=True)
+        selected &= (Vpeak if Vpeak_thres else Vmax) > Vpeak_max
+        return _cumulative_above(Vmax[selected], weight[selected])
 
 
