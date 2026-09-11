@@ -473,7 +473,7 @@ class subhalos:
 
     def rs_rhos_calc(self, M0, redshift=0.0, dz=0.1, zmax=7.0, N_ma=100, sigmalogc=0.128,
                      N_herm=5, logmamin=1, logmamax=None, sigmafac=0,
-                     N_hermNa=200, profile_change=True, method="odeint", **kwargs):
+                     N_hermNa=200, profile_change=True, method="picard_table", **kwargs):
 
         zdist = np.arange(redshift+dz,zmax+dz,dz)
         if logmamax==None:
@@ -580,7 +580,7 @@ class subhalos:
         sigmafac=0,
         N_hermNa=200,
         profile_change=True,
-        method="odeint",
+        method="picard_table",
         **kwargs,
     ):
         """Return dN/dm of current survivors using bound or accretion mass.
@@ -639,7 +639,7 @@ class subhalos:
         sigmafac=0,
         N_hermNa=200,
         profile_change=True,
-        method="odeint",
+        method="picard_table",
         **kwargs,
     ):
         """Return survivor count and N(ma200 > x), with x in Msun.
@@ -691,7 +691,7 @@ class subhalos:
         sigmafac=0,
         N_hermNa=200,
         profile_change=True,
-        method="odeint",
+        method="picard_table",
         **kwargs,
     ):
         """Return survivor count and N(Vmax > x), with x in km/s.
@@ -779,7 +779,7 @@ class TidalStrippingSolver:
     def msolve(self, m, z):
         return self.AMz(z)*(m/self.tdynz(z))*(m/self.Mzvir(z))**self.zetaMz(z)/(self.model.Hz(z)*(1+z))
 
-    def subhalo_mass_stripped(self, ma, za, z, method="odeint", **kwargs):
+    def subhalo_mass_stripped(self, ma, za, z, method="picard_table", **kwargs):
         if method=="picard_table":
             return endpoint_mass(self,ma,za,z,**kwargs)
         if method=="dop853":

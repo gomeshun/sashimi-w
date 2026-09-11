@@ -147,7 +147,7 @@ def test_full_catalog_independent_reference(particle_mass):
     config=json.loads((directory/f'B-q10-{particle_mass}.json').read_text())
     expected=np.load(directory/f'B-q10-{particle_mass}-reference.npz')
     model=w.subhalos(particle_mass)
-    actual=model.rs_rhos_calc(**config['parameters'])
+    actual=model.rs_rhos_calc(**config['parameters'],method='odeint')
     for i,value in enumerate(actual):
         assert np.all(np.isfinite(value))
         assert np.all(np.isfinite(expected[f'tuple_{i}']))
