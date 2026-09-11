@@ -1,5 +1,6 @@
 import numpy as np
 from pathlib import Path
+from sashimi_w_numerics import SharpKVariance, invert_nfw_mass_function
 import matplotlib.pyplot as plt
 from scipy import integrate
 from scipy import interpolate
@@ -12,6 +13,7 @@ from scipy.interpolate import interp1d, UnivariateSpline, splrep, splev
 from numpy.polynomial.hermite import hermgauss
 import warnings
 warnings.filterwarnings("ignore", category = RuntimeWarning, append = 1)
+
 
 
 
@@ -83,80 +85,66 @@ def _cumulative_above(values, weights, bins=10000):
 class subhalos:
 
     def __init__(self, mass_wdm=1.5):
+        if not np.isfinite(mass_wdm) or mass_wdm <= 0:
+            raise ValueError("mass_wdm must be finite and positive.")
         self.mass_wdm = mass_wdm
+        self.G_units = G * (Msolar / Mpc) * (s**2 / km**2)
+        self.Rhocrit_z = 3.0 / (8.0 * np.pi * self.G_units) * 10000.0
+        self.Omz = OmegaM
+        self.Rhomean_z = self.Rhocrit_z * self.Omz
+        self.MassMin = 1e-12
+        self.MassMax = 1e18
+        self.dlogm = (np.log10(self.MassMax) - np.log10(self.MassMin)) / (100 - 1)
+        self.logM0 = np.log10(self.MassMin) + np.arange(100) * self.dlogm + 0.5 * self.dlogm
+        self.filter_Mass = 10**self.logM0
+        self.R = cbrt(self.filter_Mass / (4 / 3 * np.pi * self.Rhomean_z)) / 2.5
+        self.MassIn8Mpc = 4 / 3 * np.pi * 8**3 * self.Rhomean_z
+        self.a = 0.049 * (1 / self.mass_wdm) ** 1.11 * (OmegaC / 0.25) ** 0.11 * (h / 0.7) ** 1.22
 
-        ########################################################
-        #  Truncated Power Spectrum -- Variance -- Concentration  
-        #  Functions adapted from A. Ludlow, arXiv: 1601.0262 
-        ########################################################
+        self._prepare_variance()
 
-        self.G_units       = G * (Msolar/Mpc)*(s**2/km**2) 
-        self.Rhocrit_z     = 3.0/(8.0 * np.pi * self.G_units ) * 1e4 # M_solar/Mpc^3/h^2
-        self.Omz           = OmegaM
-        self.Rhomean_z     = self.Rhocrit_z * self.Omz # M_solar/Mpc/h^2
+    def _prepare_variance(self):
+        key = (float(self.mass_wdm), float(OmegaM), float(OmegaC), float(h), float(sigma_8))
+        if getattr(self, '_variance_key', None) != key:
+            if not np.isfinite(self.mass_wdm) or self.mass_wdm <= 0:
+                raise ValueError("mass_wdm must be finite and positive.")
+            self.a = 0.049*(1/self.mass_wdm)**1.11*(OmegaC/0.25)**0.11*(h/0.7)**1.22
+            self._variance = SharpKVariance(k_file, Pk_file, self.a, self.Rhomean_z, h,
+                                          self.MassIn8Mpc/h, sigma_8)
+            self._variance_key = key
+            self.normalise = np.sqrt(self._variance.normalization2)
+            self.sig_8 = self.normalise*sigma_8
+            self.Sigma = np.sqrt(self._variance.variance(self.filter_Mass/h))
+            self.Sigma_Sq = self.Sigma**2
+            self.sigma_sq = self.Sigma_Sq*self.normalise**2
 
-        """ Filter mass [Msolar/h] and filter radius [Mpc/h] """ 
-        self.MassMin       = 1e-12
-        self.MassMax       = 1e18
-        self.dlogm         = (np.log10(self.MassMax) - np.log10(self.MassMin)) / (100-1)
-        self.logM0         = np.log10(self.MassMin) + np.arange(100)*self.dlogm + 0.5*self.dlogm
-        self.filter_Mass   = 10**self.logM0
-        self.R             = cbrt(self.filter_Mass / (4/3 * np.pi * self.Rhomean_z)) / 2.5 # Mpc/h Sharp-k filter, Schneider (2014) 
+    def Sigma_interp(self, mass_in_msun_over_h):
+        """Compatibility entry point: the numerical mass coordinate is Msun/h."""
+        return self.sigmaMz(np.asarray(mass_in_msun_over_h)/h, 0.)
 
-        """ Integrate Pk and obtain Sigma(M) with sharp-k filter """ 
-        self.log_k_min     = np.log10(k_min)
-        self.log_k_max     = np.log10((9*np.pi/2)**(1./3)/self.R)
-        self.dlogk         = (self.log_k_max - self.log_k_min)/(500 - 1)
-        self.tot_sum       = 0.
-        """ Transfer function WDM Power Spectrum, Viel et al. (2011) """ 
-        self.a             = 0.049*(1/self.mass_wdm)**1.11 * (OmegaC/0.25)**0.11 * (h/0.7)**1.22 # Mpc/h
-        for ii in range(500):
-            self.logk      = self.log_k_min + self.dlogk*ii
-            self.sum_rect  = Pk_interp(10**self.logk)*(10**self.logk)**2*10**self.logk*np.log(10) * \
-                                (1+(self.a*(10**self.logk))**(2*1.12))**(-5./1.12)
-            self.tot_sum   = self.tot_sum + self.sum_rect         
-        self.log_k_min     = self.log_k_min - self.dlogk
-        self.sum_rect_min  = Pk_interp(10**self.log_k_min)*(10**self.log_k_min)**2 * 10**self.log_k_min * np.log(10) * \
-                                (1+(self.a*(10**self.log_k_min))**(2*1.12))**(-5./1.12)
-        self.log_k_max     = self.log_k_max + self.dlogk
-        self.sum_rect_max  = Pk_interp(10**self.log_k_max)*(10**self.log_k_max)**2 * 10**self.log_k_max * np.log(10) * \
-                                (1+(self.a*(10**self.log_k_max))**(2*1.12))**(-5./1.12)
-        self.sigma_sq      = (self.tot_sum + 0.5*self.sum_rect_min + 0.5*self.sum_rect_max) * self.dlogk
-        self.sigma_sq     /= (2*np.pi**2)     
-        
-        ##### Sigma (M)
-        self.Sigma         = np.sqrt(self.sigma_sq)
-        self.sig_interp    = interp1d(self.filter_Mass, self.Sigma)
-        self.MassIn8Mpc    = 4/3 * np.pi * 8**3 * self.Rhomean_z
-        self.sig_8         = self.sig_interp(self.MassIn8Mpc)
-        self.normalise     = self.sig_8 / sigma_8
-        self.Sigma         = self.Sigma/self.normalise
-        self.Sigma_Sq      = self.Sigma**2 
-        self.Sigma_interp  = interp1d(self.filter_Mass,self.Sigma)  
+    def sig_interp(self, mass_in_msun_over_h):
+        return self.Sigma_interp(mass_in_msun_over_h)*self.normalise
+
+    def power_ratio(self, k):
+        """Viel power suppression, T(k)^2: the adopted exponent is q=10."""
+        self._prepare_variance()
+        return (1+(self.a*np.asarray(k))**(2*1.12))**(-10./1.12)
+
+    def transfer_amplitude(self, k):
+        """Transfer amplitude; amplitude-half means power ratio one quarter."""
+        return np.sqrt(self.power_ratio(k))
 
 
-    def dlnSigmadlnM_interp(self, M):
-        lnSigma_Sq  = np.log(self.Sigma)
-        lnMass      = np.log(self.filter_Mass)
-        derivSigma   = np.diff(lnSigma_Sq) / np.diff(lnMass)
-        return np.interp(M,lnMass[:-1],derivSigma)    
-
-
-
-        ##################################################
-        #  Calculate c(M,z) using Top-Hat filter
-        #  Functions adapted from A. Ludlow, arXiv: 1601.0262   
-        ##################################################
-
-        """ Tophat """ 
+    def dlnSigmadlnM_interp(self, log_mass_in_msun_over_h):
+        mass = np.exp(np.asarray(log_mass_in_msun_over_h))/h
+        return self.dsdm(mass, 0.)*mass/(2*self.sigmaMz(mass, 0.)**2)
     def TopHat(self,k, r):
         return 3.0/(k*r)**2 * (np.sin(k*r)/(k*r) - np.cos(k*r))  
 
-    def SigmaIntegrand(self,k, r):
-        om_wdm = OmegaM-OmegaB
-        a = 0.049*(1/self.mass_wdm)**1.11 * (om_wdm/0.25)**0.11 * (h/0.7)**1.22 # Mpc/h
-        nu = 1.12        
-        return k**2 * Pk_interp(k) * self.TopHat(k,r)**2     * (1+(a*k)**(2*nu))**(-5./nu)
+    def SigmaIntegrand(self, k, r):
+        om_wdm = OmegaM - OmegaB
+        a = 0.049 * (1 / self.mass_wdm) ** 1.11 * (om_wdm / 0.25) ** 0.11 * (h / 0.7) ** 1.22
+        return k**2 * Pk_interp(k) * self.TopHat(k, r) ** 2 * (1+(a*k)**(2*1.12))**(-10./1.12)
 
     """ Integration function """ 
     def integratePk_th(self,kmin, kmax, r):
@@ -199,109 +187,115 @@ class subhalos:
 
 
 
-    def conc200(self,M,z): 
-        M = M/Msolar/h
-
-        redshiftvect  = np.linspace(0,7,8) 
-
-        R_th         = cbrt(self.filter_Mass / (4/3 * np.pi * self.Rhomean_z)) 
-        Sigma_Sq_th     = np.zeros(len(self.filter_Mass))
-        Sigma_Sq_th     = self.integratePk_th(k_min, k_max, R_th)
-        Sigma_th        = np.sqrt(Sigma_Sq_th)
-        sig_interp_th   = interp1d(self.filter_Mass, Sigma_th)
-        MassIn8Mpc   = 4/3 * np.pi * 8**3 * self.Rhomean_z
-        sig_8_th        = sig_interp_th(MassIn8Mpc)
-        normalise_th    = sig_8_th / sigma_8
-        Sigma_th       /= normalise_th
-        Sigma_Sq_th     = Sigma_th**2 
-              
-        """ free model parameters, Ludlow et al. (2016) """ 
-        A           = 650. / 200
-        f           = 0.02
-        delta_sc    = 1.686
-        delta_sc_0_vect = delta_sc / self.linear_growth_factor(OmegaM, 1.-OmegaM, redshiftvect)
-        OmegaL      = 1.-OmegaM
-        sig2_interp_th = splrep(self.logM0-10., Sigma_Sq_th, k=1)
-
-
-
+    def conc200(self, M, z):
+        M = np.asarray(M) / Msolar * h
+        redshiftvect = np.linspace(0, 7, 8)
+        R_th = cbrt(self.filter_Mass / (4 / 3 * np.pi * self.Rhomean_z))
+        Sigma_Sq_th = np.zeros(len(self.filter_Mass))
+        Sigma_Sq_th = self.integratePk_th(k_min, k_max, R_th)
+        Sigma_th = np.sqrt(Sigma_Sq_th)
+        sig_interp_th = interp1d(self.filter_Mass, Sigma_th)
+        MassIn8Mpc = 4 / 3 * np.pi * 8**3 * self.Rhomean_z
+        sig_8_th = sig_interp_th(MassIn8Mpc)
+        normalise_th = sig_8_th / sigma_8
+        Sigma_th /= normalise_th
+        Sigma_Sq_th = Sigma_th**2
+        " free model parameters, Ludlow et al. (2016) "
+        A = 650.0 / 200
+        f = 0.02
+        delta_sc = 1.686
+        delta_sc_0_vect = delta_sc / self.linear_growth_factor(OmegaM, 1.0 - OmegaM, redshiftvect)
+        OmegaL = 1.0 - OmegaM
+        sig2_interp_th = splrep(self.logM0 - 10.0, Sigma_Sq_th, k=1)
         if np.shape(M) == ():
-            index = (np.abs(10**self.logM0 - M)).argmin()
-            c_array     = 10**(np.arange(100) * 4./99.)
-            M2          = (np.log(2.)-0.5) / (np.log(1.+c_array)-c_array/(1.+c_array))
-            rho_2       = 200. * c_array**3 * M2
-            rhoc        = rho_2 / (200. * A)
-            z2          = (1. / OmegaM *(rhoc* (OmegaM*(1+z)**3 + OmegaL) - OmegaL))**0.3333 - 1.
+            index = np.abs(10**self.logM0 - M).argmin()
+            c_array = 10 ** (np.arange(100) * 4.0 / 99.0)
+            M2 = (np.log(2.0) - 0.5) / (np.log(1.0 + c_array) - c_array / (1.0 + c_array))
+            rho_2 = 200.0 * c_array**3 * M2
+            rhoc = rho_2 / (200.0 * A)
+            c_array, rhoc, z2 = self._real_formation_trials(c_array, rhoc, z)
             delta_sc_z2 = delta_sc / self.linear_growth_factor(OmegaM, OmegaL, z2)
-            delta_sc_0_vect = delta_sc / self.linear_growth_factor(OmegaM, 1.-OmegaM, z)
-            
-            sig2fM_th      = splev(self.logM0[index] -10. + np.log10(f), sig2_interp_th)
-            sig2M_th       = Sigma_Sq_th[index]
-            sig2Min_th     = splev(np.log10(M2), sig2_interp_th)
-
-            arg         = A*rhoc/c_array**3 - (1.-erf( (delta_sc_z2-delta_sc_0_vect) / np.sqrt(2.*(sig2fM_th-sig2M_th)) ))        
-            mask        = np.isinf(arg) | np.isnan(arg)
-            arg         = arg[mask == False]     
-
-            c_array     = c_array[mask==False]
-            conc_interp = interp1d(arg, c_array)
-            c_nfw   = np.interp(0,arg,c_array)
-
+            delta_sc_0_vect = delta_sc / self.linear_growth_factor(OmegaM, 1.0 - OmegaM, z)
+            sig2fM_th = splev(self.logM0[index] - 10.0 + np.log10(f), sig2_interp_th)
+            sig2M_th = Sigma_Sq_th[index]
+            arg = A * rhoc / c_array**3 - (
+                1.0 - erf((delta_sc_z2 - delta_sc_0_vect) / np.sqrt(2.0 * (sig2fM_th - sig2M_th)))
+            )
+            mask = np.isinf(arg) | np.isnan(arg)
+            arg = arg[~mask]
+            c_array = c_array[~mask]
+            c_nfw = np.interp(0, arg, c_array)
         elif M.ndim == 1:
             M_reshaped = M.flatten()
             c_nfw = np.zeros(len(M_reshaped))
             for i in range(len(M_reshaped)):
-                index = (np.abs(10**self.logM0 - M_reshaped[i])).argmin()
-                c_array     = 10**(np.arange(100) * 4./99.)
-                M2          = (np.log(2.)-0.5) / (np.log(1.+c_array)-c_array/(1.+c_array))
-                rho_2       = 200. * c_array**3 * M2
-                rhoc        = rho_2 / (200. * A)
-                z2          = (1. / OmegaM *(rhoc* (OmegaM*(1+z)**3 + OmegaL) - OmegaL))**0.3333 - 1.
+                index = np.abs(10**self.logM0 - M_reshaped[i]).argmin()
+                c_array = 10 ** (np.arange(100) * 4.0 / 99.0)
+                M2 = (np.log(2.0) - 0.5) / (np.log(1.0 + c_array) - c_array / (1.0 + c_array))
+                rho_2 = 200.0 * c_array**3 * M2
+                rhoc = rho_2 / (200.0 * A)
+                c_array, rhoc, z2 = self._real_formation_trials(c_array, rhoc, z)
                 delta_sc_z2 = delta_sc / self.linear_growth_factor(OmegaM, OmegaL, z2)
-                delta_sc_0_vect = delta_sc / self.linear_growth_factor(OmegaM, 1.-OmegaM, z)
-                
-                sig2fM_th      = splev(self.logM0[index] -10. + np.log10(f), sig2_interp_th)
-                sig2M_th       = Sigma_Sq_th[index]
-                sig2Min_th     = splev(np.log10(M2), sig2_interp_th)
-
-                arg         = A*rhoc/c_array**3 - (1.-erf( (delta_sc_z2-delta_sc_0_vect) / np.sqrt(2.*(sig2fM_th-sig2M_th)) ))        
-                mask        = np.isinf(arg) | np.isnan(arg)
-                arg         = arg[mask == False]      
-
-                c_array     = c_array[mask==False]
-                conc_interp = interp1d(arg, c_array)
-                c_nfw[i]   = np.interp(0,arg,c_array)
-            c_nfw = np.reshape(c_nfw,np.shape(M))                        
-
+                delta_sc_0_vect = delta_sc / self.linear_growth_factor(OmegaM, 1.0 - OmegaM, z)
+                sig2fM_th = splev(self.logM0[index] - 10.0 + np.log10(f), sig2_interp_th)
+                sig2M_th = Sigma_Sq_th[index]
+                arg = A * rhoc / c_array**3 - (
+                    1.0
+                    - erf((delta_sc_z2 - delta_sc_0_vect) / np.sqrt(2.0 * (sig2fM_th - sig2M_th)))
+                )
+                mask = np.isinf(arg) | np.isnan(arg)
+                arg = arg[~mask]
+                c_array = c_array[~mask]
+                c_nfw[i] = np.interp(0, arg, c_array)
+            c_nfw = np.reshape(c_nfw, np.shape(M))
         elif M.ndim == 2:
             M_reshaped = M.flatten()
             z_reshaped = z.flatten()
             c_nfw = np.zeros(len(M_reshaped))
             for i in range(len(M_reshaped)):
-                index = (np.abs(10**self.logM0 - M_reshaped[i])).argmin()
-                c_array     = 10**(np.arange(100) * 4./99.)
-                M2          = (np.log(2.)-0.5) / (np.log(1.+c_array)-c_array/(1.+c_array))
-                rho_2       = 200. * c_array**3 * M2
-                rhoc        = rho_2 / (200. * A)
-                z2          = (1. / OmegaM *(rhoc* (OmegaM*(1+z_reshaped[i])**3 + OmegaL) - OmegaL))**0.3333 - 1.
+                index = np.abs(10**self.logM0 - M_reshaped[i]).argmin()
+                c_array = 10 ** (np.arange(100) * 4.0 / 99.0)
+                M2 = (np.log(2.0) - 0.5) / (np.log(1.0 + c_array) - c_array / (1.0 + c_array))
+                rho_2 = 200.0 * c_array**3 * M2
+                rhoc = rho_2 / (200.0 * A)
+                c_array, rhoc, z2 = self._real_formation_trials(c_array, rhoc, z_reshaped[i])
                 delta_sc_z2 = delta_sc / self.linear_growth_factor(OmegaM, OmegaL, z2)
-                delta_sc_0_vect = delta_sc / self.linear_growth_factor(OmegaM, 1.-OmegaM, z_reshaped[i])
-                
-                sig2fM_th      = splev(self.logM0[index] -10. + np.log10(f), sig2_interp_th)
-                sig2M_th       = Sigma_Sq_th[index]
-                sig2Min_th     = splev(np.log10(M2), sig2_interp_th)
+                delta_sc_0_vect = delta_sc / self.linear_growth_factor(
+                    OmegaM, 1.0 - OmegaM, z_reshaped[i]
+                )
+                sig2fM_th = splev(self.logM0[index] - 10.0 + np.log10(f), sig2_interp_th)
+                sig2M_th = Sigma_Sq_th[index]
+                arg = A * rhoc / c_array**3 - (
+                    1.0
+                    - erf((delta_sc_z2 - delta_sc_0_vect) / np.sqrt(2.0 * (sig2fM_th - sig2M_th)))
+                )
+                mask = np.isinf(arg) | np.isnan(arg)
+                arg = arg[~mask]
+                c_array = c_array[~mask]
+                c_nfw[i] = np.interp(0, arg, c_array)
+            c_nfw = np.reshape(c_nfw, np.shape(M))
+        return c_nfw
 
-                arg         = A*rhoc/c_array**3 - (1.-erf( (delta_sc_z2-delta_sc_0_vect) / np.sqrt(2.*(sig2fM_th-sig2M_th)) ))        
-                mask        = np.isinf(arg) | np.isnan(arg)
-                arg         = arg[mask == False]      
+    @staticmethod
+    def _real_formation_trials(concentration, density_ratio, redshift):
+        """Drop the same non-real trials before evaluating background growth.
 
-                c_array     = c_array[mask==False]
-                conc_interp = interp1d(arg, c_array)
-                c_nfw[i]   = np.interp(0,arg,c_array)
-            c_nfw = np.reshape(c_nfw,np.shape(M))         
-
-
-        return c_nfw         
+        The original fractional exponent is preserved. Trials with nonpositive
+        radicand have no supported finite z > -1 and were already discarded as
+        non-finite values by the final concentration interpolation.
+        """
+        omega_lambda = 1.0 - OmegaM
+        radicand = (
+            1.0
+            / OmegaM
+            * (density_ratio * (OmegaM * (1 + redshift) ** 3 + omega_lambda) - omega_lambda)
+        )
+        if not np.all(np.isfinite(radicand)):
+            raise ValueError("Concentration trial radicands must be finite.")
+        valid = radicand > 0.0
+        if not np.any(valid):
+            raise ValueError("No real concentration-formation trials remain.")
+        return concentration[valid], density_ratio[valid], radicand[valid] ** 0.3333 - 1.0
        
 
 
@@ -356,9 +350,8 @@ class subhalos:
         return pow(M*pow((1e+10)*pow(h,-1),-1),-1)
 
     def sigmaMz(self, M, z):
-        sigmaM0 = self.Sigma_interp(M)
-        sigmaMz = sigmaM0*self.growthD(z)
-        return sigmaMz
+        self._prepare_variance()
+        return np.sqrt(self._variance.variance(M))*self.growthD(z)
 
     def dOdz(self, z):
         return -OmegaL*3*OmegaM*pow(1+z,2)*pow(OmegaL+OmegaM*pow(1+z,3),-2)
@@ -409,10 +402,8 @@ class subhalos:
         return (beta+alpha*pow(1+z-zi,-1))*Mzzivir/Msolar
 
     def dsdm(self, M, z):
-        sigma0 = self.Sigma_interp(M)
-        dsdM0 = self.dlnSigmadlnM_interp(np.log(M))*2.*sigma0**2/M
-        dsdMz = dsdM0*self.growthD(z)
-        return dsdMz
+        self._prepare_variance()
+        return self._variance.derivative(M)*self.growthD(z)**2
 
     def delc_Y11(self,M, z):
         """ Critical overdensity for collapse for WDM, Benson et al. (2012): Eq.7) """ 
@@ -531,8 +522,11 @@ class subhalos:
         def msolve(m, z):
             return AMz(z)*(m/tdynz(z))*pow(m/Mzvir(z),zetaMz(z))*pow(self.Hz(z)*(1+z),-1)
 
+        ma_by_redshift = np.stack([
+            self.Mvir_from_M200(ma200*Msolar,z)/Msolar for z in zdist
+        ])
         for iz in range(len(zdist)):
-            ma = self.Mvir_from_M200(ma200*Msolar,zdist[iz])/Msolar
+            ma = ma_by_redshift[iz]
             Oz = self.Omegaz(pOmega,zdist[iz])
             zcalc = np.linspace(zdist[iz],redshift,100)
             sol = odeint(msolve,ma,zcalc)
@@ -560,17 +554,22 @@ class subhalos:
             else:
                 rs_z0[iz] = rs_acc[iz]
                 rhos_z0[iz] = rhos_acc[iz]
-            ctemp = np.linspace(0,100,1000)
-            ftemp = interp1d(self.fc(ctemp),ctemp,fill_value='extrapolate')
-            ct_z0[iz] = ftemp(m0*Msolar/(4*np.pi*rhos_z0[iz]*rs_z0[iz]**3))
+            ct_z0[iz] = invert_nfw_mass_function(m0*Msolar/(4*np.pi*rhos_z0[iz]*rs_z0[iz]**3))
             survive[iz] = np.where(ct_z0[iz]>0.77,1,0)
             m0_matrix[iz] = m0*np.ones((N_herm,1))
 
-        Na = self.Na_calc(ma,zdist,M0,z0=0,N_herm=N_hermNa,Nrand=1000,
+        Na = self.Na_calc(ma_by_redshift,zdist,M0,z0=0,N_herm=N_hermNa,Nrand=1000,
                           sigmafac=sigmafac)
-        Na_total = integrate.simpson(integrate.simpson(Na,x=np.log(ma)),x=np.log(1+zdist))
+        Na_total = integrate.simpson(integrate.simpson(Na,x=np.log(ma_by_redshift)),x=np.log(1+zdist))
         weight = Na/(1.0+zdist.reshape(len(zdist),1))
-        weight = weight/np.sum(weight)*Na_total
+        weight_sum = np.sum(weight)
+        if weight_sum == 0 and Na_total == 0:
+            # A grid wholly below the WDM cutoff represents no population.
+            weight = np.zeros_like(weight)
+        elif not np.isfinite(weight_sum) or weight_sum <= 0 or Na_total < 0:
+            raise ValueError("WDM accretion normalization must be finite and nonnegative.")
+        else:
+            weight = weight/weight_sum*Na_total
         weight = (weight.reshape((len(zdist),1,len(ma))))*w1/np.sqrt(np.pi)
         z_acc = (zdist.reshape(len(zdist),1,1))*np.ones((1,N_herm,N_ma))
         z_acc = z_acc.reshape(len(zdist)*N_herm*N_ma)
@@ -747,5 +746,3 @@ class subhalos:
         selected = np.array(survive, dtype=bool, copy=True)
         selected &= (Vpeak if Vpeak_thres else Vmax) > Vpeak_max
         return _cumulative_above(Vmax[selected], weight[selected])
-
-
