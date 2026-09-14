@@ -17,4 +17,5 @@ If you use the SASHIMI script to write a paper, please cite:
 - A.D. Ludlow, S. Bose, R.E. Angulo, L. Wang, W.A. Hellwing, J.F. Navarro, S. Cole and C.S. Frenk, arXiv: 1601.02624
 
 
-[Standalone maintenance and Picard validation](docs/standalone-maintenance.md) describes the `minor-updates` corrections, solver choices and numerical evidence.
+[Numerical notes](docs/numerical-notes.md) describe solver choices, corrections that affect results, and known limitations.
+[Tests](tests/README.md) explain how to check an installation and maintain regression fixtures.
