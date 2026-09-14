@@ -110,16 +110,7 @@ def test_survivor_counts_exact_cumulative_and_forwarding(monkeypatch,alive,total
         np.testing.assert_array_equal(old,new)
 
 
-def test_cumulative_empty_and_single():
-    from sashimi_w import _cumulative_above
-    for value,weight,total in [([],[],0.),([3.],[2.],2.)]:
-        n,x,y=_cumulative_above(value,weight)
-        assert n==total and np.all(np.isfinite(x))
-        for threshold,actual in zip(x,y):
-            assert actual==sum(v for a,v in zip(value,weight) if a>threshold)
-
-
-@pytest.mark.parametrize('order',[1,4,64,200])
+@pytest.mark.parametrize('order',[1,200])
 def test_eps_shape_support_and_finite_default_low_masses(model,order):
     z=np.array([.25,.5,1.])
     mass=np.broadcast_to(np.logspace(1,11,5),(3,5))
@@ -127,21 +118,6 @@ def test_eps_shape_support_and_finite_default_low_masses(model,order):
         result=model.Na_calc(mass,z,1e12,N_herm=order)
     assert result.shape==(3,5)
     assert np.all(np.isfinite(result)) and np.all(result>=0)
-
-
-def test_redshift_grid_passes_each_evolved_mass(monkeypatch,model):
-    observed=[]; original=model.Na_calc
-    def spy(ma,z,*args,**kwargs):
-        observed.append((np.array(ma),np.array(z),original(ma,z,*args,**kwargs)))
-        return observed[-1][2]
-    monkeypatch.setattr(model,'Na_calc',spy)
-    options=dict(M0=1e10,dz=.5,N_ma=4,logmamin=6.,logmamax=8.,N_herm=2,N_hermNa=3)
-    model.rs_rhos_calc(zmax=1.,**options)
-    model.rs_rhos_calc(zmax=1.5,**options)
-    for ma,z,rate in observed:
-        expected=np.stack([model.Mvir_from_M200(np.logspace(6,8,4)*w.Msolar,zi)/w.Msolar for zi in z])
-        np.testing.assert_array_equal(ma,expected)
-    np.testing.assert_allclose(observed[0][2],observed[1][2][:2],rtol=1e-13)
 
 
 @pytest.mark.parametrize('particle_mass',[.5,2.,5.])

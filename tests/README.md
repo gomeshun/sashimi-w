@@ -23,6 +23,12 @@ Keep reference values and tolerances fixed when moving files. A scientific
 change requires an independently justified reference update, not automatic
 replacement with current outputs.
 
+
+The default catalog path is checked against an independent reference; wrapper
+forwarding is checked on returned catalogs without repeating the same expensive
+calculation. Analytic mass histories, explicit legacy solvers, physical limits,
+and the existing frozen reference values remain separate checks.
+
 ## Repository contents
 
 Keep maintained tests, small required fixtures and user-facing numerical notes
