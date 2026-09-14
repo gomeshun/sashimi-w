@@ -1,0 +1,65 @@
+{
+  "description": "Frozen independent catalog references used by test_numerics.py. The arrays are copied byte-for-byte from the linked reference run.",
+  "cases": {
+    "B-q10-0.5": {
+      "parameters": {
+        "M0": 1000000000000.0,
+        "N_herm": 2,
+        "N_hermNa": 3,
+        "N_ma": 4,
+        "dz": 0.5,
+        "logmamax": 10.0,
+        "logmamin": 8.0,
+        "profile_change": true,
+        "redshift": 0.0,
+        "sigmafac": 0.0,
+        "sigmalogc": 0.128,
+        "zmax": 1.0
+      },
+      "file": "catalog-0.5keV.npz",
+      "sha256": "5362b979d4a6f093e6c1b4c2ca57e6555434e3b537a3a0a5272b4f219cb9ed14",
+      "source_config": "https://github.com/gomeshun/sashimi-w/blob/0a997abbf031b9630769b81d286b504a3c59bae3/validation/maintenance/B-q10-0.5.json",
+      "source_reference": "https://github.com/gomeshun/sashimi-w/blob/0a997abbf031b9630769b81d286b504a3c59bae3/validation/maintenance/B-q10-0.5-reference.json"
+    },
+    "B-q10-2.0": {
+      "parameters": {
+        "M0": 10000000000.0,
+        "N_herm": 2,
+        "N_hermNa": 3,
+        "N_ma": 4,
+        "dz": 0.5,
+        "logmamax": 8.0,
+        "logmamin": 6.0,
+        "profile_change": true,
+        "redshift": 0.0,
+        "sigmafac": 0.0,
+        "sigmalogc": 0.128,
+        "zmax": 1.0
+      },
+      "file": "catalog-2.0keV.npz",
+      "sha256": "eadcdc7dc91cb13896d403ebaa49fef6a43c2e6b5c58ed9f50ee24d74d839291",
+      "source_config": "https://github.com/gomeshun/sashimi-w/blob/0a997abbf031b9630769b81d286b504a3c59bae3/validation/maintenance/B-q10-2.0.json",
+      "source_reference": "https://github.com/gomeshun/sashimi-w/blob/0a997abbf031b9630769b81d286b504a3c59bae3/validation/maintenance/B-q10-2.0-reference.json"
+    },
+    "B-q10-5.0": {
+      "parameters": {
+        "M0": 10000000000.0,
+        "N_herm": 2,
+        "N_hermNa": 3,
+        "N_ma": 4,
+        "dz": 0.5,
+        "logmamax": 8.0,
+        "logmamin": 6.0,
+        "profile_change": true,
+        "redshift": 0.0,
+        "sigmafac": 0.0,
+        "sigmalogc": 0.128,
+        "zmax": 1.0
+      },
+      "file": "catalog-5.0keV.npz",
+      "sha256": "885caec332bb85ee82faf93486de95851eb126b0e9c7b3b8cfb0cda372a3c408",
+      "source_config": "https://github.com/gomeshun/sashimi-w/blob/0a997abbf031b9630769b81d286b504a3c59bae3/validation/maintenance/B-q10-5.0.json",
+      "source_reference": "https://github.com/gomeshun/sashimi-w/blob/0a997abbf031b9630769b81d286b504a3c59bae3/validation/maintenance/B-q10-5.0-reference.json"
+    }
+  }
+}
