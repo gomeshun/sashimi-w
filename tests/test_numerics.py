@@ -1,5 +1,6 @@
 """Independent numerical and catalog regressions for SASHIMI-W."""
 import json
+import hashlib
 from pathlib import Path
 
 import mpmath as mp
@@ -124,7 +125,9 @@ def test_eps_shape_support_and_finite_default_low_masses(model,order):
 def test_full_catalog_independent_reference(particle_mass):
     directory=Path(__file__).parent/'data'
     config=json.loads((directory/'catalogs.json').read_text())['cases'][f'B-q10-{particle_mass}']
-    expected=np.load(directory/config['file'])
+    fixture=directory/config['file']
+    assert hashlib.sha256(fixture.read_bytes()).hexdigest()==config['sha256']
+    expected=np.load(fixture)
     model=w.subhalos(particle_mass)
     actual=model.rs_rhos_calc(**config['parameters'],method='odeint')
     for i,value in enumerate(actual):

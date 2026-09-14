@@ -36,7 +36,8 @@ These changes do not recalibrate the transfer function or observational limits.
 
 The default is `method="picard_table"`. Use `method="odeint"` to select the
 previous default explicitly, or `method="dop853"` for direct log-mass integration.
-Other existing named solvers remain available. Unknown options raise errors.
+The supported names are `picard_table`, `dop853` and `odeint`.
+Unknown methods or options raise errors.
 
 Endpoint tables use 48 accretion-redshift nodes, 32 log-mass-ratio nodes,
 129 integration points, cubic interpolation, three nonlinear updates and a fourth
