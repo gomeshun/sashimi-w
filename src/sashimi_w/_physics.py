@@ -387,6 +387,9 @@ class WDMPhysics:
         the mass-dependent WDM collapse threshold does not make this an exact
         moving-barrier first-crossing solution.
         """
+        ma = np.asarray(ma)
+        if ma.ndim not in (1, 2) or (ma.ndim == 2 and ma.shape[0] != len(zacc)):
+            raise ValueError("ma must be a 1D mass axis or a 2D (accretion-redshift, mass) grid.")
         zacc_2d = np.asarray(zacc).reshape(-1, 1)
         M200_0 = self.Mzzi(Mhost, zacc_2d, z0)
         logM200_0 = np.log10(M200_0)

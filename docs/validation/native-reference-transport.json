@@ -1,0 +1,1404 @@
+{
+  "source": "dcef1910d42cab940567be448ffc79b42d436802",
+  "core": "23d01e8758a88b061b87de9e488c38ec89fd8e4f",
+  "run_id": 36725410928,
+  "observed_field_maxima": {
+    "c_t": {
+      "case": "deterministic",
+      "finite": true,
+      "max_absolute": 2.2919888209571582e-11,
+      "max_relative": 8.324359436548398e-12,
+      "zero_support_equal": true
+    },
+    "m200_acc": {
+      "case": "default",
+      "finite": true,
+      "max_absolute": 0,
+      "max_relative": 0,
+      "zero_support_equal": true
+    },
+    "m_bound": {
+      "case": "deterministic",
+      "finite": true,
+      "max_absolute": 0.001730218529701233,
+      "max_relative": 3.4170129699705476e-10,
+      "zero_support_equal": true
+    },
+    "r_s": {
+      "case": "deterministic",
+      "finite": true,
+      "max_absolute": 9.404011857422345e-14,
+      "max_relative": 1.4124552930270408e-10,
+      "zero_support_equal": true
+    },
+    "r_s_acc": {
+      "case": "deterministic",
+      "finite": true,
+      "max_absolute": 7.806255641895632e-18,
+      "max_relative": 3.935731032515052e-15,
+      "zero_support_equal": true
+    },
+    "rho_s": {
+      "case": "deterministic",
+      "finite": true,
+      "max_absolute": 1217744,
+      "max_relative": 8.964005493004921e-11,
+      "zero_support_equal": true
+    },
+    "rho_s_acc": {
+      "case": "deterministic",
+      "finite": true,
+      "max_absolute": 9.75,
+      "max_relative": 7.827381107136498e-15,
+      "zero_support_equal": true
+    },
+    "survive": {
+      "case": "default",
+      "equal": true
+    },
+    "weight_base": {
+      "case": "sigma_offset",
+      "finite": true,
+      "max_absolute": 4.658681209898652e-21,
+      "max_relative": 1.6562595746984012e-9,
+      "zero_support_equal": true
+    },
+    "weight_concentration": {
+      "case": "default",
+      "finite": true,
+      "max_absolute": 0,
+      "max_relative": 0,
+      "zero_support_equal": true
+    },
+    "weight_survival": {
+      "case": "default",
+      "finite": true,
+      "max_absolute": 0,
+      "max_relative": 0,
+      "zero_support_equal": true
+    },
+    "z_acc": {
+      "case": "default",
+      "finite": true,
+      "max_absolute": 0,
+      "max_relative": 0,
+      "zero_support_equal": true
+    }
+  },
+  "reports": [
+    {
+      "job_id": 109920899438,
+      "url": "https://github.com/gomeshun/sashimi-w/actions/runs/36725410928/job/109920899438",
+      "cases": {
+        "default": {
+          "c_t": {
+            "finite": true,
+            "max_absolute": 6.887823644774471e-13,
+            "max_relative": 2.2316707384919088e-13,
+            "zero_support_equal": true
+          },
+          "m200_acc": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          },
+          "m_bound": {
+            "finite": true,
+            "max_absolute": 0.000048395246267318726,
+            "max_relative": 4.056633243143851e-12,
+            "zero_support_equal": true
+          },
+          "r_s": {
+            "finite": true,
+            "max_absolute": 1.8433605336598546e-15,
+            "max_relative": 1.7420287298751599e-12,
+            "zero_support_equal": true
+          },
+          "r_s_acc": {
+            "finite": true,
+            "max_absolute": 4.336808689942018e-18,
+            "max_relative": 1.2459910962085544e-15,
+            "zero_support_equal": true
+          },
+          "rho_s": {
+            "finite": true,
+            "max_absolute": 9820,
+            "max_relative": 1.3648324227924803e-12,
+            "zero_support_equal": true
+          },
+          "rho_s_acc": {
+            "finite": true,
+            "max_absolute": 4.75,
+            "max_relative": 2.64163907259138e-15,
+            "zero_support_equal": true
+          },
+          "survive": {
+            "equal": true
+          },
+          "weight_base": {
+            "finite": true,
+            "max_absolute": 1.8211208365967457e-20,
+            "max_relative": 1.0519201928870646e-11,
+            "zero_support_equal": true
+          },
+          "weight_concentration": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          },
+          "weight_survival": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          },
+          "z_acc": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          }
+        },
+        "deterministic": {
+          "c_t": {
+            "finite": true,
+            "max_absolute": 2.2919888209571582e-11,
+            "max_relative": 8.324359436548398e-12,
+            "zero_support_equal": true
+          },
+          "m200_acc": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          },
+          "m_bound": {
+            "finite": true,
+            "max_absolute": 0.001730218529701233,
+            "max_relative": 3.4170129699705476e-10,
+            "zero_support_equal": true
+          },
+          "r_s": {
+            "finite": true,
+            "max_absolute": 9.404011857422345e-14,
+            "max_relative": 1.4124552930270408e-10,
+            "zero_support_equal": true
+          },
+          "r_s_acc": {
+            "finite": true,
+            "max_absolute": 7.806255641895632e-18,
+            "max_relative": 3.935731032515052e-15,
+            "zero_support_equal": true
+          },
+          "rho_s": {
+            "finite": true,
+            "max_absolute": 1217744,
+            "max_relative": 8.964005493004921e-11,
+            "zero_support_equal": true
+          },
+          "rho_s_acc": {
+            "finite": true,
+            "max_absolute": 9.75,
+            "max_relative": 7.827381107136498e-15,
+            "zero_support_equal": true
+          },
+          "survive": {
+            "equal": true
+          },
+          "weight_base": {
+            "finite": true,
+            "max_absolute": 6.776263578034403e-21,
+            "max_relative": 2.9895147916662123e-13,
+            "zero_support_equal": true
+          },
+          "weight_concentration": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          },
+          "weight_survival": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          },
+          "z_acc": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          }
+        },
+        "nonzero": {
+          "c_t": {
+            "finite": true,
+            "max_absolute": 1.8310686300537782e-11,
+            "max_relative": 6.278327133887415e-12,
+            "zero_support_equal": true
+          },
+          "m200_acc": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          },
+          "m_bound": {
+            "finite": true,
+            "max_absolute": 0.001416478306055069,
+            "max_relative": 8.079571970093729e-11,
+            "zero_support_equal": true
+          },
+          "r_s": {
+            "finite": true,
+            "max_absolute": 4.02848327613059e-14,
+            "max_relative": 3.568641692097206e-11,
+            "zero_support_equal": true
+          },
+          "r_s_acc": {
+            "finite": true,
+            "max_absolute": 3.0357660829594124e-18,
+            "max_relative": 1.0135434371402931e-15,
+            "zero_support_equal": true
+          },
+          "rho_s": {
+            "finite": true,
+            "max_absolute": 291994,
+            "max_relative": 3.187468789324005e-11,
+            "zero_support_equal": true
+          },
+          "rho_s_acc": {
+            "finite": true,
+            "max_absolute": 6,
+            "max_relative": 2.64163907259138e-15,
+            "zero_support_equal": true
+          },
+          "survive": {
+            "equal": true
+          },
+          "weight_base": {
+            "finite": true,
+            "max_absolute": 2.0679515313825692e-25,
+            "max_relative": 2.2224088767758603e-10,
+            "zero_support_equal": true
+          },
+          "weight_concentration": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          },
+          "weight_survival": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          },
+          "z_acc": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          }
+        },
+        "particle_mass": {
+          "c_t": {
+            "finite": true,
+            "max_absolute": 1.0764722446765518e-12,
+            "max_relative": 2.3544282675768455e-13,
+            "zero_support_equal": true
+          },
+          "m200_acc": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          },
+          "m_bound": {
+            "finite": true,
+            "max_absolute": 0.000042809173464775085,
+            "max_relative": 3.7252553594664205e-12,
+            "zero_support_equal": true
+          },
+          "r_s": {
+            "finite": true,
+            "max_absolute": 1.0537360914386618e-15,
+            "max_relative": 1.5984896506812961e-12,
+            "zero_support_equal": true
+          },
+          "r_s_acc": {
+            "finite": true,
+            "max_absolute": 2.6020852139652106e-18,
+            "max_relative": 1.2740387668399892e-15,
+            "zero_support_equal": true
+          },
+          "rho_s": {
+            "finite": true,
+            "max_absolute": 25996,
+            "max_relative": 1.2469631207568803e-12,
+            "zero_support_equal": true
+          },
+          "rho_s_acc": {
+            "finite": true,
+            "max_absolute": 16,
+            "max_relative": 3.526794702642455e-15,
+            "zero_support_equal": true
+          },
+          "survive": {
+            "equal": true
+          },
+          "weight_base": {
+            "finite": true,
+            "max_absolute": 8.673617379884035e-18,
+            "max_relative": 7.467603451958645e-15,
+            "zero_support_equal": true
+          },
+          "weight_concentration": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          },
+          "weight_survival": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          },
+          "z_acc": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          }
+        },
+        "profile_off": {
+          "c_t": {
+            "finite": true,
+            "max_absolute": 1.6308066008718924e-12,
+            "max_relative": 2.7359281450914567e-12,
+            "zero_support_equal": true
+          },
+          "m200_acc": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          },
+          "m_bound": {
+            "finite": true,
+            "max_absolute": 0.000048395246267318726,
+            "max_relative": 4.056633243143851e-12,
+            "zero_support_equal": true
+          },
+          "r_s": {
+            "finite": true,
+            "max_absolute": 4.336808689942018e-18,
+            "max_relative": 1.2459910962085544e-15,
+            "zero_support_equal": true
+          },
+          "r_s_acc": {
+            "finite": true,
+            "max_absolute": 4.336808689942018e-18,
+            "max_relative": 1.2459910962085544e-15,
+            "zero_support_equal": true
+          },
+          "rho_s": {
+            "finite": true,
+            "max_absolute": 4.75,
+            "max_relative": 2.64163907259138e-15,
+            "zero_support_equal": true
+          },
+          "rho_s_acc": {
+            "finite": true,
+            "max_absolute": 4.75,
+            "max_relative": 2.64163907259138e-15,
+            "zero_support_equal": true
+          },
+          "survive": {
+            "equal": true
+          },
+          "weight_base": {
+            "finite": true,
+            "max_absolute": 1.8211208365967457e-20,
+            "max_relative": 1.0519201928870646e-11,
+            "zero_support_equal": true
+          },
+          "weight_concentration": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          },
+          "weight_survival": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          },
+          "z_acc": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          }
+        },
+        "sigma_offset": {
+          "c_t": {
+            "finite": true,
+            "max_absolute": 3.341327214911871e-12,
+            "max_relative": 1.2137427598177245e-12,
+            "zero_support_equal": true
+          },
+          "m200_acc": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          },
+          "m_bound": {
+            "finite": true,
+            "max_absolute": 0.0002520214766263962,
+            "max_relative": 5.0099889292752015e-11,
+            "zero_support_equal": true
+          },
+          "r_s": {
+            "finite": true,
+            "max_absolute": 1.374735828646445e-14,
+            "max_relative": 2.0704242193644897e-11,
+            "zero_support_equal": true
+          },
+          "r_s_acc": {
+            "finite": true,
+            "max_absolute": 7.806255641895632e-18,
+            "max_relative": 3.935731032515052e-15,
+            "zero_support_equal": true
+          },
+          "rho_s": {
+            "finite": true,
+            "max_absolute": 178548,
+            "max_relative": 1.3121726611432822e-11,
+            "zero_support_equal": true
+          },
+          "rho_s_acc": {
+            "finite": true,
+            "max_absolute": 9.75,
+            "max_relative": 7.827381107136498e-15,
+            "zero_support_equal": true
+          },
+          "survive": {
+            "equal": true
+          },
+          "weight_base": {
+            "finite": true,
+            "max_absolute": 4.658681209898652e-21,
+            "max_relative": 1.6562595746984012e-9,
+            "zero_support_equal": true
+          },
+          "weight_concentration": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          },
+          "weight_survival": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          },
+          "z_acc": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          }
+        }
+      },
+      "module_path": "/home/runner/work/sashimi-w/sashimi-w/.baseline-install/sashimi_w/__init__.py",
+      "numpy": "2.4.6",
+      "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+      "python": "3.11.16 (main, Sep 29 2026, 14:59:26) [Clang 22.1.3 ]",
+      "scipy": "1.17.1",
+      "source": "dcef1910d42cab940567be448ffc79b42d436802"
+    },
+    {
+      "job_id": 109920899450,
+      "url": "https://github.com/gomeshun/sashimi-w/actions/runs/36725410928/job/109920899450",
+      "cases": {
+        "default": {
+          "c_t": {
+            "finite": true,
+            "max_absolute": 6.887823644774471e-13,
+            "max_relative": 2.2316707384919088e-13,
+            "zero_support_equal": true
+          },
+          "m200_acc": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          },
+          "m_bound": {
+            "finite": true,
+            "max_absolute": 0.000048395246267318726,
+            "max_relative": 4.056633243143851e-12,
+            "zero_support_equal": true
+          },
+          "r_s": {
+            "finite": true,
+            "max_absolute": 1.8433605336598546e-15,
+            "max_relative": 1.7420287298751599e-12,
+            "zero_support_equal": true
+          },
+          "r_s_acc": {
+            "finite": true,
+            "max_absolute": 4.336808689942018e-18,
+            "max_relative": 1.2459910962085544e-15,
+            "zero_support_equal": true
+          },
+          "rho_s": {
+            "finite": true,
+            "max_absolute": 9820,
+            "max_relative": 1.3648324227924803e-12,
+            "zero_support_equal": true
+          },
+          "rho_s_acc": {
+            "finite": true,
+            "max_absolute": 4.75,
+            "max_relative": 2.64163907259138e-15,
+            "zero_support_equal": true
+          },
+          "survive": {
+            "equal": true
+          },
+          "weight_base": {
+            "finite": true,
+            "max_absolute": 1.8211208365967457e-20,
+            "max_relative": 1.0519201928870646e-11,
+            "zero_support_equal": true
+          },
+          "weight_concentration": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          },
+          "weight_survival": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          },
+          "z_acc": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          }
+        },
+        "deterministic": {
+          "c_t": {
+            "finite": true,
+            "max_absolute": 2.2919888209571582e-11,
+            "max_relative": 8.324359436548398e-12,
+            "zero_support_equal": true
+          },
+          "m200_acc": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          },
+          "m_bound": {
+            "finite": true,
+            "max_absolute": 0.001730218529701233,
+            "max_relative": 3.4170129699705476e-10,
+            "zero_support_equal": true
+          },
+          "r_s": {
+            "finite": true,
+            "max_absolute": 9.404011857422345e-14,
+            "max_relative": 1.4124552930270408e-10,
+            "zero_support_equal": true
+          },
+          "r_s_acc": {
+            "finite": true,
+            "max_absolute": 7.806255641895632e-18,
+            "max_relative": 3.935731032515052e-15,
+            "zero_support_equal": true
+          },
+          "rho_s": {
+            "finite": true,
+            "max_absolute": 1217744,
+            "max_relative": 8.964005493004921e-11,
+            "zero_support_equal": true
+          },
+          "rho_s_acc": {
+            "finite": true,
+            "max_absolute": 9.75,
+            "max_relative": 7.827381107136498e-15,
+            "zero_support_equal": true
+          },
+          "survive": {
+            "equal": true
+          },
+          "weight_base": {
+            "finite": true,
+            "max_absolute": 6.776263578034403e-21,
+            "max_relative": 2.9895147916662123e-13,
+            "zero_support_equal": true
+          },
+          "weight_concentration": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          },
+          "weight_survival": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          },
+          "z_acc": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          }
+        },
+        "nonzero": {
+          "c_t": {
+            "finite": true,
+            "max_absolute": 1.8310686300537782e-11,
+            "max_relative": 6.278327133887415e-12,
+            "zero_support_equal": true
+          },
+          "m200_acc": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          },
+          "m_bound": {
+            "finite": true,
+            "max_absolute": 0.001416478306055069,
+            "max_relative": 8.079571970093729e-11,
+            "zero_support_equal": true
+          },
+          "r_s": {
+            "finite": true,
+            "max_absolute": 4.02848327613059e-14,
+            "max_relative": 3.568641692097206e-11,
+            "zero_support_equal": true
+          },
+          "r_s_acc": {
+            "finite": true,
+            "max_absolute": 3.0357660829594124e-18,
+            "max_relative": 1.0135434371402931e-15,
+            "zero_support_equal": true
+          },
+          "rho_s": {
+            "finite": true,
+            "max_absolute": 291994,
+            "max_relative": 3.187468789324005e-11,
+            "zero_support_equal": true
+          },
+          "rho_s_acc": {
+            "finite": true,
+            "max_absolute": 6,
+            "max_relative": 2.64163907259138e-15,
+            "zero_support_equal": true
+          },
+          "survive": {
+            "equal": true
+          },
+          "weight_base": {
+            "finite": true,
+            "max_absolute": 2.0679515313825692e-25,
+            "max_relative": 2.2224088767758603e-10,
+            "zero_support_equal": true
+          },
+          "weight_concentration": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          },
+          "weight_survival": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          },
+          "z_acc": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          }
+        },
+        "particle_mass": {
+          "c_t": {
+            "finite": true,
+            "max_absolute": 1.0764722446765518e-12,
+            "max_relative": 2.3544282675768455e-13,
+            "zero_support_equal": true
+          },
+          "m200_acc": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          },
+          "m_bound": {
+            "finite": true,
+            "max_absolute": 0.000042809173464775085,
+            "max_relative": 3.7252553594664205e-12,
+            "zero_support_equal": true
+          },
+          "r_s": {
+            "finite": true,
+            "max_absolute": 1.0537360914386618e-15,
+            "max_relative": 1.5984896506812961e-12,
+            "zero_support_equal": true
+          },
+          "r_s_acc": {
+            "finite": true,
+            "max_absolute": 2.6020852139652106e-18,
+            "max_relative": 1.2740387668399892e-15,
+            "zero_support_equal": true
+          },
+          "rho_s": {
+            "finite": true,
+            "max_absolute": 25996,
+            "max_relative": 1.2469631207568803e-12,
+            "zero_support_equal": true
+          },
+          "rho_s_acc": {
+            "finite": true,
+            "max_absolute": 16,
+            "max_relative": 3.526794702642455e-15,
+            "zero_support_equal": true
+          },
+          "survive": {
+            "equal": true
+          },
+          "weight_base": {
+            "finite": true,
+            "max_absolute": 8.673617379884035e-18,
+            "max_relative": 7.467603451958645e-15,
+            "zero_support_equal": true
+          },
+          "weight_concentration": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          },
+          "weight_survival": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          },
+          "z_acc": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          }
+        },
+        "profile_off": {
+          "c_t": {
+            "finite": true,
+            "max_absolute": 1.6308066008718924e-12,
+            "max_relative": 2.7359281450914567e-12,
+            "zero_support_equal": true
+          },
+          "m200_acc": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          },
+          "m_bound": {
+            "finite": true,
+            "max_absolute": 0.000048395246267318726,
+            "max_relative": 4.056633243143851e-12,
+            "zero_support_equal": true
+          },
+          "r_s": {
+            "finite": true,
+            "max_absolute": 4.336808689942018e-18,
+            "max_relative": 1.2459910962085544e-15,
+            "zero_support_equal": true
+          },
+          "r_s_acc": {
+            "finite": true,
+            "max_absolute": 4.336808689942018e-18,
+            "max_relative": 1.2459910962085544e-15,
+            "zero_support_equal": true
+          },
+          "rho_s": {
+            "finite": true,
+            "max_absolute": 4.75,
+            "max_relative": 2.64163907259138e-15,
+            "zero_support_equal": true
+          },
+          "rho_s_acc": {
+            "finite": true,
+            "max_absolute": 4.75,
+            "max_relative": 2.64163907259138e-15,
+            "zero_support_equal": true
+          },
+          "survive": {
+            "equal": true
+          },
+          "weight_base": {
+            "finite": true,
+            "max_absolute": 1.8211208365967457e-20,
+            "max_relative": 1.0519201928870646e-11,
+            "zero_support_equal": true
+          },
+          "weight_concentration": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          },
+          "weight_survival": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          },
+          "z_acc": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          }
+        },
+        "sigma_offset": {
+          "c_t": {
+            "finite": true,
+            "max_absolute": 3.341327214911871e-12,
+            "max_relative": 1.2137427598177245e-12,
+            "zero_support_equal": true
+          },
+          "m200_acc": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          },
+          "m_bound": {
+            "finite": true,
+            "max_absolute": 0.0002520214766263962,
+            "max_relative": 5.0099889292752015e-11,
+            "zero_support_equal": true
+          },
+          "r_s": {
+            "finite": true,
+            "max_absolute": 1.374735828646445e-14,
+            "max_relative": 2.0704242193644897e-11,
+            "zero_support_equal": true
+          },
+          "r_s_acc": {
+            "finite": true,
+            "max_absolute": 7.806255641895632e-18,
+            "max_relative": 3.935731032515052e-15,
+            "zero_support_equal": true
+          },
+          "rho_s": {
+            "finite": true,
+            "max_absolute": 178548,
+            "max_relative": 1.3121726611432822e-11,
+            "zero_support_equal": true
+          },
+          "rho_s_acc": {
+            "finite": true,
+            "max_absolute": 9.75,
+            "max_relative": 7.827381107136498e-15,
+            "zero_support_equal": true
+          },
+          "survive": {
+            "equal": true
+          },
+          "weight_base": {
+            "finite": true,
+            "max_absolute": 4.658681209898652e-21,
+            "max_relative": 1.6562595746984012e-9,
+            "zero_support_equal": true
+          },
+          "weight_concentration": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          },
+          "weight_survival": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          },
+          "z_acc": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          }
+        }
+      },
+      "module_path": "/home/runner/work/sashimi-w/sashimi-w/.baseline-install/sashimi_w/__init__.py",
+      "numpy": "2.5.3",
+      "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+      "python": "3.13.15 (main, Sep 29 2026, 15:01:28) [Clang 22.1.3 ]",
+      "scipy": "1.18.1",
+      "source": "dcef1910d42cab940567be448ffc79b42d436802"
+    },
+    {
+      "job_id": 109920899558,
+      "url": "https://github.com/gomeshun/sashimi-w/actions/runs/36725410928/job/109920899558",
+      "cases": {
+        "default": {
+          "c_t": {
+            "finite": true,
+            "max_absolute": 6.887823644774471e-13,
+            "max_relative": 2.2316707384919088e-13,
+            "zero_support_equal": true
+          },
+          "m200_acc": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          },
+          "m_bound": {
+            "finite": true,
+            "max_absolute": 0.000048395246267318726,
+            "max_relative": 4.056633243143851e-12,
+            "zero_support_equal": true
+          },
+          "r_s": {
+            "finite": true,
+            "max_absolute": 1.8433605336598546e-15,
+            "max_relative": 1.7420287298751599e-12,
+            "zero_support_equal": true
+          },
+          "r_s_acc": {
+            "finite": true,
+            "max_absolute": 4.336808689942018e-18,
+            "max_relative": 1.2459910962085544e-15,
+            "zero_support_equal": true
+          },
+          "rho_s": {
+            "finite": true,
+            "max_absolute": 9820,
+            "max_relative": 1.3648324227924803e-12,
+            "zero_support_equal": true
+          },
+          "rho_s_acc": {
+            "finite": true,
+            "max_absolute": 4.75,
+            "max_relative": 2.64163907259138e-15,
+            "zero_support_equal": true
+          },
+          "survive": {
+            "equal": true
+          },
+          "weight_base": {
+            "finite": true,
+            "max_absolute": 1.8211208365967457e-20,
+            "max_relative": 1.0519201928870646e-11,
+            "zero_support_equal": true
+          },
+          "weight_concentration": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          },
+          "weight_survival": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          },
+          "z_acc": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          }
+        },
+        "deterministic": {
+          "c_t": {
+            "finite": true,
+            "max_absolute": 2.2919888209571582e-11,
+            "max_relative": 8.324359436548398e-12,
+            "zero_support_equal": true
+          },
+          "m200_acc": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          },
+          "m_bound": {
+            "finite": true,
+            "max_absolute": 0.001730218529701233,
+            "max_relative": 3.4170129699705476e-10,
+            "zero_support_equal": true
+          },
+          "r_s": {
+            "finite": true,
+            "max_absolute": 9.404011857422345e-14,
+            "max_relative": 1.4124552930270408e-10,
+            "zero_support_equal": true
+          },
+          "r_s_acc": {
+            "finite": true,
+            "max_absolute": 7.806255641895632e-18,
+            "max_relative": 3.935731032515052e-15,
+            "zero_support_equal": true
+          },
+          "rho_s": {
+            "finite": true,
+            "max_absolute": 1217744,
+            "max_relative": 8.964005493004921e-11,
+            "zero_support_equal": true
+          },
+          "rho_s_acc": {
+            "finite": true,
+            "max_absolute": 9.75,
+            "max_relative": 7.827381107136498e-15,
+            "zero_support_equal": true
+          },
+          "survive": {
+            "equal": true
+          },
+          "weight_base": {
+            "finite": true,
+            "max_absolute": 6.776263578034403e-21,
+            "max_relative": 2.9895147916662123e-13,
+            "zero_support_equal": true
+          },
+          "weight_concentration": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          },
+          "weight_survival": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          },
+          "z_acc": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          }
+        },
+        "nonzero": {
+          "c_t": {
+            "finite": true,
+            "max_absolute": 1.8310686300537782e-11,
+            "max_relative": 6.278327133887415e-12,
+            "zero_support_equal": true
+          },
+          "m200_acc": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          },
+          "m_bound": {
+            "finite": true,
+            "max_absolute": 0.001416478306055069,
+            "max_relative": 8.079571970093729e-11,
+            "zero_support_equal": true
+          },
+          "r_s": {
+            "finite": true,
+            "max_absolute": 4.02848327613059e-14,
+            "max_relative": 3.568641692097206e-11,
+            "zero_support_equal": true
+          },
+          "r_s_acc": {
+            "finite": true,
+            "max_absolute": 3.0357660829594124e-18,
+            "max_relative": 1.0135434371402931e-15,
+            "zero_support_equal": true
+          },
+          "rho_s": {
+            "finite": true,
+            "max_absolute": 291994,
+            "max_relative": 3.187468789324005e-11,
+            "zero_support_equal": true
+          },
+          "rho_s_acc": {
+            "finite": true,
+            "max_absolute": 6,
+            "max_relative": 2.64163907259138e-15,
+            "zero_support_equal": true
+          },
+          "survive": {
+            "equal": true
+          },
+          "weight_base": {
+            "finite": true,
+            "max_absolute": 2.0679515313825692e-25,
+            "max_relative": 2.2224088767758603e-10,
+            "zero_support_equal": true
+          },
+          "weight_concentration": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          },
+          "weight_survival": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          },
+          "z_acc": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          }
+        },
+        "particle_mass": {
+          "c_t": {
+            "finite": true,
+            "max_absolute": 1.0764722446765518e-12,
+            "max_relative": 2.3544282675768455e-13,
+            "zero_support_equal": true
+          },
+          "m200_acc": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          },
+          "m_bound": {
+            "finite": true,
+            "max_absolute": 0.000042809173464775085,
+            "max_relative": 3.7252553594664205e-12,
+            "zero_support_equal": true
+          },
+          "r_s": {
+            "finite": true,
+            "max_absolute": 1.0537360914386618e-15,
+            "max_relative": 1.5984896506812961e-12,
+            "zero_support_equal": true
+          },
+          "r_s_acc": {
+            "finite": true,
+            "max_absolute": 2.6020852139652106e-18,
+            "max_relative": 1.2740387668399892e-15,
+            "zero_support_equal": true
+          },
+          "rho_s": {
+            "finite": true,
+            "max_absolute": 25996,
+            "max_relative": 1.2469631207568803e-12,
+            "zero_support_equal": true
+          },
+          "rho_s_acc": {
+            "finite": true,
+            "max_absolute": 16,
+            "max_relative": 3.526794702642455e-15,
+            "zero_support_equal": true
+          },
+          "survive": {
+            "equal": true
+          },
+          "weight_base": {
+            "finite": true,
+            "max_absolute": 8.673617379884035e-18,
+            "max_relative": 7.467603451958645e-15,
+            "zero_support_equal": true
+          },
+          "weight_concentration": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          },
+          "weight_survival": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          },
+          "z_acc": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          }
+        },
+        "profile_off": {
+          "c_t": {
+            "finite": true,
+            "max_absolute": 1.6308066008718924e-12,
+            "max_relative": 2.7359281450914567e-12,
+            "zero_support_equal": true
+          },
+          "m200_acc": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          },
+          "m_bound": {
+            "finite": true,
+            "max_absolute": 0.000048395246267318726,
+            "max_relative": 4.056633243143851e-12,
+            "zero_support_equal": true
+          },
+          "r_s": {
+            "finite": true,
+            "max_absolute": 4.336808689942018e-18,
+            "max_relative": 1.2459910962085544e-15,
+            "zero_support_equal": true
+          },
+          "r_s_acc": {
+            "finite": true,
+            "max_absolute": 4.336808689942018e-18,
+            "max_relative": 1.2459910962085544e-15,
+            "zero_support_equal": true
+          },
+          "rho_s": {
+            "finite": true,
+            "max_absolute": 4.75,
+            "max_relative": 2.64163907259138e-15,
+            "zero_support_equal": true
+          },
+          "rho_s_acc": {
+            "finite": true,
+            "max_absolute": 4.75,
+            "max_relative": 2.64163907259138e-15,
+            "zero_support_equal": true
+          },
+          "survive": {
+            "equal": true
+          },
+          "weight_base": {
+            "finite": true,
+            "max_absolute": 1.8211208365967457e-20,
+            "max_relative": 1.0519201928870646e-11,
+            "zero_support_equal": true
+          },
+          "weight_concentration": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          },
+          "weight_survival": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          },
+          "z_acc": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          }
+        },
+        "sigma_offset": {
+          "c_t": {
+            "finite": true,
+            "max_absolute": 3.341327214911871e-12,
+            "max_relative": 1.2137427598177245e-12,
+            "zero_support_equal": true
+          },
+          "m200_acc": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          },
+          "m_bound": {
+            "finite": true,
+            "max_absolute": 0.0002520214766263962,
+            "max_relative": 5.0099889292752015e-11,
+            "zero_support_equal": true
+          },
+          "r_s": {
+            "finite": true,
+            "max_absolute": 1.374735828646445e-14,
+            "max_relative": 2.0704242193644897e-11,
+            "zero_support_equal": true
+          },
+          "r_s_acc": {
+            "finite": true,
+            "max_absolute": 7.806255641895632e-18,
+            "max_relative": 3.935731032515052e-15,
+            "zero_support_equal": true
+          },
+          "rho_s": {
+            "finite": true,
+            "max_absolute": 178548,
+            "max_relative": 1.3121726611432822e-11,
+            "zero_support_equal": true
+          },
+          "rho_s_acc": {
+            "finite": true,
+            "max_absolute": 9.75,
+            "max_relative": 7.827381107136498e-15,
+            "zero_support_equal": true
+          },
+          "survive": {
+            "equal": true
+          },
+          "weight_base": {
+            "finite": true,
+            "max_absolute": 4.658681209898652e-21,
+            "max_relative": 1.6562595746984012e-9,
+            "zero_support_equal": true
+          },
+          "weight_concentration": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          },
+          "weight_survival": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          },
+          "z_acc": {
+            "finite": true,
+            "max_absolute": 0,
+            "max_relative": 0,
+            "zero_support_equal": true
+          }
+        }
+      },
+      "module_path": "/home/runner/work/sashimi-w/sashimi-w/.baseline-install/sashimi_w/__init__.py",
+      "numpy": "2.5.3",
+      "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+      "python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+      "scipy": "1.18.1",
+      "source": "dcef1910d42cab940567be448ffc79b42d436802"
+    }
+  ]
+}

@@ -92,6 +92,11 @@ restore its old length-based reshape or first-sampled-redshift scatter anchor.
 Native transport fixtures remain records of the old migration calculation;
 nonzero deterministic scatter weights intentionally change under this correction.
 
+The native integration now retains that validation, removes its obsolete
+sampled-z>1 guard and reports both deterministic anchors as exactly 1.0.
+[Native integration validation](native-eps-integration.md) describes the separate
+corrected-reference gate; historical fixtures remain unchanged.
+
 ### Measured effects on selected grids
 
 - The three representative `N_hermNa=200` populations (0.5/2/5 keV, host
