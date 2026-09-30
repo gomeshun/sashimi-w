@@ -1,5 +1,7 @@
 """Standard public WDM API. Select the power convention explicitly."""
 
+from ._native import WDM
+
 from ._physics import (
     Pk_file as Pk_file,
     k_file as k_file,
@@ -38,4 +40,5 @@ from ._physics import (
 from ._itamae_migration import Subhalos, STANDARD_T2_Q10
 
 subhalos = Subhalos
-__all__ = ["Subhalos", "subhalos", "STANDARD_T2_Q10"]
+__all__ = [
+    "WDM","Subhalos", "subhalos", "STANDARD_T2_Q10"]

@@ -336,7 +336,7 @@ class Subhalos(WDMPhysics):
             columns["survive"],
         )
 
-    def _execute_population(self, parameters):
+    def _execute_population(self, parameters, *, preparation=None):
         from scipy.integrate import simpson
         from itamae.execution import PopulationComponents
         from ._itamae_components import (
@@ -350,7 +350,8 @@ class Subhalos(WDMPhysics):
         )
 
         p = parameters
-        zdist = np.arange(p["redshift"] + p["dz"], p["zmax"] + p["dz"], p["dz"])
+        zdist = (np.arange(p["redshift"] + p["dz"], p["zmax"] + p["dz"], p["dz"])
+                 if preparation is None else preparation.redshift_nodes)
         logmax = np.log10(0.1 * p["M0"]) if p["logmamax"] is None else p["logmamax"]
         ma200 = np.logspace(p["logmamin"], logmax, p["N_ma"])
         ma_by_redshift = np.array(
@@ -380,8 +381,9 @@ class Subhalos(WDMPhysics):
                 p["redshift"],
                 p["N_herm"],
                 p["profile_change"],
+                solver_options={} if preparation is None else preparation.solver_options,
             ),
-            survival=WDMSurvival(),
+            survival=WDMSurvival(.77 if preparation is None else preparation.ct_threshold),
             columns=WDMCatalogColumns(),
         )
         batches, contexts = zip(*(slices.build(i) for i in range(zdist.size)), strict=True)
@@ -483,7 +485,7 @@ class Subhalos(WDMPhysics):
             metadata=self._catalog_metadata(),
         )
 
-    def _catalog_metadata(self, parameters=None):
+    def _catalog_metadata(self, parameters=None, *, preparation=None):
         backend = BackendConfig(self.itamae_cosmology, self.itamae_units)
         variance = self.variance_model()
         return build_calculation_metadata(
@@ -491,12 +493,15 @@ class Subhalos(WDMPhysics):
             distribution_name="sashimi-w",
             module_file=__file__,
             calculation_specification=CALCULATION_SPECIFICATION,
-            model_identifier=f"sashimi-w:wdm:m_wdm_keV={self.mass_wdm:g}:power={self.wdm_power_convention}:v2",
+            model_identifier=(f"sashimi-w:wdm:m_wdm_keV={self.mass_wdm:g}:power={self.wdm_power_convention}:v2"
+                if preparation is None else preparation.metadata['native_configuration_identifier']),
             backend_identifier=backend.identifier,
             source_identifier="sashimi-w:itamae-migration",
             variance_identifier=variance.identifier,
             power_identifier=variance.power.identifier,
-            solver_identifier="itamae:odeint:scipy-default-tolerances:100-output-points",
+            solver_identifier=("itamae:odeint:scipy-default-tolerances:100-output-points"
+                if preparation is None or not preparation.solver_options
+                else "itamae:odeint:explicit-controls:100-output-points"),
             extra={
                 "mass_wdm_keV": float(self.mass_wdm),
                 "wdm_power_convention": self.wdm_power_convention,
@@ -539,6 +544,7 @@ class Subhalos(WDMPhysics):
                 "calculation_parameters": {} if parameters is None else parameters,
                 "survival": "strict c_t > 0.77",
                 "profile": "tidally-evolved NFW",
+                **({} if preparation is None else preparation.metadata),
                 "concentration": "Ludlow-2016:100-mass-nodes:500-tophat-nodes",
             },
         )

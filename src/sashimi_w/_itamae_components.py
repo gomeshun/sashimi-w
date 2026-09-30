@@ -139,11 +139,15 @@ class WDMProfileEvolution:
     redshift: float
     N_herm: int
     profile_change: bool
+    solver_options: dict = field(default_factory=dict)
 
     def evolve(self, batch, initial, context):
         ma = context["ma"]
         grid = np.linspace(context["z_acc"], self.redshift, 100)
-        bound_mass = solve_evolution(self.law.rhs, ma, grid, method="odeint")[-1]
+        options = dict(self.solver_options)
+        rtol, atol = options.pop("rtol", None), options.pop("atol", None)
+        bound_mass = solve_evolution(self.law.rhs, ma, grid, method="odeint",
+                                    rtol=rtol, atol=atol, odeint_options=options)[-1]
         rs_acc = initial["r_s_acc"].reshape(self.N_herm, -1) * _MPC
         rhos_acc = initial["rho_s_acc"].reshape(self.N_herm, -1) * _DENSITY
         if self.profile_change:

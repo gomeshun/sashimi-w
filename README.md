@@ -133,3 +133,9 @@ The prepared version is `0.2.0rc1`, with a versioned `sashimi-itamae` dependency
 See [release preparation](docs/release-preparation.md), [changelog](CHANGELOG.md)
 and [citation metadata](CITATION.cff). The full artifact matrix is recorded in the
 family review handoff after verification; no public upload is implied.
+
+## Native WDM API
+
+See the [native API guide](docs/native-api.md) for immutable process settings,
+explicit physical inputs and variant-specific supported boundaries. Historical
+entry points and the existing weighted catalog remain available.
