@@ -61,16 +61,16 @@ def test_native_and_legacy_match_independent_baseline(name):
     }
     with np.load(path) as saved:
         for state, catalog in native.items():
+            for key, array in catalog.columns.items():
+                np.testing.assert_array_equal(array, legacy[state].columns[key])
+            for key, array in catalog.weights.items():
+                np.testing.assert_array_equal(array, legacy[state].weights[key])
             for key, array in {**catalog.columns, **catalog.weights}.items():
                 expected = saved[state + "__" + key]
                 if array.dtype.kind == "b":
                     np.testing.assert_array_equal(array, expected)
                 else:
                     np.testing.assert_allclose(array, expected, rtol=5e-12, atol=1e-300)
-            for key, array in catalog.columns.items():
-                np.testing.assert_array_equal(array, legacy[state].columns[key])
-            for key, array in catalog.weights.items():
-                np.testing.assert_array_equal(array, legacy[state].weights[key])
 
 
 def test_configuration_is_detached_immutable_and_partial():
