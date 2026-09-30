@@ -36,8 +36,9 @@ Quadrature behavior and its sigmafac=0 policy are unchanged.
 Existing saved-file transport tolerances are unchanged. Two small new references
 live in `tests/references/native-api-eps-baseline`: corrected deterministic
 `sigma_offset` and the original nonsquare inputs evaluated independently one row
-at a time by the corrected source. The row test retains rtol=5e-12 and atol=0;
-its CI runner reference additionally requires exact equality.
+at a time by the corrected source. The row test retains rtol=5e-12 and atol=0
+when runner references are absent. CI instead requires exact independent
+same-runner row equality; see the transport diagnostic below.
 
 [The integration record](validation/native-eps-integration.json) quantifies the
 old-to-corrected change. The deterministic offset case changes total survivor
@@ -66,3 +67,23 @@ SASHIMI_W_BASELINE_REFERENCE_DIR=/tmp/w-old SASHIMI_W_CORRECTED_REFERENCE_DIR=/t
 This does not merge or release the native API PR. The numerical scope remains
 [the retained fixed-gap WDM EPS approximation](eps-stability.md), with unchanged
 transfer/cosmology/calibration and no new moving-barrier model.
+
+### Saved extreme-tail rows versus same-runner references
+
+The first integrated CI run (36787861497) passed 158 tests on every Python
+version but failed the saved-file row comparison at a rate of about 1.33e-128:
+CI returned 1.3335590505542295e-128 versus the saved
+1.3335590505356437e-128 (1.39e-11 relative, 1.86e-139 absolute).
+That saved assertion previously ran before the exact same-runner row assertion,
+so this failure alone did not establish whether the independent corrected
+single-row source agreed on CI.
+
+The gate now uses the independently installed immutable corrected source as
+its primary **exact** row oracle when runner references are supplied. Saved
+and historical hashes, exact input arrays, field sets and zero support are
+still checked. The generator records both arrays and unchanged-source transport
+metrics in `corrected-reference-report.json`, uploaded with test diagnostics.
+The existing rtol=5e-12/atol=0 saved-file comparison remains only the fallback
+when independently installed runner references are not supplied. No tolerance
+was widened and no product formula changed. Final CI must establish exact
+same-runner equality; the saved-file variation is reported separately.

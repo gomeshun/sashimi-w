@@ -54,6 +54,7 @@ jobs:
         run: |
           SASHIMI_W_SOURCE_REVISION=65f25390f7d745d671818ba904c59b133ce1aa29 uv pip install --no-deps --target .corrected-install ./.corrected-baseline
           PYTHONPATH="$PWD/.corrected-install" uv run --no-sync python scripts/generate_corrected_native_reference.py --output "$RUNNER_TEMP/w-corrected-baseline"
+          cp "$RUNNER_TEMP/w-corrected-baseline/report.json" corrected-reference-report.json
       - name: Run ITAMAE migration regression tests
         env:
           SASHIMI_W_BASELINE_REFERENCE_DIR: ${{ runner.temp }}/w-baseline
@@ -64,7 +65,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: migration-test-results-${{ matrix.python-version }}
-          path: test-results.xml
+          path: |
+            test-results.xml
+            corrected-reference-report.json
 
   package:
     runs-on: ubuntu-latest

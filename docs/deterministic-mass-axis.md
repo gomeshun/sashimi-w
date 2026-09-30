@@ -17,9 +17,10 @@ The original independent one-dimensional row fixture from dcef191 is preserved
 with its original hash. Stable variance gaps and log-space kernels change two
 extremely small row rates by at most 2.94e-11 relative (1.35e-39 absolute) on the
 recorded environment. A separately installed corrected migration at 65f2539
-provides new independent single-row references. The test retains rtol=5e-12,
-atol=0 against that corrected file and additionally requires exact equality
-against a separately generated corrected-source reference on every CI runner.
+provides new independent single-row references. Every CI runner requires exact
+equality against its separately generated corrected-source rows, with saved
+input/hash/zero-support checks and transport diagnostics. When runner references
+are absent, the saved-file fallback retains rtol=5e-12 and atol=0.
 No historical file or comparison tolerance was overwritten.
 
 Nonzero deterministic scatter weights intentionally change because both native

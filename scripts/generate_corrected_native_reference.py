@@ -48,7 +48,10 @@ for path in sorted(root.glob("*.json")):
     report["runner_files"][path.stem] = hashlib.sha256(destination.read_bytes()).hexdigest()
 # Preserve the original nonsquare inputs; regenerate only the independently
 # evaluated one-dimensional row rates using this pinned post-EPS source.
-with np.load(repository / "tests/references/deterministic_rate_rows.npz") as historical:
+historical_path = repository / "tests/references/deterministic_rate_rows.npz"
+historical_meta = json.loads(historical_path.with_suffix(".json").read_text())
+assert hashlib.sha256(historical_path.read_bytes()).hexdigest() == historical_meta["sha256"]
+with np.load(historical_path) as historical:
     model = Subhalos(2.0)
     expected = np.stack([model.Na_calc(row, np.array([z]), 1e10, N_herm=1,
                                       sigmafac=0.0)[0]
@@ -56,5 +59,25 @@ with np.load(repository / "tests/references/deterministic_rate_rows.npz") as his
     destination = args.output / "deterministic_rate_rows.npz"
     np.savez(destination, mvir=historical["mvir"], z=historical["z"], expected=expected)
     report["runner_files"]["deterministic_rate_rows"] = hashlib.sha256(destination.read_bytes()).hexdigest()
+    saved_path = repository / "tests/references/native-api-eps-baseline/deterministic_rate_rows.npz"
+    saved_meta = json.loads(saved_path.with_suffix(".json").read_text())
+    assert saved_meta["source"] == CORRECTED
+    assert hashlib.sha256(saved_path.read_bytes()).hexdigest() == saved_meta["sha256"]
+    with np.load(saved_path) as saved:
+        np.testing.assert_array_equal(historical["mvir"], saved["mvir"])
+        np.testing.assert_array_equal(historical["z"], saved["z"])
+        np.testing.assert_array_equal(expected == 0, saved["expected"] == 0)
+        nonzero = saved["expected"] != 0
+        relative = np.abs(expected[nonzero] / saved["expected"][nonzero] - 1)
+        report["nonsquare_row_transport"] = {
+            "source": CORRECTED,
+            "saved_sha256": saved_meta["sha256"],
+            "max_relative": float(relative.max()) if relative.size else 0.0,
+            "max_absolute": float(np.max(np.abs(expected - saved["expected"]))),
+            "inputs_equal": True,
+            "zero_support_equal": True,
+            "runner_expected": expected.tolist(),
+            "saved_expected": saved["expected"].tolist(),
+        }
 (args.output / "report.json").write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
 print(json.dumps(report, indent=2, sort_keys=True))
