@@ -43,8 +43,10 @@ jobs:
       - name: Measure unchanged baseline transport on this runner
         run: |
           SASHIMI_W_SOURCE_REVISION=dcef1910d42cab940567be448ffc79b42d436802 uv pip install --no-deps --target .baseline-install ./.baseline
-          PYTHONPATH="$PWD/.baseline-install" uv run --no-sync python scripts/check_native_baseline_transport.py
+          PYTHONPATH="$PWD/.baseline-install" uv run --no-sync python scripts/check_native_baseline_transport.py --output "$RUNNER_TEMP/w-baseline"
       - name: Run ITAMAE migration regression tests
+        env:
+          SASHIMI_W_BASELINE_REFERENCE_DIR: ${{ runner.temp }}/w-baseline
         run: uv run --no-sync python -m pytest -q --junitxml=test-results.xml
       - name: Upload migration test diagnostics
         if: always()

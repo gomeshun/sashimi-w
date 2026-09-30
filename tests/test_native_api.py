@@ -2,6 +2,7 @@
 
 import hashlib
 import json
+import os
 import warnings
 from dataclasses import FrozenInstanceError
 from pathlib import Path
@@ -13,6 +14,16 @@ from itamae.types import WeightedSubhaloCatalog
 from sashimi_w import WDM, Subhalos
 
 ROOT = Path(__file__).parent / "references/native-api-baseline"
+# Unchanged-source runner dispersion is recorded in docs/validation/
+# native-reference-transport.json. These apply only across saved environments;
+# current native/legacy and independently run pinned-source equality stay exact.
+TRANSPORT_RTOL = {
+    "m_bound": 5e-10,
+    "r_s": 2e-10,
+    "rho_s": 2e-10,
+    "c_t": 2e-11,
+    "weight_base": 3e-9,
+}
 
 
 def configured(name="default"):
@@ -59,6 +70,20 @@ def test_native_and_legacy_match_independent_baseline(name):
     legacy = {
         "default": Subhalos(**record["constructor"]).rs_rhos_catalog_calc(**record["parameters"])
     }
+    runner_directory = os.environ.get("SASHIMI_W_BASELINE_REFERENCE_DIR")
+    if runner_directory is not None:
+        directory = Path(runner_directory)
+        report = json.loads((directory / "report.json").read_text())
+        assert report["source"] == record["source"]
+        assert report["itamae_source"] == record["core"]
+        runner_path = directory / (name + ".npz")
+        assert hashlib.sha256(runner_path.read_bytes()).hexdigest() == report["runner_files"][name]
+        with np.load(runner_path) as independent:
+            for catalog in native.values():
+                assert set(independent.files) == set(catalog.columns) | set(catalog.weights)
+                for key, array in {**catalog.columns, **catalog.weights}.items():
+                    assert array.shape == independent[key].shape
+                    np.testing.assert_array_equal(array, independent[key])
     with np.load(path) as saved:
         for state, catalog in native.items():
             for key, array in catalog.columns.items():
@@ -70,7 +95,10 @@ def test_native_and_legacy_match_independent_baseline(name):
                 if array.dtype.kind == "b":
                     np.testing.assert_array_equal(array, expected)
                 else:
-                    np.testing.assert_allclose(array, expected, rtol=5e-12, atol=1e-300)
+                    np.testing.assert_array_equal(array == 0, expected == 0)
+                    np.testing.assert_allclose(
+                        array, expected, rtol=TRANSPORT_RTOL.get(key, 5e-12), atol=1e-300
+                    )
 
 
 def test_configuration_is_detached_immutable_and_partial():

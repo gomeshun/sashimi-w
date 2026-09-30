@@ -123,3 +123,29 @@ categories from intermediate historical kernels (overflow/invalid/division).
 The test checks native/legacy warning category/message parity and finite final
 columns/weights. Runtime warnings are not suppressed by the API, and this
 regression is not described as warning-free physical-domain validation.
+
+
+### Frozen-reference transport across runners
+
+The unchanged pinned migration was independently installed and executed on each
+CI matrix runner before testing the native API. On some runners it is exactly elementwise
+equal to the original fixtures; on others its maximum relative deviations are
+3.42e-10 for evolved mass, 1.42e-10 for scale radius, 8.97e-11 for scale density,
+8.33e-12 for truncation ratio and 1.66e-9 for EPS weights (the last has a maximum
+absolute difference of 4.66e-21 in the affected sigma-offset case). Mass/redshift
+inputs, masks, zero support and quadrature/survival factors remain exact.
+[Per-field measurements and software versions](validation/native-reference-transport.json)
+record the unchanged source/core pins and the three runner reports.
+
+The saved cross-environment comparisons therefore use bounded field-specific
+relative tolerances: 5e-10 for evolved mass, 2e-10 for evolved radius/density,
+2e-11 for truncation ratio and 3e-9 for EPS weights; remaining fields retain
+5e-12. This is a fixture-transport allowance, not a scientific accuracy claim.
+No physical calculation or solver tolerance was changed. The exact low-level
+hardware/math-library cause is unresolved; Python version alone did not explain
+which runners differed.
+
+CI additionally requires exact elementwise equality to independently calculated pinned
+old-source arrays from that same runner, alongside exact current legacy/native
+parity. Missing requested runner references fail rather than silently skipping
+the comparison. Original checked-in fixtures and their hashes are unchanged.

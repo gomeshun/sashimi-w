@@ -1,5 +1,6 @@
 """Measure frozen-reference transport using the unchanged installed migration."""
 
+import argparse
 import hashlib
 import json
 import platform
@@ -13,14 +14,22 @@ from itamae.provenance import source_revision
 import sashimi_w
 from sashimi_w import Subhalos
 
+parser = argparse.ArgumentParser()
+parser.add_argument("--output", type=Path, required=True)
+args = parser.parse_args()
+args.output.mkdir(parents=True, exist_ok=True)
+
 BASELINE = "dcef1910d42cab940567be448ffc79b42d436802"
 assert source_revision("sashimi-w") == BASELINE
+CORE = "23d01e8758a88b061b87de9e488c38ec89fd8e4f"
+assert source_revision("itamae") == CORE
 repository = Path(__file__).resolve().parents[1]
 module_path = Path(sashimi_w.__file__).resolve()
 assert module_path.is_relative_to(repository / ".baseline-install")
 root = repository / "tests/references/native-api-baseline"
 report = {
     "source": BASELINE,
+    "itamae_source": CORE,
     "module_path": str(module_path),
     "python": sys.version,
     "numpy": np.__version__,
@@ -47,5 +56,9 @@ for path in sorted(root.glob("*.json")):
                     "finite": bool(np.all(np.isfinite(actual))),
                     "zero_support_equal": bool(np.array_equal(actual == 0, expected == 0)),
                 }
+    destination = args.output / (path.stem + ".npz")
+    np.savez(destination, **catalog.columns, **catalog.weights)
     report["cases"][path.stem] = fields
+    report.setdefault("runner_files", {})[path.stem] = hashlib.sha256(destination.read_bytes()).hexdigest()
+(args.output / "report.json").write_text(json.dumps(report, indent=2, sort_keys=True))
 print(json.dumps(report, indent=2, sort_keys=True))
