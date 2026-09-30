@@ -343,6 +343,9 @@ class WDMPhysics:
 
     def Na_calc(self, ma, zacc, Mhost, z0=0, N_herm=200, Nrand=1000, sigmafac=0):
         """Returns Na, Eq. (3) of Yang et al. (2011)"""
+        ma = np.asarray(ma)
+        if ma.ndim not in (1, 2) or (ma.ndim == 2 and ma.shape[0] != len(zacc)):
+            raise ValueError("ma must be a 1D mass axis or a 2D (accretion-redshift, mass) grid.")
         zacc_2d = zacc.reshape(len(zacc), 1)
         M200_0 = self.Mzzi(Mhost, zacc_2d, z0)
         logM200_0 = np.log10(M200_0)
@@ -382,7 +385,7 @@ class WDMPhysics:
         Phi = self.Ffunc_Yang(delcM, delca, sM, sa) / normB * np.heaviside(mmax - ma, 0)
         if N_herm == 1:
             F2t = np.nan_to_num(Phi)
-            F2 = F2t.reshape((len(zacc_2d), len(ma)))
+            F2 = F2t.reshape((len(zacc_2d), ma.shape[-1]))
         else:
             F2 = np.sum(np.nan_to_num(Phi) * wwi / np.sqrt(np.pi), axis=0)
         Na = F2 * self.dsdm(ma, 0) * self.dMdz(Mhost, zacc_2d, z0, sigmafac) * (1 + zacc_2d)
