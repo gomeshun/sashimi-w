@@ -158,11 +158,9 @@ class WDM:
             target, accretion_redshift_range, a["redshift_step"], 7.0
         )
         deterministic = a["host_history_mode"] == "deterministic"
-        if deterministic and not np.any(nodes > 1.0):
-            raise ValueError(
-                "The preserved deterministic accretion law requires a sampled z>1 scatter anchor, even when sigmafac=0."
-            )
-        anchor = float(nodes[nodes > 1.0][0]) if deterministic else None
+        # PR19 anchors the deterministic width to the physical z=1 host mass,
+        # independently of whether this requested redshift grid samples z=1.
+        anchor = 1.0 if deterministic else None
         from ._itamae_migration import Subhalos
 
         model = Subhalos(mass_wdm=dm["mass_keV"], wdm_power_convention=dm["power_convention"])

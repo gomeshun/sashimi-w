@@ -49,20 +49,18 @@ sigmafac offset. A mode-only change that leaves incompatible inherited values
 fails with an explicit instruction to change/reset them. No ignored sigmafac
 is silently retained in quadrature mode.
 
-The preserved deterministic accretion law anchors its low-z scatter at the
-**first sampled z>1**; the tidal history uses z=1. Both are recorded separately.
-On this pinned migration branch, a deterministic population without a sampled
-z>1 is rejected before execution,
-even for sigmafac0. These are existing scientific/numerical conventions, not
-silently unified prescriptions.
+Deterministic accretion scatter now anchors its low-redshift width at exactly
+**z=1**, matching the already exact-z=1 tidal-history anchor. The host mass is
+evaluated there independently of the requested redshift grid, so a population
+with all accretion nodes at or below one is supported. Both anchor values are
+recorded separately in metadata. The inherited low-z taper is unchanged.
 
-The pre-existing nonsquare 2D mass-axis reshape defect in this non-default
-branch is corrected separately: see [dimension-contract correction](deterministic-mass-axis.md).
-Its 1D/square-grid outputs and the default quadrature branch remain unchanged.
-This is a minimal migration backport of a known main/PR17 correction; upstream
-also changes exact-z1 anchoring and EPS active-support/gap arithmetic. Those
-scientific changes remain explicitly outstanding, so this adapter does not
-claim main-equivalence.
+The earlier nonsquare mass-axis repair retains explicit leading-redshift-axis
+validation. PR19's numerical backport uses an explicit host-node axis and stable
+EPS evaluation, including zero-weight populations. See the
+[dimension-contract history](deterministic-mass-axis.md),
+[EPS approximation and numerical scope](eps-stability.md), and
+[native integration validation](native-eps-integration.md).
 
 ## Solver and disruption controls
 
@@ -92,14 +90,22 @@ controls, host branch/anchors, coupled power/variance identifiers and units.
 
 ## Verification
 
-Independent pre-edit records use W dcef1910d42cab940567be448ffc79b42d436802 and
-core23d01e8758a88b061b87de9e488c38ec89fd8e4f. They cover nonzero output epoch,
-particle mass, both host branches, sigmafac offset and profile-off. The
-nonsquare fix has a separate per-redshift 1D reference from the untouched
-installed baseline. Old/new same-runtime comparisons are exact; frozen output
-comparisons allow the existing reference tolerance. Configuration changes are
-also checked for simultaneous variance/concentration propagation and state
-isolation. These W semantics are not interchangeable with every family variant.
+Historical pre-edit records use W dcef1910d42cab940567be448ffc79b42d436802 and
+core 23d01e8758a88b061b87de9e488c38ec89fd8e4f; they remain unchanged. They cover
+nonzero output epoch, particle mass, both host branches, sigmafac offset and
+profile-off. Current native/current compatibility API comparisons remain exact.
+Each CI runner also independently installs corrected migration
+65f25390f7d745d671818ba904c59b133ce1aa29 and requires exact field sets, shapes,
+columns and weight arrays against all six cases.
+
+The old migration remains an exact same-runtime structural reference, but its
+EPS weights are historical after PR19. Corrected independent files are added for
+the changed deterministic offset and nonsquare rate rows. Original transport
+allowances are unchanged; no tolerance is widened to hide the intentional
+anchor correction. [Integration evidence](native-eps-integration.md) distinguishes
+these references. Configuration changes still test simultaneous variance and
+concentration propagation and state isolation. W semantics are not interchangeable
+with every family variant.
 
 ### ODE reference diagnostic: discontinuous concentration sampling
 

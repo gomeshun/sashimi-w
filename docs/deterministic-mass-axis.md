@@ -1,43 +1,34 @@
-# Migration backport of the deterministic mass-axis correction
+# Deterministic mass-axis correction and EPS integration
 
-This is a migration-specific minimal backport of a **known issue already fixed
-on main**, not a newly discovered unfixed main bug. Upstream commit
-[5de09c2](https://github.com/gomeshun/sashimi-w/commit/5de09c2c1bc7e7c58eb2467aa230bb590941df0b),
-merged by [PR17](https://github.com/gomeshun/sashimi-w/pull/17), also changed the
-scatter anchor and EPS active-support/variance-gap arithmetic.
+The original PR18 shape repair addressed a known issue already fixed on fork
+main by [5de09c2](https://github.com/gomeshun/sashimi-w/commit/5de09c2c1bc7e7c58eb2467aa230bb590941df0b).
+Migration dcef191 reshaped using `(len(zacc), len(ma))`, even when `ma` was a
+2D per-redshift virial-mass array. A 3-redshift × 4-mass grid therefore tried to
+reshape 12 values to (3,3).
 
-The pinned migration's non-default `N_hermNa=1` branch reshaped the accretion kernel
-using `(len(zacc), len(ma))`. The current population executor supplies a 2D
-per-redshift virial-mass grid, so `len(ma)` is the redshift count, not the mass
-count. A 3-redshift × 4-mass grid failed by trying to reshape 12 values to (3,3).
+PR18 initially used `ma.shape[-1]` while preserving the old EPS arithmetic.
+PR19 subsequently backported stable EPS and exact-z=1 scatter anchoring, merged
+as 65f25390f7d745d671818ba904c59b133ce1aa29. The integrated implementation keeps
+PR18's explicit 1D/2D mass-grid validation and leading-axis alignment check,
+then uses PR19's `(N_herm, n_redshift, 1)` host axis and `Phi[0]` selection.
+It does not restore the obsolete reshape or sampled-z>1 anchor requirement.
 
-The correction uses `ma.shape[-1]` and explicitly validates 2D leading-axis
-alignment. It preserves the 1D mass-axis behavior, the ordinary quadrature
-branch, and all kernel/normalization arithmetic. No physical formula or default
-solver changes.
+The original independent one-dimensional row fixture from dcef191 is preserved
+with its original hash. Stable variance gaps and log-space kernels change two
+extremely small row rates by at most 2.94e-11 relative (1.35e-39 absolute) on the
+recorded environment. A separately installed corrected migration at 65f2539
+provides new independent single-row references. The test retains rtol=5e-12,
+atol=0 against that corrected file and additionally requires exact equality
+against a separately generated corrected-source reference on every CI runner.
+No historical file or comparison tolerance was overwritten.
 
-The small independent reference was generated before editing from installed
-migration commit `dcef1910d42cab940567be448ffc79b42d436802`: each redshift row was
-calculated separately through its unchanged 1D mass-grid path with `sigmafac=0`.
-The repaired nonsquare 2D path is compared against those stored rows. The
-native API's square deterministic catalogs also retain pre-change parity.
+Nonzero deterministic scatter weights intentionally change because both native
+and compatibility paths now use the physical z=1 host mass. Both native anchor
+metadata fields are 1.0. All-at-or-below-one domains succeed, and common
+accretion-rate rows are independent of extending the redshift grid. Population
+weights themselves may legitimately change when the integrated domain expands.
 
-A separate existing convention remains: deterministic accretion scatter uses
-the first sampled redshift above one as its anchor, while the tidal host
-history uses redshift one. The native API records both and rejects domains with
-no sampled z>1. This patch does not silently change either convention.
-
-## Comparison with upstream and remaining divergence
-
-Upstream normalizes M200 to `(N_herm, n_redshift, 1)` and selects `Phi[0]` for
-the deterministic branch after replacing the EPS kernel/active-domain handling.
-The migration-only repair instead uses `ma.shape[-1]` in its existing reshape,
-with leading-axis validation. The saved square-grid and independent 1D-row
-references establish equivalence to the intended migration arithmetic.
-
-The exact-z1 scatter anchor and finite active-support/variance-gap/log-kernel
-changes from upstream are **not** included here. The sampled-z>1 requirement is
-a preserved limitation of this pinned migration branch, not a universal WDM
-requirement or a limitation of current main. No whole-commit cherry-pick or
-scientific-default synchronization is implied; main and migration remain
-different reviewed scientific specifications.
+See [EPS numerical scope](eps-stability.md) and
+[native integration validation](native-eps-integration.md). This remains the
+existing fixed-gap EPS approximation with unchanged q10, WMAP7 and calibration;
+it is not a new moving-barrier first-crossing model.

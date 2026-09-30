@@ -204,6 +204,12 @@ class Subhalos(WDMPhysics):
             self._variance_model = make_integrated_variance_model(self)
         return self._variance_model
 
+    def _variance_gap(self, smaller_mass, larger_mass):
+        """Integrate S(smaller)-S(larger) directly with the configured spectrum."""
+        from ._itamae_variance import _sharp_k_variance_gap
+
+        return _sharp_k_variance_gap(self.variance_model(), smaller_mass, larger_mass)
+
     def sigmaMz(self, mass: Any, z: Any):
         """Evaluate the physical sharp-k integral in the model's mass domain.
 
@@ -368,7 +374,15 @@ class Subhalos(WDMPhysics):
         )
         total = simpson(simpson(accretion, x=np.log(ma_by_redshift)), x=np.log(1 + zdist))
         population = accretion / (1.0 + zdist[:, None])
-        population = population / np.sum(population) * total
+        population_sum = np.sum(population)
+        if population_sum == 0.0 and total == 0.0:
+            # A grid wholly below the WDM cutoff carries zero population.
+            population = np.zeros_like(population)
+        elif (not np.isfinite(population_sum) or population_sum <= 0.0
+              or not np.isfinite(total) or total < 0.0):
+            raise ValueError("WDM accretion population requires a finite nonnegative normalization.")
+        else:
+            population = population / population_sum * total
         slices = WDMAccretionSlices(
             self, ma200, ma_by_redshift, zdist, population, p["sigmalogc"], p["N_herm"]
         )
@@ -503,6 +517,8 @@ class Subhalos(WDMPhysics):
                 if preparation is None or not preparation.solver_options
                 else "itamae:odeint:explicit-controls:100-output-points"),
             extra={
+                "eps_numerics": "active-support:direct-variance-gap:normalized-zero-limit:v1",
+                "deterministic_scatter_anchor": "exact-z=1",
                 "mass_wdm_keV": float(self.mass_wdm),
                 "wdm_power_convention": self.wdm_power_convention,
                 "wdm_power_formula_role": self.wdm_power_formula_role,

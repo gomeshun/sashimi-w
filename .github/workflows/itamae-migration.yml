@@ -44,9 +44,20 @@ jobs:
         run: |
           SASHIMI_W_SOURCE_REVISION=dcef1910d42cab940567be448ffc79b42d436802 uv pip install --no-deps --target .baseline-install ./.baseline
           PYTHONPATH="$PWD/.baseline-install" uv run --no-sync python scripts/check_native_baseline_transport.py --output "$RUNNER_TEMP/w-baseline"
+      - name: Check out pinned post-EPS migration
+        uses: actions/checkout@v4
+        with:
+          repository: gomeshun/sashimi-w
+          ref: 65f25390f7d745d671818ba904c59b133ce1aa29
+          path: .corrected-baseline
+      - name: Generate independent corrected references on this runner
+        run: |
+          SASHIMI_W_SOURCE_REVISION=65f25390f7d745d671818ba904c59b133ce1aa29 uv pip install --no-deps --target .corrected-install ./.corrected-baseline
+          PYTHONPATH="$PWD/.corrected-install" uv run --no-sync python scripts/generate_corrected_native_reference.py --output "$RUNNER_TEMP/w-corrected-baseline"
       - name: Run ITAMAE migration regression tests
         env:
           SASHIMI_W_BASELINE_REFERENCE_DIR: ${{ runner.temp }}/w-baseline
+          SASHIMI_W_CORRECTED_REFERENCE_DIR: ${{ runner.temp }}/w-corrected-baseline
         run: uv run --no-sync python -m pytest -q --junitxml=test-results.xml
       - name: Upload migration test diagnostics
         if: always()

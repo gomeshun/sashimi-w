@@ -1,0 +1,102 @@
+{
+  "historical_source": "dcef1910d42cab940567be448ffc79b42d436802",
+  "corrected_source": "65f25390f7d745d671818ba904c59b133ce1aa29",
+  "native_previous_head": "2d6e2d535d3948a9f31281948143ccf2be404594",
+  "itamae_source": "23d01e8758a88b061b87de9e488c38ec89fd8e4f",
+  "comparison": "independently installed old/corrected migration in one runtime; native parity tested separately",
+  "cases": {
+    "default": {
+      "structure_exact": true,
+      "historical_fixture_sha256": "84af80846a708e4c74005351ba7087e71dcf5757a93eb5c8bd10e248882f9cb3",
+      "survivor_count": {
+        "historical": 2.341293228491045e-06,
+        "corrected": 2.3412932284910656e-06,
+        "relative_change": 8.881784197001252e-15
+      },
+      "bound_mass_fraction": {
+        "historical": 7.997004226633628e-09,
+        "corrected": 7.997004226633699e-09,
+        "relative_change": 8.881784197001252e-15
+      }
+    },
+    "deterministic": {
+      "structure_exact": true,
+      "historical_fixture_sha256": "e835848c9b64542cf1ea7859dd7499aadbdfdd558d7698a05814e8fce44197a7",
+      "survivor_count": {
+        "historical": 1.7982564216186284e-06,
+        "corrected": 1.7982564216186388e-06,
+        "relative_change": 5.773159728050814e-15
+      },
+      "bound_mass_fraction": {
+        "historical": 6.142786180491684e-09,
+        "corrected": 6.14278618049172e-09,
+        "relative_change": 5.773159728050814e-15
+      }
+    },
+    "nonzero": {
+      "structure_exact": true,
+      "historical_fixture_sha256": "a0eceec8e91cdad6191e355cf8ac897ff5d8fa98e840e3badbe0d3cfccdf3ff3",
+      "survivor_count": {
+        "historical": 2.899613052503984e-10,
+        "corrected": 2.899613052501984e-10,
+        "relative_change": -6.897815651996098e-13
+      },
+      "bound_mass_fraction": {
+        "historical": 1.19186626716382e-12,
+        "corrected": 1.1918662671629976e-12,
+        "relative_change": -6.900036098045348e-13
+      }
+    },
+    "particle_mass": {
+      "structure_exact": true,
+      "historical_fixture_sha256": "036f96ba4ab102447a850299833e6af4a93c2f877a5e1dc02d9ff8b34e570bd1",
+      "survivor_count": {
+        "historical": 0.010368125885646836,
+        "corrected": 0.010368125885646846,
+        "relative_change": 1.1102230246251565e-15
+      },
+      "bound_mass_fraction": {
+        "historical": 2.4761778537740283e-05,
+        "corrected": 2.4761778537740317e-05,
+        "relative_change": 1.3322676295501878e-15
+      }
+    },
+    "profile_off": {
+      "structure_exact": true,
+      "historical_fixture_sha256": "9c33639003d07e4bbbfb5009099fe7b7b4b77aedbb9d223becec68bf726ac578",
+      "survivor_count": {
+        "historical": 2.3410141029607063e-06,
+        "corrected": 2.341014102960727e-06,
+        "relative_change": 8.881784197001252e-15
+      },
+      "bound_mass_fraction": {
+        "historical": 7.996671232547893e-09,
+        "corrected": 7.996671232547964e-09,
+        "relative_change": 8.881784197001252e-15
+      }
+    },
+    "sigma_offset": {
+      "structure_exact": true,
+      "historical_fixture_sha256": "5fc59c47c4b4e59e87b5794ae6893f0e1eea4dcb1ac75b67cd623e232212c5d6",
+      "survivor_count": {
+        "historical": 1.6026954838093999e-06,
+        "corrected": 1.5664456684208593e-06,
+        "relative_change": -0.02261803053339828
+      },
+      "bound_mass_fraction": {
+        "historical": 5.469119964550316e-09,
+        "corrected": 5.3453927632165375e-09,
+        "relative_change": -0.022622872077363798
+      }
+    }
+  },
+  "corrected_files": {
+    "deterministic_rate_rows.npz": "305b832726d355e4b05b07cbf93d8adf175e0af7e616bb62f110cffd94d20405",
+    "sigma_offset.npz": "a3ae396e0d088431733bf1df6758110b99fd255ed83dce1586e31468e9df79bd"
+  },
+  "nonsquare_rows": {
+    "max_relative_change": 2.9422575487103586e-11,
+    "max_absolute_change": 1.3498876262656682e-39,
+    "inputs_exact": true
+  }
+}

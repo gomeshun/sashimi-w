@@ -1,4 +1,4 @@
-"""Native WDM contracts against independent pre-edit installed results."""
+"""Native WDM contracts against historical and independently corrected references."""
 
 import hashlib
 import json
@@ -14,6 +14,8 @@ from itamae.types import WeightedSubhaloCatalog
 from sashimi_w import WDM, Subhalos
 
 ROOT = Path(__file__).parent / "references/native-api-baseline"
+CORRECTED_ROOT = Path(__file__).parent / "references/native-api-eps-baseline"
+CORRECTED_SOURCE = "65f25390f7d745d671818ba904c59b133ce1aa29"
 # Unchanged-source runner dispersion is recorded in docs/validation/
 # native-reference-transport.json. These apply only across saved environments;
 # current native/legacy and independently run pinned-source equality stay exact.
@@ -83,6 +85,23 @@ def test_native_and_legacy_match_independent_baseline(name):
                 assert set(independent.files) == set(catalog.columns) | set(catalog.weights)
                 for key, array in {**catalog.columns, **catalog.weights}.items():
                     assert array.shape == independent[key].shape
+                    # The old source is an exact structural reference. EPS
+                    # weights now have explicitly corrected numerical behavior.
+                    if key != "weight_base":
+                        np.testing.assert_array_equal(array, independent[key])
+    corrected_directory = os.environ.get("SASHIMI_W_CORRECTED_REFERENCE_DIR")
+    if corrected_directory is not None:
+        directory = Path(corrected_directory)
+        report = json.loads((directory / "report.json").read_text())
+        assert report["source"] == CORRECTED_SOURCE
+        assert report["itamae_source"] == record["core"]
+        runner_path = directory / (name + ".npz")
+        assert hashlib.sha256(runner_path.read_bytes()).hexdigest() == report["runner_files"][name]
+        with np.load(runner_path) as independent:
+            for catalog in native.values():
+                assert set(independent.files) == set(catalog.columns) | set(catalog.weights)
+                for key, array in {**catalog.columns, **catalog.weights}.items():
+                    assert array.shape == independent[key].shape
                     np.testing.assert_array_equal(array, independent[key])
     with np.load(path) as saved:
         for state, catalog in native.items():
@@ -92,6 +111,17 @@ def test_native_and_legacy_match_independent_baseline(name):
                 np.testing.assert_array_equal(array, legacy[state].weights[key])
             for key, array in {**catalog.columns, **catalog.weights}.items():
                 expected = saved[state + "__" + key]
+                if name == "sigma_offset" and key == "weight_base":
+                    # Keep the old fixture intact: the exact-z1 width changes
+                    # these weights intentionally, so it is no longer an oracle.
+                    assert not np.array_equal(array, expected)
+                    corrected_path = CORRECTED_ROOT / "sigma_offset.npz"
+                    corrected_meta = json.loads(corrected_path.with_suffix(".json").read_text())
+                    assert corrected_meta["source"] == CORRECTED_SOURCE
+                    assert corrected_meta["parameters"] == record["parameters"]
+                    assert hashlib.sha256(corrected_path.read_bytes()).hexdigest() == corrected_meta["sha256"]
+                    with np.load(corrected_path) as corrected:
+                        expected = corrected[key]
                 if array.dtype.kind == "b":
                     np.testing.assert_array_equal(array, expected)
                 else:
@@ -222,11 +252,12 @@ def test_deterministic_scatter_anchors_are_explicit_and_nonsquare_supported():
     model = model.configure(
         accretion={"host_history_mode": "deterministic", "host_history_nodes": 1, "sigmafac": 0.0}
     )
-    with pytest.raises(ValueError, match="sampled z>1"):
-        model.population(**request)
+    short = model.population(**request)
+    assert short.metadata["deterministic_accretion_scatter_anchor_redshift"] == 1.0
+    assert np.all(np.isfinite(short.weight_final))
     catalog = model.population(**{**request, "accretion_redshift_range": (0.2, 1.8)})
     assert len(catalog.columns["m_bound"]) == 3 * 4 * 2
-    assert catalog.metadata["deterministic_accretion_scatter_anchor_redshift"] == 1.2
+    assert catalog.metadata["deterministic_accretion_scatter_anchor_redshift"] == 1.0
     assert catalog.metadata["deterministic_tidal_scatter_anchor_redshift"] == 1.0
     assert catalog.metadata["host_history_mode"] == "deterministic"
 
@@ -340,3 +371,39 @@ def test_omitted_redshift_domain_preserves_legacy_support():
             np.testing.assert_array_equal(array, legacy[state].columns[key])
         for key, array in catalog.weights.items():
             np.testing.assert_array_equal(array, legacy[state].weights[key])
+
+
+@pytest.mark.parametrize("sigmafac", [-0.5, 0.0, 0.5])
+def test_deterministic_native_rate_rows_are_grid_independent(monkeypatch, sigmafac):
+    model, request, _ = configured()
+    model = model.configure(accretion={"host_history_mode": "deterministic",
+                                      "host_history_nodes": 1, "sigmafac": sigmafac})
+    observed = []
+    original = Subhalos.Na_calc
+    def spy(self, mass, redshift, *args, **kwargs):
+        result = original(self, mass, redshift, *args, **kwargs)
+        observed.append((np.array(redshift), result.copy()))
+        return result
+    monkeypatch.setattr(Subhalos, "Na_calc", spy)
+    short = model.population(**request)
+    long = model.population(**{**request, "accretion_redshift_range": (0.0, 2.0)})
+    for catalog in (short, long):
+        assert catalog.metadata["deterministic_accretion_scatter_anchor_redshift"] == 1.0
+        assert catalog.metadata["deterministic_tidal_scatter_anchor_redshift"] == 1.0
+        assert np.all(np.isfinite(catalog.weight_final))
+    zshort, rateshort = observed[0]
+    zlong, ratelong = observed[1]
+    np.testing.assert_array_equal(zshort, zlong[:len(zshort)])
+    # Only row rates are grid-independent; integrating a longer accretion
+    # domain legitimately changes the population normalization and weights.
+    np.testing.assert_array_equal(rateshort, ratelong[:len(zshort)])
+
+
+def test_native_wholly_suppressed_population_has_zero_weight():
+    model, request, _ = configured()
+    model = model.configure(dark_matter={"mass_keV": 0.5})
+    with np.errstate(invalid="raise", divide="raise", over="raise"):
+        catalog = model.population(**{**request, "host_mass_msun": 1e12})
+    assert np.all(catalog.weight_final == 0.0)
+    assert np.all(catalog.weights["weight_base"] == 0.0)
+    assert all(np.all(np.isfinite(value)) for value in catalog.columns.values())

@@ -64,6 +64,44 @@ def _cumulative_above(values, weights, bins=10000):
     return float(np.sum(weights)), thresholds, tail[above]
 
 
+def _normalized_eps_kernel(barrier_gap, variance_gap, minimum_variance_gap):
+    """Stable F/B for the retained fixed-gap EPS normalization.
+
+    At a zero barrier gap both numerator and erf normalization vanish; their
+    ratio tends to sqrt(dsmin)/(2*ds**1.5). This is not a moving-barrier solver.
+    """
+    gap, ds, dsmin = np.broadcast_arrays(barrier_gap, variance_gap, minimum_variance_gap)
+    if (not all(np.all(np.isfinite(x)) for x in (gap, ds, dsmin))
+            or np.any(gap < 0) or np.any(ds <= 0) or np.any(dsmin <= 0)):
+        raise ValueError("WDM EPS requires nonnegative barrier and positive variance gaps.")
+    ratio = gap / np.sqrt(2 * dsmin)
+    values = np.empty_like(gap, dtype=float)
+    small_gap = ratio < 1e-4
+    t = ratio[small_gap] ** 2
+    # Logarithms also protect the normalized zero/small-gap limit against
+    # intermediate underflow in ds**1.5 on saturated WDM tails.
+    values[small_gap] = np.exp(
+        0.5 * np.log(dsmin[small_gap]) - np.log(2.0) - 1.5 * np.log(ds[small_gap])
+        - gap[small_gap] ** 2 / (2 * ds[small_gap])
+        - np.log1p(-t / 3 + t * t / 10 - t * t * t / 42)
+    )
+    regular = ~small_gap
+    exponent = gap[regular] / np.sqrt(ds[regular])
+    # Such an exponent cannot contribute a representable float rate. Avoid
+    # overflowing its square, without clipping any representable kernel.
+    active = exponent < 1e150
+    ordinary = np.zeros(exponent.shape)
+    ordinary[active] = np.exp(
+        np.log(gap[regular][active]) - 1.5 * np.log(ds[regular][active])
+        - 0.5 * np.log(2 * np.pi) - 0.5 * exponent[active] ** 2
+        - np.log(special.erf(ratio[regular][active]))
+    )
+    values[regular] = ordinary
+    if not np.all(np.isfinite(values)):
+        raise ValueError("Non-finite WDM EPS kernel in the active domain.")
+    return values
+
+
 class WDMPhysics:
     def __init__(self, mass_wdm=1.5):
         self.mass_wdm = mass_wdm
@@ -322,12 +360,13 @@ class WDMPhysics:
             * pow(self.mass_wdm, -4)
         )
         x = np.log(M / Mj)
-        hh = 1.0 / (1 + np.exp((x + 2.4) / 0.1))
-        return (
-            1.686
-            * pow(self.growthD(z), -1)
-            * (hh * (0.04 / np.exp(2.3 * x)) + (1 - hh) * np.exp(0.31687 / np.exp(0.809 * x)))
-        )
+        hh = special.expit(-(x + 2.4) / 0.1)
+        # Do not evaluate the discarded branch below the WDM cutoff.
+        x, hh = np.broadcast_arrays(x, hh)
+        correction = hh * (0.04 / np.exp(2.3 * x))
+        active = hh != 1.0
+        correction[active] += (1 - hh[active]) * np.exp(0.31687 / np.exp(0.809 * x[active]))
+        return 1.686 / self.growthD(z) * correction
 
     def s_Y11(self, M):
         return pow(self.sigmaMz(M, 0), 2)
@@ -342,20 +381,23 @@ class WDMPhysics:
         )
 
     def Na_calc(self, ma, zacc, Mhost, z0=0, N_herm=200, Nrand=1000, sigmafac=0):
-        """Returns Na, Eq. (3) of Yang et al. (2011)"""
+        """Return the retained Yang EPS approximation on its active support.
+
+        The analytic normalization treats the barrier gap as fixed. Retaining
+        the mass-dependent WDM collapse threshold does not make this an exact
+        moving-barrier first-crossing solution.
+        """
         ma = np.asarray(ma)
         if ma.ndim not in (1, 2) or (ma.ndim == 2 and ma.shape[0] != len(zacc)):
             raise ValueError("ma must be a 1D mass axis or a 2D (accretion-redshift, mass) grid.")
-        zacc_2d = zacc.reshape(len(zacc), 1)
+        zacc_2d = np.asarray(zacc).reshape(-1, 1)
         M200_0 = self.Mzzi(Mhost, zacc_2d, z0)
         logM200_0 = np.log10(M200_0)
         if N_herm == 1:
             sigmalogM200_0 = 0.12 + 0.15 * np.log10(Mhost / M200_0)
-            sigmalogM200_1 = (
-                sigmalogM200_0[zacc_2d > 1.0][0]
-                / np.log10(M200_0[zacc_2d > 1.0][0] / Mhost)
-                * np.log10(M200_0 / Mhost)
-            )
+            Mz1 = self.Mzzi(Mhost, 1.0, z0)
+            sigma1 = 0.12 - 0.15 * np.log10(Mz1 / Mhost)
+            sigmalogM200_1 = sigma1 / np.log10(Mz1 / Mhost) * np.log10(M200_0 / Mhost)
             sigmalogM200 = np.where(zacc_2d > 1.0, sigmalogM200_0, sigmalogM200_1)
             logM200 = logM200_0 + sigmafac * sigmalogM200
             M200 = 10**logM200
@@ -369,6 +411,7 @@ class WDMPhysics:
             sigmalogM200 = 0.12 - 0.15 * np.log10(M200_0 / Mhost)
             logM200 = np.sqrt(2) * sigmalogM200 * xxi + logM200_0
             M200 = 10**logM200
+        M200 = np.asarray(M200).reshape(N_herm, len(zacc_2d), 1)
         mmax = np.minimum(M200, Mhost / 2.0)
         Mmax = np.minimum(M200_0 + mmax, Mhost)
         zlist = zacc_2d * np.linspace(1, 0, Nrand)
@@ -377,17 +420,16 @@ class WDMPhysics:
         z_Max_3d = z_Max.reshape(N_herm, len(zlist), 1)
         delcM = self.delc_Y11(Mmax, z_Max_3d)
         delca = self.delc_Y11(ma, zacc_2d)
-        sM = self.s_Y11(Mmax)
-        sa = self.s_Y11(ma)
-        xmax = pow(delca - delcM, 2) * pow(2 * (self.s_Y11(mmax) - sM), -1)
-        normB = special.gamma(0.5) * special.gammainc(0.5, xmax) / np.sqrt(np.pi)
-        " those reside in the exponential part of eq.14 "
-        Phi = self.Ffunc_Yang(delcM, delca, sM, sa) / normB * np.heaviside(mmax - ma, 0)
-        if N_herm == 1:
-            F2t = np.nan_to_num(Phi)
-            F2 = F2t.reshape((len(zacc_2d), ma.shape[-1]))
-        else:
-            F2 = np.sum(np.nan_to_num(Phi) * wwi / np.sqrt(np.pi), axis=0)
+        d1, d2, small, big, minimum, allowed = np.broadcast_arrays(
+            delcM, delca, ma, Mmax, mmax, mmax > ma
+        )
+        Phi = np.zeros(allowed.shape)
+        # Evaluate only ma < mmax; forbidden nodes must not create invalid
+        # fractional powers or poison the host-history quadrature.
+        ds = self._variance_gap(small[allowed], big[allowed])
+        dsmin = self._variance_gap(minimum[allowed], big[allowed])
+        Phi[allowed] = _normalized_eps_kernel(d2[allowed] - d1[allowed], ds, dsmin)
+        F2 = Phi[0] if N_herm == 1 else np.sum(Phi * wwi / np.sqrt(np.pi), axis=0)
         Na = F2 * self.dsdm(ma, 0) * self.dMdz(Mhost, zacc_2d, z0, sigmafac) * (1 + zacc_2d)
         return Na
 
