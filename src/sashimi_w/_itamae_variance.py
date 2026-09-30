@@ -184,4 +184,72 @@ def make_integrated_variance_model(
     )
 
 
+def _sharp_k_variance_gap(variance, smaller_mass, larger_mass):
+    """Integrate a variance interval without subtracting saturated variances.
+
+    The pinned ITAMAE exposes no interval API. Use its public configuration,
+    normalized canonical spectrum, fixed log cells, spectrum knots and Gauss
+    order unchanged. This helper supplies only the EPS gap at redshift zero;
+    standard sigma and derivative evaluation still belong to ITAMAE.
+    """
+    small, large = np.broadcast_arrays(
+        np.asarray(smaller_mass, dtype=float), np.asarray(larger_mass, dtype=float)
+    )
+    if (not np.all(np.isfinite(small)) or not np.all(np.isfinite(large))
+            or np.any(small <= 0) or np.any(small > large)):
+        raise ValueError("Variance gap requires finite positive ordered masses.")
+    if not isinstance(variance.window, SharpKWindow):
+        raise TypeError("WDM EPS variance gaps require a sharp-k window.")
+    if not small.size:
+        return np.empty(small.shape)
+    edges = np.linspace(np.log(variance.k_min), np.log(variance.k_max), variance.n_k)
+    knots = np.asarray(variance.power.integration_breakpoints)
+    interior = knots[(knots > variance.k_min) & (knots < variance.k_max)]
+    edges = np.unique(np.concatenate((edges, np.log(interior))))
+    nodes, weights = np.polynomial.legendre.leggauss(variance.sharp_k_order)
+    fractions, weights = (nodes + 1) / 2, weights / 2
+
+    def integrate(left, right):
+        left, right = np.broadcast_arrays(left, right)
+        result = np.empty(left.size)
+        left, right = left.reshape(-1), right.reshape(-1)
+        for start in range(0, result.size, variance.chunk_size):
+            stop = start + variance.chunk_size
+            width = right[start:stop] - left[start:stop]
+            logk = left[start:stop, None] + width[:, None] * fractions
+            k = np.clip(np.exp(logk), variance.k_min, variance.k_max)
+            power = np.asarray(variance.power(k))
+            if power.shape != k.shape or not np.all(np.isfinite(power)) or np.any(power < 0):
+                raise ValueError("Power spectrum must return aligned finite nonnegative values.")
+            result[start:stop] = width * np.sum(k**3 * power * weights / (2 * np.pi**2), axis=1)
+        return result
+
+    def cutoff(mass):
+        radius = (3 * mass / (4 * np.pi * variance.rho_mean)) ** (1 / 3)
+        return np.log(np.clip(variance.filter_scale / radius, variance.k_min, variance.k_max))
+
+    complete = integrate(edges[:-1], edges[1:])
+    cumulative = np.r_[0.0, np.cumsum(complete)]
+    tail = np.r_[np.cumsum(complete[::-1])[::-1], 0.0]
+    left, right = cutoff(large).reshape(-1), cutoff(small).reshape(-1)
+    i = np.clip(np.searchsorted(edges, left, side="right") - 1, 0, len(edges) - 2)
+    j = np.clip(np.searchsorted(edges, right, side="right") - 1, 0, len(edges) - 2)
+    result = np.empty(left.shape)
+    same = i == j
+    result[same] = integrate(left[same], right[same])
+    a, b = i[~same], j[~same]
+    # Choose forward sums in the rising spectrum and reverse sums in the
+    # suppressed tail, so positive high-k support survives variance saturation.
+    middle = np.where(
+        cumulative[b] < tail[a + 1],
+        cumulative[b] - cumulative[a + 1],
+        tail[a + 1] - tail[b],
+    )
+    result[~same] = (integrate(left[~same], edges[a + 1]) + middle
+                     + integrate(edges[b], right[~same]))
+    if not np.all(np.isfinite(result)) or np.any(result < 0):
+        raise ValueError("Variance gap integration produced invalid values.")
+    return result.reshape(small.shape)
+
+
 __all__ = ["make_integrated_variance_model", "make_variance_model"]

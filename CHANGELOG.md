@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased — EPS numerical backport
+
+- Stabilize the retained WDM EPS approximation on active support with direct
+  variance-gap integration, log-space evaluation and its normalized zero-gap limit.
+- Anchor deterministic host scatter at exactly z=1 and preserve zero-weight
+  populations. The physical transfer/cosmology/calibration remains unchanged.
+- Add independent numerical checks and controlled old-migration/main comparisons;
+  see [EPS stability](docs/eps-stability.md).
+
 ## Unreleased — package layout and physical examples
 
 - Move runtime code into `src/sashimi_w` and keep previous import aliases.
