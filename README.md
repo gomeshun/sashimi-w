@@ -85,6 +85,11 @@ clipping. Top-hat concentration retains the original numerical calibration.
 The default mass solver retains odeint/LSODA, SciPy tolerance defaults and
 100 redshift output points. The strict survival criterion is c_t > 0.77.
 
+The [EPS numerical backport](docs/eps-stability.md) preserves positive variance
+intervals in suppressed WDM tails, evaluates only active support, and anchors
+single-history scatter at exactly z=1. It retains the existing fixed-gap EPS
+normalization approximation and introduces no new moving-barrier model.
+
 ## Reproducible use and validation
 
 [Usage walkthrough](notebooks/usage_walkthrough.ipynb) runs from outside the
