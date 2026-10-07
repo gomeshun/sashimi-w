@@ -1,89 +1,195 @@
 name: itamae-migration
-
-on:
+'on':
   push:
-    branches: [itamae-migration]
+    branches:
+    - itamae-migration
   pull_request:
-    branches: [main, itamae-migration]
-  workflow_dispatch:
-
+    branches:
+    - main
+    - itamae-migration
+  workflow_dispatch: null
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.changes.outputs.changed }}
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.event.pull_request.head.sha || github.sha }}
+    - uses: gomeshun/sashimi-family/.github/actions/changed-paths@42a964b21287f802ea323146144ee6784229bbf2
+      id: changes
+      with:
+        paths: |
+          src/**
+          *.py
+          *.toml
+          *.cfg
+          MANIFEST.in
+          uv.lock
+          requirements*.txt
+          data/**
+          .github/workflows/itamae-migration.yml
+          .github/actions/**
+          tests/**
+          validation/**
+          scripts/**
+          README.md
+          LICENSE*
+          NOTICE.md
+  package:
+    needs: changes
+    if: needs.changes.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.event.pull_request.head.sha || github.sha }}
+    - name: Check out pinned public ITAMAE
+      uses: actions/checkout@v4
+      with:
+        repository: gomeshun/itamae
+        ref: ${{ env.ITAMAE_REF }}
+        path: .itamae
+    - uses: astral-sh/setup-uv@v6
+      with:
+        python-version: '3.11'
+    - name: Build the component and core artifacts once
+      run: |
+        uv build --python 3.11 --wheel --out-dir dist ./.itamae
+        uv build --python 3.11 --out-dir dist .
+        python - <<'PY'
+        from pathlib import Path
+        from zipfile import ZipFile
+        wheels = list(Path('dist').glob('*.whl'))
+        assert len(wheels) == 2
+        for wheel in wheels:
+            with ZipFile(wheel) as bundle:
+                name, = (n for n in bundle.namelist() if n.endswith('.dist-info/WHEEL'))
+                lines = bundle.read(name).decode().splitlines()
+                assert 'Root-Is-Purelib: true' in lines, wheel
+                assert [s for s in lines if s.startswith('Tag:')] == ['Tag: py3-none-any'], wheel
+        PY
+        sha256sum dist/*.whl dist/*.tar.gz > dist/SHA256SUMS
+    - name: Install wheels with declared runtime dependencies
+      run: |
+        uv venv --python 3.11 .venv-smoke
+        uv pip install --python .venv-smoke/bin/python dist/*.whl
+    - name: Verify durable embedded source revisions
+      run: |
+        itamae_ref="$(git -C .itamae rev-parse HEAD)"
+        sashimi_ref="$(git rev-parse HEAD)"
+        mkdir -p "${RUNNER_TEMP}/sashimi-w-provenance-repository"
+        cd "${RUNNER_TEMP}/sashimi-w-provenance-repository"
+        ITAMAE_SOURCE_REVISION=0000000000000000000000000000000000000000 \
+          SASHIMI_W_SOURCE_REVISION=1111111111111111111111111111111111111111 \
+          EXPECTED_ITAMAE_REVISION="$itamae_ref" \
+          EXPECTED_SASHIMI_REVISION="$sashimi_ref" \
+          "${GITHUB_WORKSPACE}/.venv-smoke/bin/python" - <<'PY'
+        import os
+
+        from itamae.provenance import source_revision
+
+        assert source_revision("itamae") == os.environ["EXPECTED_ITAMAE_REVISION"]
+        assert source_revision("sashimi-w") == os.environ["EXPECTED_SASHIMI_REVISION"]
+        PY
+    - name: Smoke-test legacy and opt-in imports outside the source tree
+      working-directory: ${{ runner.temp }}
+      run: |
+        "$GITHUB_WORKSPACE/.venv-smoke/bin/python" -c "import sashimi_w; assert sashimi_w.subhalos"
+        "$GITHUB_WORKSPACE/.venv-smoke/bin/python" -c "import sashimi_w_itamae, sashimi_w_itamae_migration, sashimi_w_itamae_variance; assert sashimi_w_itamae.subhalos"
+        "$GITHUB_WORKSPACE/.venv-smoke/bin/python" -c "import importlib.util; assert importlib.util.find_spec('itamae_migration') is None; assert importlib.util.find_spec('itamae_variance') is None"
+    - uses: actions/upload-artifact@v4
+      with:
+        name: migration-distributions
+        path: dist/
+        if-no-files-found: error
   regression:
+    needs: package
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.11", "3.12", "3.13"]
+        python-version:
+        - '3.11'
+        - '3.12'
+        - '3.13'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Check out pinned public ITAMAE
-        uses: actions/checkout@v4
-        with:
-          repository: gomeshun/itamae
-          ref: 23d01e8758a88b061b87de9e488c38ec89fd8e4f
-          path: .itamae
-      - name: Export migration provenance revisions
-        run: |
-          echo "ITAMAE_SOURCE_REVISION=$(git -C .itamae rev-parse HEAD)" >> "$GITHUB_ENV"
-          echo "SASHIMI_W_SOURCE_REVISION=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
-      - uses: astral-sh/setup-uv@v6
-        with:
-          python-version: ${{ matrix.python-version }}
-      - run: uv venv --python ${{ matrix.python-version }}
-      - name: Install migration dependencies
-        run: uv pip install --no-sources ./.itamae . "astropy>=6" "pytest>=8" ruff hatchling
-      - name: Lint maintained migration modules
-        run: uv run --no-sync ruff check src/sashimi_w/__init__.py src/sashimi_w/_physics.py src/sashimi_w/_itamae.py src/sashimi_w/_itamae_migration.py src/sashimi_w/_itamae_components.py src/sashimi_w/_itamae_variance.py tests
-      - name: Run ITAMAE migration regression tests
-        run: uv run --no-sync python -m pytest -q --junitxml=test-results.xml
-      - name: Upload migration test diagnostics
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: migration-test-results-${{ matrix.python-version }}
-          path: test-results.xml
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.event.pull_request.head.sha || github.sha }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: migration-distributions
+        path: dist
+    - name: Verify the shared artifact hashes
+      run: sha256sum --check dist/SHA256SUMS
+    - uses: astral-sh/setup-uv@v6
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install the same wheels and test tools
+      run: |
+        uv venv --python "${{ matrix.python-version }}"
+        uv pip install dist/*.whl "pytest>=8" ruff hatchling "astropy>=6"
+    - name: Verify installed source identities outside the checkout
+      env:
+        EXPECTED_COMPONENT_REVISION: ${{ github.event.pull_request.head.sha || github.sha }}
+      run: |
+        "$GITHUB_WORKSPACE/.venv/bin/python" -I - <<'PY'
+        import os
+        from pathlib import Path
+        import sys
+        import sashimi_w
+        from itamae.provenance import source_revision
 
-  package:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Check out pinned public ITAMAE
-        uses: actions/checkout@v4
-        with:
-          repository: gomeshun/itamae
-          ref: 23d01e8758a88b061b87de9e488c38ec89fd8e4f
-          path: .itamae
-      - uses: astral-sh/setup-uv@v6
-        with:
-          python-version: "3.11"
-      - name: Build wheel and source distribution
-        run: SASHIMI_W_SOURCE_REVISION="$(git rev-parse HEAD)" uv build
-      - name: Install wheel in a clean environment
-        run: |
-          uv venv --python 3.11 .venv-smoke
-          uv pip install --python .venv-smoke/bin/python ./.itamae
-          uv pip install --python .venv-smoke/bin/python --no-deps dist/*.whl
-      - name: Verify durable embedded source revisions
-        run: |
-          itamae_ref="$(git -C .itamae rev-parse HEAD)"
-          sashimi_ref="$(git rev-parse HEAD)"
-          mkdir -p "${RUNNER_TEMP}/sashimi-w-provenance-repository"
-          cd "${RUNNER_TEMP}/sashimi-w-provenance-repository"
-          ITAMAE_SOURCE_REVISION=0000000000000000000000000000000000000000 \
-            SASHIMI_W_SOURCE_REVISION=1111111111111111111111111111111111111111 \
-            EXPECTED_ITAMAE_REVISION="$itamae_ref" \
-            EXPECTED_SASHIMI_REVISION="$sashimi_ref" \
-            "${GITHUB_WORKSPACE}/.venv-smoke/bin/python" - <<'PY'
-          import os
+        assert Path(sashimi_w.__file__).resolve().is_relative_to(Path(sys.prefix).resolve())
+        assert source_revision('sashimi-w') == os.environ['EXPECTED_COMPONENT_REVISION']
+        assert source_revision('itamae') == os.environ['ITAMAE_REF']
+        PY
+    - name: Lint maintained migration modules
+      run: uv run --no-sync ruff check src/sashimi_w/__init__.py src/sashimi_w/_physics.py src/sashimi_w/_itamae.py
+        src/sashimi_w/_itamae_migration.py src/sashimi_w/_itamae_components.py src/sashimi_w/_itamae_variance.py
+        tests
+      if: matrix.python-version == '3.11'
+    - name: Stage shipped tests outside the source checkout
+      run: |
+        python - <<'PY'
+        import os
+        from pathlib import Path
+        import tarfile
 
-          from itamae.provenance import source_revision
-
-          assert source_revision("itamae") == os.environ["EXPECTED_ITAMAE_REVISION"]
-          assert source_revision("sashimi-w") == os.environ["EXPECTED_SASHIMI_REVISION"]
-          PY
-      - name: Smoke-test legacy and opt-in imports outside the source tree
-        working-directory: ${{ runner.temp }}
-        run: |
-          "$GITHUB_WORKSPACE/.venv-smoke/bin/python" -c "import sashimi_w; assert sashimi_w.subhalos"
-          "$GITHUB_WORKSPACE/.venv-smoke/bin/python" -c "import sashimi_w_itamae, sashimi_w_itamae_migration, sashimi_w_itamae_variance; assert sashimi_w_itamae.subhalos"
-          "$GITHUB_WORKSPACE/.venv-smoke/bin/python" -c "import importlib.util; assert importlib.util.find_spec('itamae_migration') is None; assert importlib.util.find_spec('itamae_variance') is None"
+        target = Path(os.environ['RUNNER_TEMP']) / 'sashimi-w-installed-tests'
+        target.mkdir()
+        archive, = Path('dist').glob('sashimi_w-*.tar.gz')
+        with tarfile.open(archive) as bundle:
+            for member in bundle.getmembers():
+                relative = Path(*Path(member.name).parts[1:])
+                if not member.isfile() or '..' in relative.parts:
+                    continue
+                if relative.parts[0] not in {'tests', 'validation'} and str(relative) not in {'setup.py', 'hatch_build.py'}:
+                    continue
+                destination = target / relative
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                destination.write_bytes(bundle.extractfile(member).read())
+        PY
+    - name: Run installed-wheel regressions
+      env:
+        SASHIMI_F_CACHE_DIR: ${{ runner.temp }}/sashimi-f-power-cache
+      run: |
+        cd "$RUNNER_TEMP/sashimi-w-installed-tests"
+        "$GITHUB_WORKSPACE/.venv/bin/python" -I -m pytest --import-mode=importlib -q --junitxml="$GITHUB_WORKSPACE/test-results.xml" tests
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: migration-test-results-${{ matrix.python-version }}
+        path: test-results.xml
+        if-no-files-found: error
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.head.repo.full_name || github.repository }}-${{ github.event_name
+    == 'workflow_dispatch' && github.run_id || github.ref }}
+  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' }}
+env:
+  ITAMAE_REF: 23d01e8758a88b061b87de9e488c38ec89fd8e4f
