@@ -28,18 +28,58 @@ def test_flat_background_and_growth(model):
 
 @pytest.mark.parametrize("mass", [1e7, 1e9, 1e12])
 def test_variance_is_independent_sharp_k_integral(model, mass):
+    """Compare physical sharp-k variance with adaptive integration at c=2.5.
+
+    Parameters
+    ----------
+    model : subhalos
+        Shared 2 keV WDM model in the WMAP7 background.
+    mass : float
+        Positive physical halo mass in Msun.
+
+    Notes
+    -----
+    QUADPACK integrates each original spectrum interval up to 2.5/R_th.
+    Pass at rtol=2e-11 against the production Gauss integral. The common
+    top-hat amplitude is independently checked in test_power_prescription;
+    this test isolates the cutoff and integral, not empirical calibration.
+    """
     def raw(m):
-        radius = (3*(m*w.h)/(4*np.pi*model.Rhomean_z))**(1/3)/2.5
-        cutoff = min((9*np.pi/2)**(1/3)/radius, w.k_file[-1])
+        """Integrate raw WDM power up to the physical halo cutoff.
+
+        Parameters
+        ----------
+        m : float
+            Physical halo mass in Msun.
+
+        Returns
+        -------
+        float
+            Unnormalized dimensionless sharp-k density variance.
+        """
+        radius = (3*(m*w.h)/(4*np.pi*model.Rhomean_z))**(1/3)
+        cutoff = min(2.5/radius, w.k_file[-1])
         knots = np.log(w.k_file[w.k_file < cutoff])
         knots = np.r_[knots, np.log(cutoff)]
         def integrand(logk):
+            """Return raw dimensionless WDM power per log-wavenumber.
+
+            Parameters
+            ----------
+            logk : float
+                Natural log of k in h/Mpc.
+
+            Returns
+            -------
+            float
+                k**3 P_WDM(k)/(2*pi**2).
+            """
             k = np.exp(logk)
             alpha = .049*(1/model.mass_wdm)**1.11*(w.OmegaC/.25)**.11*(w.h/.7)**1.22
             ratio = (1+(alpha*k)**(2*1.12))**(-10/1.12)
             return k**3*np.interp(k,w.k_file,w.Pk_file)*ratio/(2*np.pi**2)
         return sum(quad(integrand,a,b,epsabs=0,epsrel=2e-12)[0] for a,b in zip(knots[:-1],knots[1:]))
-    expected = raw(mass)/raw(model.MassIn8Mpc/w.h)*w.sigma_8**2
+    expected = raw(mass)/model.normalise**2
     np.testing.assert_allclose(model.sigmaMz(mass,0.)**2,expected,rtol=2e-11)
 
 
@@ -123,8 +163,26 @@ def test_eps_shape_support_and_finite_default_low_masses(model,order):
 
 @pytest.mark.parametrize('particle_mass',[.5,2.,5.])
 def test_full_catalog_independent_reference(particle_mass):
+    """Preserve complete WDM catalogues under the declared physical prescription.
+
+    Parameters
+    ----------
+    particle_mass : float
+        Thermal WDM particle mass in keV; fixture parameters specify host
+        masses in physical Msun and the compact accretion grid.
+
+    Notes
+    -----
+    Frozen author source, independently patched to c=2.5 and a shared
+    top-hat sigma8 amplitude, supplies all ten tuple columns. Pass when
+    finite values and shapes match at the retained rtol=2e-8 and survival
+    masks match exactly. This is historical-default odeint regression,
+    not a total accuracy bound: tighter integration can resolve different
+    branches in the retained concentration lookup. No empirical abundance
+    calibration or grid convergence is established.
+    """
     directory=Path(__file__).parent/'data'
-    config=json.loads((directory/'catalogs.json').read_text())['cases'][f'B-q10-{particle_mass}']
+    config=json.loads((directory/'catalogs-top-hat-c2.5.json').read_text())['cases'][f'B-q10-{particle_mass}']
     fixture=directory/config['file']
     assert hashlib.sha256(fixture.read_bytes()).hexdigest()==config['sha256']
     expected=np.load(fixture)

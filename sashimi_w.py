@@ -104,6 +104,20 @@ class subhalos:
         self._prepare_variance()
 
     def _prepare_variance(self):
+        """Refresh the physical variance and its shared top-hat normalization.
+
+        Raises
+        ------
+        ValueError
+            If the configured thermal particle mass is nonfinite or nonpositive.
+
+        Notes
+        -----
+        Cache the fixed spectrum at the configured WDM mass and background.
+        The normalization is defined at R=8 Mpc/h, while halo masses use
+        k_cut=2.5/R_th. Concentration reads the same amplitude divisor.
+        No independent concentration renormalization is performed.
+        """
         key = (float(self.mass_wdm), float(OmegaM), float(OmegaC), float(h), float(sigma_8))
         if getattr(self, '_variance_key', None) != key:
             if not np.isfinite(self.mass_wdm) or self.mass_wdm <= 0:
@@ -191,9 +205,33 @@ class subhalos:
     def conc200(self, M, z):
         """Ludlow concentration on the unchanged 100-mass top-hat table.
 
+        Parameters
+        ----------
+        M : array_like
+            Positive physical M200 in grams.
+        z : array_like
+            Redshift, broadcast with M, with z greater than -1.
+
+        Returns
+        -------
+        float or numpy.ndarray
+            Dimensionless c200 from the Ludlow formation condition.
+
+        Raises
+        ------
+        ValueError
+            If mass/redshift is invalid, the variance gap is nonpositive,
+            or no finite real formation trial remains on the retained grid.
+
+        Notes
+        -----
         Cache only the spectrum integral. Evaluate all real formation trials
         in arrays, retaining the original nearest-mass and c interpolation.
+        Divide the raw top-hat variance by the same amplitude squared as
+        EPS. The 100 mass nodes and 500 wavenumber quadrature nodes are
+        retained numerical approximations, not a new concentration fit.
         """
+        self._prepare_variance()
         mass, redshift = np.broadcast_arrays(np.asarray(M)/Msolar*h,np.asarray(z))
         if np.any(~np.isfinite(mass)) or np.any(mass<=0) or np.any(~np.isfinite(redshift)) or np.any(redshift<=-1):
             raise ValueError("Concentration requires finite M>0 and z>-1.")
@@ -203,7 +241,7 @@ class subhalos:
         if getattr(self,'_concentration_key',None)!=cache_key:
             radius=cbrt(self.filter_Mass/(4/3*np.pi*self.Rhomean_z))
             sigma=np.sqrt(self.integratePk_th(k_min,k_max,radius))
-            normalization=interp1d(self.filter_Mass,sigma)(self.MassIn8Mpc)/sigma_8
+            normalization=self.normalise
             variance=(sigma/normalization)**2
             self._concentration_variance=variance
             self._concentration_spline=splrep(self.logM0-10.,variance,k=1)

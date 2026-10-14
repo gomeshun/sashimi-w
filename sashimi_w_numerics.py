@@ -26,6 +26,7 @@ SOFTWARE.
 import numpy as np
 from numpy.polynomial.legendre import leggauss
 from scipy.optimize import brentq
+from sashimi_w_power import SHARP_K_MASS_ASSIGNMENT, sigma8_normalization
 
 
 class SharpKVariance:
@@ -34,9 +35,49 @@ class SharpKVariance:
     Sixteen-point Gauss-Legendre integration in log(k) resolves each input
     spectrum knot. Partial cells use the same rule; no mass interpolation or
     projection is applied. Physical masses are in Msun, k in h/Mpc.
+    The cutoff is 2.5/R_th, where R_th encloses the physical halo mass.
+    The amplitude is set independently by a top-hat at 8 Mpc/h.
+
+    Parameters
+    ----------
+    k, power : array_like
+        Original k and CDM power table in h/Mpc and (Mpc/h)**3.
+    alpha : float
+        Viel thermal suppression length in Mpc/h.
+    density : float
+        Numerical mean density in Msun*h**2/Mpc**3.
+    hubble_h : float
+        Reduced Hubble parameter used to convert physical halo masses.
+    normalizing_mass : float
+        Physical mass in Msun enclosed by the sigma8 top-hat sphere.
+    sigma8 : float
+        Target top-hat rms contrast at that radius, at redshift zero.
     """
 
     def __init__(self, k, power, alpha, density, hubble_h, normalizing_mass, sigma8):
+        """Tabulate raw sharp-k cells and set the independent top-hat amplitude.
+
+        Parameters
+        ----------
+        k, power : array_like
+            Wavenumbers in h/Mpc and CDM power in (Mpc/h)**3.
+        alpha : float
+            WDM suppression length in Mpc/h.
+        density : float
+            Mean density in numerical Msun*h**2/Mpc**3 units.
+        hubble_h : float
+            Dimensionless reduced Hubble parameter.
+        normalizing_mass : float
+            Physical top-hat mass in Msun, corresponding to radius 8 Mpc/h
+            for the supplied cosmology. It does not set a sharp-k cutoff.
+        sigma8 : float
+            Positive target top-hat rms density contrast at redshift zero.
+
+        Notes
+        -----
+        Forward and reverse cell sums preserve small positive EPS variance
+        gaps; only the amplitude divisor and mass assignment change here.
+        """
         self.k = np.asarray(k, dtype=float)
         self.power = np.asarray(power, dtype=float)
         self.logk = np.log(self.k)
@@ -45,7 +86,10 @@ class SharpKVariance:
         cells = self._partial(self.logk[:-1], self.logk[1:])
         self.cumulative = np.r_[0., np.cumsum(cells)]
         self.tail = np.r_[np.cumsum(cells[::-1])[::-1], 0.]
-        self.normalization2 = self._raw(normalizing_mass)/sigma8**2
+        radius8 = (3 * normalizing_mass * hubble_h / (4 * np.pi * density)) ** (1 / 3)
+        self.normalization2 = sigma8_normalization(
+            self.k, self.power, alpha, sigma8, radius=radius8
+        ) ** 2
 
     def _integrand(self, logk):
         k = np.exp(logk)
@@ -59,11 +103,34 @@ class SharpKVariance:
         return half*np.sum(self._integrand(nodes)*self.weights, axis=-1)
 
     def _cutoff(self, mass):
+        """Map physical mass to the Schneider sharp-k upper wavenumber.
+
+        Parameters
+        ----------
+        mass : array_like
+            Finite positive physical halo mass in Msun.
+
+        Returns
+        -------
+        numpy.ndarray
+            Cutoff 2.5/R_th in h/Mpc with the input shape, where
+            R_th**3=3*(mass*h)/(4*pi*density).
+
+        Raises
+        ------
+        ValueError
+            If mass is nonfinite or nonpositive.
+
+        Notes
+        -----
+        M=(4*pi/3)*rho*(c*R)**3 with W=Theta(1-k*R) gives this
+        cutoff for c=2.5. No additional (9*pi/2)**(1/3) is applied.
+        """
         mass = np.asarray(mass, dtype=float)
         if np.any(~np.isfinite(mass)) or np.any(mass <= 0):
             raise ValueError("Mass must be finite and positive.")
-        radius = (3*(mass*self.h)/(4*np.pi*self.density))**(1/3)/2.5
-        return (9*np.pi/2)**(1/3)/radius
+        radius = (3*(mass*self.h)/(4*np.pi*self.density))**(1/3)
+        return SHARP_K_MASS_ASSIGNMENT/radius
 
     def _raw(self, mass):
         cutoff = self._cutoff(mass)

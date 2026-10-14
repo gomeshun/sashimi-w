@@ -6,6 +6,10 @@ arguments remain supported. See the example notebook for catalog usage and
 
 ## Changes affecting results
 
+- The sharp-k cutoff is `k_cut=2.5/R_th`. EPS and concentration share one
+  WDM power amplitude fixed by a top-hat of radius 8 Mpc/h at z=0.
+  Sharp-k sigma(M8) is a different quantity from top-hat sigma8. See the
+  [physical prescription and independent reference](w-power-prescription.md).
 - The Viel transfer amplitude is squared to obtain the power ratio:
   `P_WDM / P_CDM = (1 + (alpha*k)**(2*nu))**(-10/nu)`. Both the sharp-k variance
   and concentration top-hat calculation use this ratio, with the existing
