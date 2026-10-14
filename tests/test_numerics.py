@@ -28,7 +28,7 @@ def test_flat_background_and_growth(model):
 
 @pytest.mark.parametrize("mass", [1e7, 1e9, 1e12])
 def test_variance_is_independent_sharp_k_integral(model, mass):
-    """Compare physical sharp-k variance with adaptive integration at c=2.5.
+    r"""Compare physical sharp-k variance with adaptive integration at c=2.5.
 
     Parameters
     ----------
@@ -39,13 +39,28 @@ def test_variance_is_independent_sharp_k_integral(model, mass):
 
     Notes
     -----
+    Viel et al. give the thermal-relic amplitude T = [1+(alpha*k)**(2*nu)]**(-5/nu),
+    nu=1.12, and alpha=0.049*(m/keV)**(-1.11)*(Omega_WDM/0.25)**0.11*(h/0.7)**1.22 in Mpc/h.
+    Power uses T**2, hence exponent -10/nu; k is in h/Mpc. The sharp-k mass assignment
+    M=(4*pi/3)*rho*(c*R)**3 with c=2.5 follows Schneider. This calibrated mass mapping is
+    distinct from the real-space top-hat radius used to define sigma8.
+
     QUADPACK integrates each original spectrum interval up to 2.5/R_th.
     Pass at rtol=2e-11 against the production Gauss integral. The common
     top-hat amplitude is independently checked in test_power_prescription;
     this test isolates the cutoff and integral, not empirical calibration.
+
+    References
+    ----------
+
+    .. [cite-viel] Viel et al. (2005), Constraining warm dark matter candidates including sterile neutrinos and light gravitinos with WMAP and the Lyman-alpha forest, Eqs. (6)-(7).
+        https://arxiv.org/abs/astro-ph/0501562
+
+    .. [cite-sharp] Schneider (2015), Structure formation with suppressed small-scale perturbations, Eqs. (10)-(12).
+        https://doi.org/10.1093/mnras/stv1169
     """
     def raw(m):
-        """Integrate raw WDM power up to the physical halo cutoff.
+        r"""Integrate raw WDM power up to the physical halo cutoff.
 
         Parameters
         ----------
@@ -56,13 +71,30 @@ def test_variance_is_independent_sharp_k_integral(model, mass):
         -------
         float
             Unnormalized dimensionless sharp-k density variance.
+
+        Notes
+        -----
+        Viel et al. give the thermal-relic amplitude T = [1+(alpha*k)**(2*nu)]**(-5/nu),
+        nu=1.12, and alpha=0.049*(m/keV)**(-1.11)*(Omega_WDM/0.25)**0.11*(h/0.7)**1.22 in Mpc/h.
+        Power uses T**2, hence exponent -10/nu; k is in h/Mpc. The sharp-k mass assignment
+        M=(4*pi/3)*rho*(c*R)**3 with c=2.5 follows Schneider. This calibrated mass mapping is
+        distinct from the real-space top-hat radius used to define sigma8.
+
+        References
+        ----------
+
+        .. [cite-viel] Viel et al. (2005), Constraining warm dark matter candidates including sterile neutrinos and light gravitinos with WMAP and the Lyman-alpha forest, Eqs. (6)-(7).
+            https://arxiv.org/abs/astro-ph/0501562
+
+        .. [cite-sharp] Schneider (2015), Structure formation with suppressed small-scale perturbations, Eqs. (10)-(12).
+            https://doi.org/10.1093/mnras/stv1169
         """
         radius = (3*(m*w.h)/(4*np.pi*model.Rhomean_z))**(1/3)
         cutoff = min(2.5/radius, w.k_file[-1])
         knots = np.log(w.k_file[w.k_file < cutoff])
         knots = np.r_[knots, np.log(cutoff)]
         def integrand(logk):
-            """Return raw dimensionless WDM power per log-wavenumber.
+            r"""Return raw dimensionless WDM power per log-wavenumber.
 
             Parameters
             ----------
@@ -73,6 +105,23 @@ def test_variance_is_independent_sharp_k_integral(model, mass):
             -------
             float
                 k**3 P_WDM(k)/(2*pi**2).
+
+            Notes
+            -----
+            Viel et al. give the thermal-relic amplitude T = [1+(alpha*k)**(2*nu)]**(-5/nu),
+            nu=1.12, and alpha=0.049*(m/keV)**(-1.11)*(Omega_WDM/0.25)**0.11*(h/0.7)**1.22 in Mpc/h.
+            Power uses T**2, hence exponent -10/nu; k is in h/Mpc. The sharp-k mass assignment
+            M=(4*pi/3)*rho*(c*R)**3 with c=2.5 follows Schneider. This calibrated mass mapping is
+            distinct from the real-space top-hat radius used to define sigma8.
+
+            References
+            ----------
+
+            .. [cite-viel] Viel et al. (2005), Constraining warm dark matter candidates including sterile neutrinos and light gravitinos with WMAP and the Lyman-alpha forest, Eqs. (6)-(7).
+                https://arxiv.org/abs/astro-ph/0501562
+
+            .. [cite-sharp] Schneider (2015), Structure formation with suppressed small-scale perturbations, Eqs. (10)-(12).
+                https://doi.org/10.1093/mnras/stv1169
             """
             k = np.exp(logk)
             alpha = .049*(1/model.mass_wdm)**1.11*(w.OmegaC/.25)**.11*(w.h/.7)**1.22
@@ -99,6 +148,27 @@ def test_variance_derivative_and_growth_square(model):
 
 
 def test_top_hat_and_sharp_k_both_use_power_q10(model):
+    r"""Check that both variance routes use the same squared thermal transfer.
+
+    Parameters
+    ----------
+    model : subhalos
+        Fixture model with the adopted thermal mass and power table.
+
+    Notes
+    -----
+    Viel et al. give the thermal-relic amplitude T = [1+(alpha*k)**(2*nu)]**(-5/nu),
+    nu=1.12, and alpha=0.049*(m/keV)**(-1.11)*(Omega_WDM/0.25)**0.11*(h/0.7)**1.22 in Mpc/h.
+    Power uses T**2, hence exponent -10/nu; k is in h/Mpc.
+
+    The independent algebraic ratio at k=[0.01,1,30] h/Mpc is compared with the top-hat integrand, public power ratio, and squared transfer amplitude. Pass requires relative agreement within 2e-14; a q5 exponent or inconsistent route fails. This is an algebraic identity tolerance and does not validate the transfer against simulations.
+
+    References
+    ----------
+
+    .. [cite-viel] Viel et al. (2005), Constraining warm dark matter candidates including sterile neutrinos and light gravitinos with WMAP and the Lyman-alpha forest, Eqs. (6)-(7).
+        https://arxiv.org/abs/astro-ph/0501562
+    """
     k = np.array([.01, 1., 30.])
     ratio = (1+(model.a*k)**(2*1.12))**(-10/1.12)
     np.testing.assert_allclose(model.SigmaIntegrand(k,1.)/(k*k*w.Pk_interp(k)*model.TopHat(k,1.)**2),ratio,rtol=2e-14)
@@ -115,6 +185,31 @@ def test_concentration_trials_keep_real_future_times(model):
 
 
 def test_exact_nfw_boundary(model):
+    r"""Check the NFW mass inverse at the adopted disruption radius.
+
+    Parameters
+    ----------
+    model : subhalos
+        Shared 2 keV WDM model in the stored WMAP7 background.
+
+    Notes
+    -----
+    The literature threshold rt/rs > 0.77 follows the Hayashi et al. disruption prescription
+    adopted by Hiroshima et al. A caller-supplied threshold takes precedence in variants
+    that expose it (C and SI currently default to 0). This is a model selection rule; an
+    exact-boundary test does not calibrate disruption physics.
+
+    Construct enclosed NFW masses using 65-digit arithmetic at radii 0, 0.77-1e-8, 0.77+1e-8, 1e-5 and 500. The inverse must recover them at rtol=1e-11 (zero absolute tolerance) and preserve exactly the boolean classification r_t/r_s>0.77. Either disagreement fails. This checks numerical inversion and boundary classification, not the physical validity of the disruption threshold.
+
+    References
+    ----------
+
+    .. [cite-survival] Hayashi et al. (2003), The Structural Evolution of Substructure.
+        https://arxiv.org/abs/astro-ph/0203004
+
+    .. [cite-structure] Hiroshima, Ando & Ishiyama (2018), Modeling evolution of dark matter substructure and annihilation boost, Section II, Eqs. (5)-(9).
+        https://arxiv.org/abs/1803.07691
+    """
     from sashimi_w_numerics import invert_nfw_mass_function
     radii = np.array([0.,.77-1e-8,.77+1e-8,1e-5,500.])
     with mp.workdps(65):

@@ -1,0 +1,1970 @@
+{
+  "audit_started": "2026-10-14 UTC",
+  "audit_completed_at": "2026-10-14T15:03:15.541001+00:00",
+  "code_before_citation_edit": "345a8d02b3c64c552fb818e29df9acc2c441e520",
+  "comparison_baseline": {
+    "kind": "author upstream/main",
+    "sha": "99dfc3632eec0126080c0273ddf78f84fe09216c"
+  },
+  "active_definitions_inventoried": 134,
+  "changed_docstrings": 51,
+  "changed_with_local_references": 47,
+  "local_test_cases_passed": 46,
+  "executable_ast_differences": [],
+  "reference_files_changed": [],
+  "method": "Source-qualified AST inventory including private/nested definitions, existing-attribution and direct-literal screening, followed by primary-paper equation/table matching. Generic numerical controls and fixed regressions are not treated as empirical calibration. Inventory counts alone do not prove scientific correctness.",
+  "limits": [
+    "Viel thermal power uses the square of the density transfer (q10). Schneider c=2.5 sharp-k mass assignment is distinct from the top-hat R=8 Mpc/h normalization. References are also attached to independent test formulas.",
+    "The Ludlow model uses C=650 and f=0.02. Its original profile calibration is Einasto-based; this code uses NFW enclosed masses and retains C. This is an adaptation, not a new calibration.",
+    "Dekker Appendix C prints rounded tidal coefficients, e.g. -0.31, while exact author upstream/main 99dfc3632eec0126080c0273ddf78f84fe09216c uses -0.313 and additional precision in zeta. Both sources are identified; the retained coefficients are unchanged.",
+    "Benson writes x=log(M/MJ) without an explicit base at that equation. The retained implementation uses natural log. This audit does not establish equality of those conventions; the ambiguity is documented in delc_Y11.",
+    "The WMAP7-labelled stored CAMB header is an input record. A Komatsu citation does not recover the exact undocumented original CAMB configuration."
+  ],
+  "references": {
+    "benson": [
+      "Benson et al. (2013), Dark Matter Halo Merger Histories Beyond Cold Dark Matter: I - Methods and Application to Warm Dark Matter, Eqs. (7)-(10).",
+      "https://arxiv.org/abs/1209.3018"
+    ],
+    "constants": [
+      "Mohr & Taylor (2005), CODATA recommended values of the fundamental physical constants: 2002, Table XXVI.",
+      "https://physics.nist.gov/cuu/pdf/CODATA_RMP2005.pdf"
+    ],
+    "conversion": [
+      "Hu & Kravtsov (2003), Sample Variance Considerations for Cluster Surveys, Appendix C.",
+      "https://arxiv.org/abs/astro-ph/0203169"
+    ],
+    "correa": [
+      "Correa et al. (2015), The accretion history of dark matter haloes - III. A physical model for the concentration-mass relation, Section 3 and Appendix B.",
+      "https://arxiv.org/abs/1502.00391"
+    ],
+    "formation": [
+      "Ludlow et al. (2016), The mass-concentration-redshift relation of cold and warm dark matter haloes, Section 4.3, Eqs. (6)-(7).",
+      "https://arxiv.org/abs/1601.02624"
+    ],
+    "growth": [
+      "Carroll, Press & Turner (1992), The Cosmological Constant, Section 3.5.",
+      "https://doi.org/10.1146/annurev.aa.30.090192.002435"
+    ],
+    "ludlow": [
+      "Ludlow et al. (2016), The mass-concentration-redshift relation of cold and warm dark matter haloes, Appendix C.",
+      "https://arxiv.org/abs/1601.02624"
+    ],
+    "nfw": [
+      "Navarro, Frenk & White (1997), A Universal Density Profile from Hierarchical Clustering.",
+      "https://arxiv.org/abs/astro-ph/9611107"
+    ],
+    "scatter": [
+      "Ishiyama et al. (2013), The Cosmogrid Simulation: Statistical Properties of Small Dark Matter Halos, Eq. (7), Fig. 10.",
+      "https://arxiv.org/abs/1101.2020"
+    ],
+    "sharp": [
+      "Schneider (2015), Structure formation with suppressed small-scale perturbations, Eqs. (10)-(12).",
+      "https://doi.org/10.1093/mnras/stv1169"
+    ],
+    "structure": [
+      "Hiroshima, Ando & Ishiyama (2018), Modeling evolution of dark matter substructure and annihilation boost, Section II, Eqs. (5)-(9).",
+      "https://arxiv.org/abs/1803.07691"
+    ],
+    "survival": [
+      "Hayashi et al. (2003), The Structural Evolution of Substructure.",
+      "https://arxiv.org/abs/astro-ph/0203004"
+    ],
+    "time": [
+      "Jiang & van den Bosch (2016), Statistics of Dark Matter Substructure: I. Model and Universal Fitting Functions, Eq. (2).",
+      "https://arxiv.org/abs/1403.6827"
+    ],
+    "viel": [
+      "Viel et al. (2005), Constraining warm dark matter candidates including sterile neutrinos and light gravitinos with WMAP and the Lyman-alpha forest, Eqs. (6)-(7).",
+      "https://arxiv.org/abs/astro-ph/0501562"
+    ],
+    "virial": [
+      "Bryan & Norman (1998), Statistical Properties of X-ray Clusters: Analytic and Numerical Comparisons, Eq. (6).",
+      "https://arxiv.org/abs/astro-ph/9710107"
+    ],
+    "wmap": [
+      "Komatsu et al. (2011), Seven-Year Wilkinson Microwave Anisotropy Probe Observations: Cosmological Interpretation.",
+      "https://arxiv.org/abs/1001.4538"
+    ],
+    "wtidal": [
+      "Dekker et al. (2022), Warm dark matter constraints using Milky-Way satellite observations and subhalo evolution modeling, Appendix C.",
+      "https://arxiv.org/abs/2111.13137"
+    ],
+    "yang": [
+      "Yang et al. (2011), An Analytical Model for the Accretion of Dark Matter Subhalos, Eqs. (12)-(14), (21).",
+      "https://arxiv.org/abs/1104.1757"
+    ]
+  },
+  "definitions": [
+    {
+      "repo": "sashimi-w-main",
+      "file": "picard_tidal_stripping.py",
+      "name": "PicardFallbackWarning",
+      "kind": "ClassDef",
+      "line": 44,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "picard_tidal_stripping.py",
+      "name": "_real",
+      "kind": "FunctionDef",
+      "line": 48,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "picard_tidal_stripping.py",
+      "name": "_integer",
+      "kind": "FunctionDef",
+      "line": 55,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "picard_tidal_stripping.py",
+      "name": "physics_key",
+      "kind": "FunctionDef",
+      "line": 61,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "picard_tidal_stripping.py",
+      "name": "_state",
+      "kind": "FunctionDef",
+      "line": 85,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "picard_tidal_stripping.py",
+      "name": "cached_host_mass",
+      "kind": "FunctionDef",
+      "line": 98,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "picard_tidal_stripping.py",
+      "name": "cached_scalar_variance",
+      "kind": "FunctionDef",
+      "line": 113,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "picard_tidal_stripping.py",
+      "name": "_coefficients",
+      "kind": "FunctionDef",
+      "line": 127,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "picard_tidal_stripping.py",
+      "name": "_iterate",
+      "kind": "FunctionDef",
+      "line": 147,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "picard_tidal_stripping.py",
+      "name": "direct_log_mass",
+      "kind": "FunctionDef",
+      "line": 171,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "picard_tidal_stripping.py",
+      "name": "_fallback",
+      "kind": "FunctionDef",
+      "line": 199,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "picard_tidal_stripping.py",
+      "name": "PicardTidalStrippingTable",
+      "kind": "ClassDef",
+      "line": 209,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "picard_tidal_stripping.py",
+      "name": "endpoint_mass",
+      "kind": "FunctionDef",
+      "line": 322,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "picard_tidal_stripping.py",
+      "name": "history_mass",
+      "kind": "FunctionDef",
+      "line": 388,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "picard_tidal_stripping.py",
+      "name": "PicardTidalStrippingTable.__init__",
+      "kind": "FunctionDef",
+      "line": 215,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "picard_tidal_stripping.py",
+      "name": "PicardTidalStrippingTable._points",
+      "kind": "FunctionDef",
+      "line": 277,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "picard_tidal_stripping.py",
+      "name": "PicardTidalStrippingTable.delta_log_mass",
+      "kind": "FunctionDef",
+      "line": 293,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "picard_tidal_stripping.py",
+      "name": "PicardTidalStrippingTable.mass",
+      "kind": "FunctionDef",
+      "line": 304,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "picard_tidal_stripping.py",
+      "name": "PicardTidalStrippingTable.converged",
+      "kind": "FunctionDef",
+      "line": 309,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "picard_tidal_stripping.py",
+      "name": "direct_log_mass.rhs",
+      "kind": "FunctionDef",
+      "line": 186,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "picard_tidal_stripping.py",
+      "name": "_iterate.update",
+      "kind": "FunctionDef",
+      "line": 155,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w.py",
+      "name": "_cumulative_above",
+      "kind": "FunctionDef",
+      "line": 69,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w.py",
+      "name": "subhalos",
+      "kind": "ClassDef",
+      "line": 85,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "viel",
+        "constants",
+        "wmap"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/1001.4538",
+        "https://arxiv.org/abs/astro-ph/0501562",
+        "https://physics.nist.gov/cuu/pdf/CODATA_RMP2005.pdf"
+      ]
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w.py",
+      "name": "TidalStrippingSolver",
+      "kind": "ClassDef",
+      "line": 1946,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "wtidal",
+        "time",
+        "virial"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/1403.6827",
+        "https://arxiv.org/abs/2111.13137",
+        "https://arxiv.org/abs/astro-ph/9710107"
+      ]
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w.py",
+      "name": "TidalStrippingSolver.__init__",
+      "kind": "FunctionDef",
+      "line": 1972,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w.py",
+      "name": "TidalStrippingSolver.picard_physics_key",
+      "kind": "FunctionDef",
+      "line": 1977,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w.py",
+      "name": "TidalStrippingSolver.Mzvir",
+      "kind": "FunctionDef",
+      "line": 1980,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w.py",
+      "name": "TidalStrippingSolver._Mzvir_uncached",
+      "kind": "FunctionDef",
+      "line": 1984,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "yang",
+        "correa"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/1104.1757",
+        "https://arxiv.org/abs/1502.00391"
+      ]
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w.py",
+      "name": "TidalStrippingSolver.AMz",
+      "kind": "FunctionDef",
+      "line": 2029,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "wtidal",
+        "time",
+        "virial"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/1403.6827",
+        "https://arxiv.org/abs/2111.13137",
+        "https://arxiv.org/abs/astro-ph/9710107"
+      ]
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w.py",
+      "name": "TidalStrippingSolver.zetaMz",
+      "kind": "FunctionDef",
+      "line": 2066,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "wtidal",
+        "time",
+        "virial"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/1403.6827",
+        "https://arxiv.org/abs/2111.13137",
+        "https://arxiv.org/abs/astro-ph/9710107"
+      ]
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w.py",
+      "name": "TidalStrippingSolver.tdynz",
+      "kind": "FunctionDef",
+      "line": 2103,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "time",
+        "virial"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/1403.6827",
+        "https://arxiv.org/abs/astro-ph/9710107"
+      ]
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w.py",
+      "name": "TidalStrippingSolver.Phi",
+      "kind": "FunctionDef",
+      "line": 2135,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w.py",
+      "name": "TidalStrippingSolver.msolve",
+      "kind": "FunctionDef",
+      "line": 2138,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w.py",
+      "name": "TidalStrippingSolver.subhalo_mass_stripped",
+      "kind": "FunctionDef",
+      "line": 2141,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w.py",
+      "name": "subhalos.__init__",
+      "kind": "FunctionDef",
+      "line": 118,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "viel",
+        "sharp",
+        "constants",
+        "wmap"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/1001.4538",
+        "https://arxiv.org/abs/astro-ph/0501562",
+        "https://doi.org/10.1093/mnras/stv1169",
+        "https://physics.nist.gov/cuu/pdf/CODATA_RMP2005.pdf"
+      ]
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w.py",
+      "name": "subhalos._prepare_variance",
+      "kind": "FunctionDef",
+      "line": 179,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "sharp"
+      ],
+      "paper_urls": [
+        "https://doi.org/10.1093/mnras/stv1169"
+      ]
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w.py",
+      "name": "subhalos.Sigma_interp",
+      "kind": "FunctionDef",
+      "line": 218,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w.py",
+      "name": "subhalos.sig_interp",
+      "kind": "FunctionDef",
+      "line": 222,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w.py",
+      "name": "subhalos.power_ratio",
+      "kind": "FunctionDef",
+      "line": 225,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "viel"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/astro-ph/0501562"
+      ]
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w.py",
+      "name": "subhalos.transfer_amplitude",
+      "kind": "FunctionDef",
+      "line": 255,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "viel"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/astro-ph/0501562"
+      ]
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w.py",
+      "name": "subhalos.dlnSigmadlnM_interp",
+      "kind": "FunctionDef",
+      "line": 285,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w.py",
+      "name": "subhalos.TopHat",
+      "kind": "FunctionDef",
+      "line": 289,
+      "archived": false,
+      "outcome": "documentation_clarified_without_new_paper_values",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w.py",
+      "name": "subhalos.SigmaIntegrand",
+      "kind": "FunctionDef",
+      "line": 315,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "viel"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/astro-ph/0501562"
+      ]
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w.py",
+      "name": "subhalos.integratePk_th",
+      "kind": "FunctionDef",
+      "line": 352,
+      "archived": false,
+      "outcome": "documentation_clarified_without_new_paper_values",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w.py",
+      "name": "subhalos.linear_growth_factor",
+      "kind": "FunctionDef",
+      "line": 397,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "growth"
+      ],
+      "paper_urls": [
+        "https://doi.org/10.1146/annurev.aa.30.090192.002435"
+      ]
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w.py",
+      "name": "subhalos.conc200",
+      "kind": "FunctionDef",
+      "line": 444,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "formation",
+        "sharp"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/1601.02624",
+        "https://doi.org/10.1093/mnras/stv1169"
+      ]
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w.py",
+      "name": "subhalos._real_formation_trials",
+      "kind": "FunctionDef",
+      "line": 534,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "formation"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/1601.02624"
+      ]
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w.py",
+      "name": "subhalos.fc",
+      "kind": "FunctionDef",
+      "line": 595,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "nfw"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/astro-ph/9611107"
+      ]
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w.py",
+      "name": "subhalos.g",
+      "kind": "FunctionDef",
+      "line": 626,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w.py",
+      "name": "subhalos.rhocrit",
+      "kind": "FunctionDef",
+      "line": 629,
+      "archived": false,
+      "outcome": "documentation_clarified_without_new_paper_values",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w.py",
+      "name": "subhalos.Mvir_from_M200",
+      "kind": "FunctionDef",
+      "line": 652,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "nfw"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/astro-ph/9611107"
+      ]
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w.py",
+      "name": "subhalos._Mvir_from_M200_grid",
+      "kind": "FunctionDef",
+      "line": 695,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "nfw"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/astro-ph/9611107"
+      ]
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w.py",
+      "name": "subhalos.Mvir_from_M200_fit",
+      "kind": "FunctionDef",
+      "line": 736,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "conversion"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/astro-ph/0203169"
+      ]
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w.py",
+      "name": "subhalos.growthD",
+      "kind": "FunctionDef",
+      "line": 841,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "growth"
+      ],
+      "paper_urls": [
+        "https://doi.org/10.1146/annurev.aa.30.090192.002435"
+      ]
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w.py",
+      "name": "subhalos.xi",
+      "kind": "FunctionDef",
+      "line": 874,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "ludlow"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/1601.02624"
+      ]
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w.py",
+      "name": "subhalos.sigmaMz",
+      "kind": "FunctionDef",
+      "line": 906,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w.py",
+      "name": "subhalos.dOdz",
+      "kind": "FunctionDef",
+      "line": 910,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w.py",
+      "name": "subhalos.dDdz",
+      "kind": "FunctionDef",
+      "line": 913,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "growth"
+      ],
+      "paper_urls": [
+        "https://doi.org/10.1146/annurev.aa.30.090192.002435"
+      ]
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w.py",
+      "name": "subhalos.Mzi",
+      "kind": "FunctionDef",
+      "line": 947,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "correa",
+        "ludlow"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/1502.00391",
+        "https://arxiv.org/abs/1601.02624"
+      ]
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w.py",
+      "name": "subhalos.Mzzi",
+      "kind": "FunctionDef",
+      "line": 989,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "correa",
+        "ludlow"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/1502.00391",
+        "https://arxiv.org/abs/1601.02624"
+      ]
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w.py",
+      "name": "subhalos.Hz",
+      "kind": "FunctionDef",
+      "line": 1036,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w.py",
+      "name": "subhalos.Omegaz",
+      "kind": "FunctionDef",
+      "line": 1039,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w.py",
+      "name": "subhalos.Delc",
+      "kind": "FunctionDef",
+      "line": 1043,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "virial"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/astro-ph/9710107"
+      ]
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w.py",
+      "name": "subhalos.dMdz",
+      "kind": "FunctionDef",
+      "line": 1074,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "correa",
+        "ludlow"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/1502.00391",
+        "https://arxiv.org/abs/1601.02624"
+      ]
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w.py",
+      "name": "subhalos.dsdm",
+      "kind": "FunctionDef",
+      "line": 1127,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w.py",
+      "name": "subhalos.delc_Y11",
+      "kind": "FunctionDef",
+      "line": 1131,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "benson"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/1209.3018"
+      ]
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w.py",
+      "name": "subhalos.s_Y11",
+      "kind": "FunctionDef",
+      "line": 1179,
+      "archived": false,
+      "outcome": "documentation_clarified_without_new_paper_values",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w.py",
+      "name": "subhalos.Ffunc_Yang",
+      "kind": "FunctionDef",
+      "line": 1201,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "yang"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/1104.1757"
+      ]
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w.py",
+      "name": "subhalos.Na_calc",
+      "kind": "FunctionDef",
+      "line": 1245,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "yang"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/1104.1757"
+      ]
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w.py",
+      "name": "subhalos.rs_rhos_calc",
+      "kind": "FunctionDef",
+      "line": 1368,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "nfw",
+        "structure",
+        "scatter",
+        "survival"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/1101.2020",
+        "https://arxiv.org/abs/1803.07691",
+        "https://arxiv.org/abs/astro-ph/0203004",
+        "https://arxiv.org/abs/astro-ph/9611107"
+      ]
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w.py",
+      "name": "subhalos.subhalo_distr",
+      "kind": "FunctionDef",
+      "line": 1546,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "scatter",
+        "structure",
+        "survival"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/1101.2020",
+        "https://arxiv.org/abs/1803.07691",
+        "https://arxiv.org/abs/astro-ph/0203004"
+      ]
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w.py",
+      "name": "subhalos.N_sat",
+      "kind": "FunctionDef",
+      "line": 1679,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "scatter",
+        "structure",
+        "survival"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/1101.2020",
+        "https://arxiv.org/abs/1803.07691",
+        "https://arxiv.org/abs/astro-ph/0203004"
+      ]
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w.py",
+      "name": "subhalos.N_sat_Vthres",
+      "kind": "FunctionDef",
+      "line": 1809,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "nfw",
+        "structure",
+        "scatter",
+        "survival"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/1101.2020",
+        "https://arxiv.org/abs/1803.07691",
+        "https://arxiv.org/abs/astro-ph/0203004",
+        "https://arxiv.org/abs/astro-ph/9611107"
+      ]
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w.py",
+      "name": "subhalos.Mvir_from_M200_fit.ffunc",
+      "kind": "FunctionDef",
+      "line": 774,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "conversion"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/astro-ph/0203169"
+      ]
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w.py",
+      "name": "subhalos.Mvir_from_M200_fit.xfunc",
+      "kind": "FunctionDef",
+      "line": 805,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "conversion"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/astro-ph/0203169"
+      ]
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w_numerics.py",
+      "name": "SharpKVariance",
+      "kind": "ClassDef",
+      "line": 32,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "viel"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/astro-ph/0501562"
+      ]
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w_numerics.py",
+      "name": "_real_numeric",
+      "kind": "FunctionDef",
+      "line": 234,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w_numerics.py",
+      "name": "nfw_mass_function",
+      "kind": "FunctionDef",
+      "line": 242,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "nfw"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/astro-ph/9611107"
+      ]
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w_numerics.py",
+      "name": "invert_nfw_mass_function",
+      "kind": "FunctionDef",
+      "line": 280,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "nfw"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/astro-ph/9611107"
+      ]
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w_numerics.py",
+      "name": "invert_nfw_mass_function.one",
+      "kind": "FunctionDef",
+      "line": 317,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w_numerics.py",
+      "name": "invert_nfw_mass_function.one.residual",
+      "kind": "FunctionDef",
+      "line": 326,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w_numerics.py",
+      "name": "SharpKVariance.__init__",
+      "kind": "FunctionDef",
+      "line": 69,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "viel"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/astro-ph/0501562"
+      ]
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w_numerics.py",
+      "name": "SharpKVariance._integrand",
+      "kind": "FunctionDef",
+      "line": 116,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "viel"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/astro-ph/0501562"
+      ]
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w_numerics.py",
+      "name": "SharpKVariance._partial",
+      "kind": "FunctionDef",
+      "line": 147,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w_numerics.py",
+      "name": "SharpKVariance._cutoff",
+      "kind": "FunctionDef",
+      "line": 153,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "sharp"
+      ],
+      "paper_urls": [
+        "https://doi.org/10.1093/mnras/stv1169"
+      ]
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w_numerics.py",
+      "name": "SharpKVariance._raw",
+      "kind": "FunctionDef",
+      "line": 193,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w_numerics.py",
+      "name": "SharpKVariance.variance",
+      "kind": "FunctionDef",
+      "line": 199,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w_numerics.py",
+      "name": "SharpKVariance.derivative",
+      "kind": "FunctionDef",
+      "line": 202,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w_numerics.py",
+      "name": "SharpKVariance.gap",
+      "kind": "FunctionDef",
+      "line": 210,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w_power.py",
+      "name": "top_hat_window",
+      "kind": "FunctionDef",
+      "line": 15,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w_power.py",
+      "name": "sigma8_normalization",
+      "kind": "FunctionDef",
+      "line": 42,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "viel"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/astro-ph/0501562"
+      ]
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "tests/reference-generation/ablation.py",
+      "name": "diagnostic_cutoff",
+      "kind": "FunctionDef",
+      "line": 18,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "tests/reference-generation/ablation.py",
+      "name": "main",
+      "kind": "FunctionDef",
+      "line": 42,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "tests/reference-generation/historical-controller/reference_worker.py",
+      "name": "main",
+      "kind": "FunctionDef",
+      "line": 24,
+      "archived": true,
+      "outcome": "immutable_historical_evidence",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "tests/reference-generation/historical-controller/run_reference.py",
+      "name": "sha256",
+      "kind": "FunctionDef",
+      "line": 22,
+      "archived": true,
+      "outcome": "immutable_historical_evidence",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "tests/reference-generation/historical-controller/run_reference.py",
+      "name": "run",
+      "kind": "FunctionDef",
+      "line": 26,
+      "archived": true,
+      "outcome": "immutable_historical_evidence",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "tests/reference-generation/historical-controller/run_reference.py",
+      "name": "main",
+      "kind": "FunctionDef",
+      "line": 98,
+      "archived": true,
+      "outcome": "immutable_historical_evidence",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "tests/test_nfw_vectorized.py",
+      "name": "test_vectorized_inverse_spans_radii_and_the_disruption_threshold",
+      "kind": "FunctionDef",
+      "line": 8,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "survival",
+        "structure"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/1803.07691",
+        "https://arxiv.org/abs/astro-ph/0203004"
+      ]
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "tests/test_numerics.py",
+      "name": "model",
+      "kind": "FunctionDef",
+      "line": 15,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "tests/test_numerics.py",
+      "name": "test_flat_background_and_growth",
+      "kind": "FunctionDef",
+      "line": 19,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "tests/test_numerics.py",
+      "name": "test_variance_is_independent_sharp_k_integral",
+      "kind": "FunctionDef",
+      "line": 30,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "viel",
+        "sharp"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/astro-ph/0501562",
+        "https://doi.org/10.1093/mnras/stv1169"
+      ]
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "tests/test_numerics.py",
+      "name": "test_variance_derivative_and_growth_square",
+      "kind": "FunctionDef",
+      "line": 135,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "tests/test_numerics.py",
+      "name": "test_top_hat_and_sharp_k_both_use_power_q10",
+      "kind": "FunctionDef",
+      "line": 150,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "viel"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/astro-ph/0501562"
+      ]
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "tests/test_numerics.py",
+      "name": "test_concentration_trials_keep_real_future_times",
+      "kind": "FunctionDef",
+      "line": 179,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "tests/test_numerics.py",
+      "name": "test_exact_nfw_boundary",
+      "kind": "FunctionDef",
+      "line": 187,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "survival",
+        "structure"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/1803.07691",
+        "https://arxiv.org/abs/astro-ph/0203004"
+      ]
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "tests/test_numerics.py",
+      "name": "synthetic_catalog",
+      "kind": "FunctionDef",
+      "line": 222,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "tests/test_numerics.py",
+      "name": "test_survivor_counts_exact_cumulative_and_forwarding",
+      "kind": "FunctionDef",
+      "line": 228,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "tests/test_numerics.py",
+      "name": "test_eps_shape_support_and_finite_default_low_masses",
+      "kind": "FunctionDef",
+      "line": 250,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "tests/test_numerics.py",
+      "name": "test_full_catalog_independent_reference",
+      "kind": "FunctionDef",
+      "line": 260,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "tests/test_numerics.py",
+      "name": "test_grid_entirely_below_wdm_cutoff_has_zero_weight",
+      "kind": "FunctionDef",
+      "line": 296,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "tests/test_numerics.py",
+      "name": "test_survivor_counts_exact_cumulative_and_forwarding.fake",
+      "kind": "FunctionDef",
+      "line": 231,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "tests/test_numerics.py",
+      "name": "test_variance_is_independent_sharp_k_integral.raw",
+      "kind": "FunctionDef",
+      "line": 62,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "viel",
+        "sharp"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/astro-ph/0501562",
+        "https://doi.org/10.1093/mnras/stv1169"
+      ]
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "tests/test_numerics.py",
+      "name": "test_variance_is_independent_sharp_k_integral.raw.integrand",
+      "kind": "FunctionDef",
+      "line": 96,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "viel",
+        "sharp"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/astro-ph/0501562",
+        "https://doi.org/10.1093/mnras/stv1169"
+      ]
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "tests/test_picard_solver.py",
+      "name": "AnalyticHost",
+      "kind": "ClassDef",
+      "line": 13,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "tests/test_picard_solver.py",
+      "name": "test_full_history_against_analytic_unexpanded_equation",
+      "kind": "FunctionDef",
+      "line": 33,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "tests/test_picard_solver.py",
+      "name": "test_shapes_no_evolution_and_partial_history_start",
+      "kind": "FunctionDef",
+      "line": 44,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "tests/test_picard_solver.py",
+      "name": "test_rejects_nonphysical_solver_coordinates",
+      "kind": "FunctionDef",
+      "line": 60,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "tests/test_picard_solver.py",
+      "name": "test_history_direction_and_unknown_options_are_not_silently_ignored",
+      "kind": "FunctionDef",
+      "line": 66,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "tests/test_picard_solver.py",
+      "name": "test_table_cache_options_and_host_background_invalidation",
+      "kind": "FunctionDef",
+      "line": 80,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "tests/test_picard_solver.py",
+      "name": "test_no_silent_extrapolation_and_counted_fallback",
+      "kind": "FunctionDef",
+      "line": 96,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "tests/test_picard_solver.py",
+      "name": "_wdm_host_breakpoints",
+      "kind": "FunctionDef",
+      "line": 110,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "tests/test_picard_solver.py",
+      "name": "_segmented_log_reference",
+      "kind": "FunctionDef",
+      "line": 173,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "tests/test_picard_solver.py",
+      "name": "test_public_dispatcher_candidate_and_legacy_paths",
+      "kind": "FunctionDef",
+      "line": 205,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "tests/test_picard_solver.py",
+      "name": "test_warm_particle_change_invalidates_host_and_endpoint_tables",
+      "kind": "FunctionDef",
+      "line": 248,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "tests/test_picard_solver.py",
+      "name": "test_long_solver_range_does_not_extend_an_in_domain_table",
+      "kind": "FunctionDef",
+      "line": 260,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "tests/test_picard_solver.py",
+      "name": "test_original_two_point_table_configuration_remains_supported",
+      "kind": "FunctionDef",
+      "line": 268,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "tests/test_picard_solver.py",
+      "name": "test_default_catalog_and_wrapper_forwarding_against_frozen_reference",
+      "kind": "FunctionDef",
+      "line": 274,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "tests/test_picard_solver.py",
+      "name": "test_default_catalog_and_wrapper_forwarding_against_frozen_reference.record",
+      "kind": "FunctionDef",
+      "line": 302,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "tests/test_picard_solver.py",
+      "name": "test_default_catalog_and_wrapper_forwarding_against_frozen_reference.catalog",
+      "kind": "FunctionDef",
+      "line": 342,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "tests/test_picard_solver.py",
+      "name": "_wdm_host_breakpoints.offset",
+      "kind": "FunctionDef",
+      "line": 140,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "tests/test_picard_solver.py",
+      "name": "AnalyticHost.__init__",
+      "kind": "FunctionDef",
+      "line": 14,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "tests/test_picard_solver.py",
+      "name": "AnalyticHost.Mzvir",
+      "kind": "FunctionDef",
+      "line": 20,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "tests/test_picard_solver.py",
+      "name": "AnalyticHost.zetaMz",
+      "kind": "FunctionDef",
+      "line": 22,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "tests/test_picard_solver.py",
+      "name": "AnalyticHost.Phi",
+      "kind": "FunctionDef",
+      "line": 24,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "tests/test_picard_solver.py",
+      "name": "AnalyticHost.exact",
+      "kind": "FunctionDef",
+      "line": 26,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "tests/test_power_prescription.py",
+      "name": "test_top_hat_zero_and_bessel_reference",
+      "kind": "FunctionDef",
+      "line": 12,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "tests/test_power_prescription.py",
+      "name": "test_eps_power_has_independent_top_hat_sigma8",
+      "kind": "FunctionDef",
+      "line": 30,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "tests/test_power_prescription.py",
+      "name": "test_invalid_normalization_cannot_create_a_physical_spectrum",
+      "kind": "FunctionDef",
+      "line": 65,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    }
+  ],
+  "source_identity_checks": [
+    {
+      "repo": "sashimi-w-main",
+      "file": "picard_tidal_stripping.py",
+      "source_before_sha256": "005643cd500fbdab74896933bdb7779bca8ca73feca0c27b7bd3956e09a745e1",
+      "source_after_sha256": "005643cd500fbdab74896933bdb7779bca8ca73feca0c27b7bd3956e09a745e1",
+      "executable_ast_sha256": "d0d6022532b677ae39e2ca5d8588824f38da7de39a7e8810be53aa6c20e99e4a",
+      "executable_ast_equal": true,
+      "historical_archive": false
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w.py",
+      "source_before_sha256": "98134bc6737d4d62c2bf15f502abc15eed41a9c406d722ae2d0364f32e2fcd11",
+      "source_after_sha256": "a5f0c4319cdb5b7938f3bbe67adb5b50f49bde3208b4e0bce340914aa383cff2",
+      "executable_ast_sha256": "91f1473841879d796d590d14cf56d6c3dbaf3cc58c49302152557e71b29bb314",
+      "executable_ast_equal": true,
+      "historical_archive": false
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w_numerics.py",
+      "source_before_sha256": "6c972986532cbd39a89ff7dd2dc1c31c767b25bfa5f8fc1354e0bd9bcd40d8ba",
+      "source_after_sha256": "6b6cbc31244434fbe007acbb1727791b98d6969d26ad1348528becde62fff931",
+      "executable_ast_sha256": "09347d11af4f34d3f90dfa5c0ec9c9c9bdb02efddfedf6eff23e2928996d786d",
+      "executable_ast_equal": true,
+      "historical_archive": false
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "sashimi_w_power.py",
+      "source_before_sha256": "31253f9eb96a2591b8e1f23deca03d77717f5fb09d3d011004296d799aca3ac3",
+      "source_after_sha256": "f6a2255e98c51aa246e88a1e6bef75762820893e5c4e7a92374ff6c727a6cb75",
+      "executable_ast_sha256": "f4b9a88e0532d305816249cec1db4f8e4f101255dbbf3065f5dfbc5a055719a9",
+      "executable_ast_equal": true,
+      "historical_archive": false
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "tests/reference-generation/ablation.py",
+      "source_before_sha256": "1556da6a8efe9e1726d662772e57a540410a08f3ecc3267f94b9b4b8d2ad180b",
+      "source_after_sha256": "1556da6a8efe9e1726d662772e57a540410a08f3ecc3267f94b9b4b8d2ad180b",
+      "executable_ast_sha256": "14dbe5cd4c0206d649ee9e266a66b017783fe27c035a35955aafaf806ae07cf5",
+      "executable_ast_equal": true,
+      "historical_archive": false
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "tests/reference-generation/historical-controller/reference_worker.py",
+      "source_before_sha256": "f7f33a77b19117f17a5a6ca606c8507d8552e515cb325429c3961c235739798b",
+      "source_after_sha256": "f7f33a77b19117f17a5a6ca606c8507d8552e515cb325429c3961c235739798b",
+      "executable_ast_sha256": "afde5e67e910ecfd896c6150d29aff8d21c58d38d27d6360868eef227227bca2",
+      "executable_ast_equal": true,
+      "historical_archive": true
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "tests/reference-generation/historical-controller/run_reference.py",
+      "source_before_sha256": "bb22d3196573c224f1cb811f211fbf81844737c3b625812addf90ede96b34b85",
+      "source_after_sha256": "bb22d3196573c224f1cb811f211fbf81844737c3b625812addf90ede96b34b85",
+      "executable_ast_sha256": "3b0a902da8766a444f9f0934725f452765a64c853b16a23ff35830d9cdd98a88",
+      "executable_ast_equal": true,
+      "historical_archive": true
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "tests/test_nfw_vectorized.py",
+      "source_before_sha256": "a1979e7b5e3691362097d42e17eeaf4127b5eb9ddc5d75fe409c2cd80203c961",
+      "source_after_sha256": "ac559219da7376a0034544485f8cbf78fa9e91316b8f2854f467b362b5969480",
+      "executable_ast_sha256": "3dbb5abe55b81458af0f20f656b38b58c9c5f3fed7992c3c686458f3e9c1fc37",
+      "executable_ast_equal": true,
+      "historical_archive": false
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "tests/test_numerics.py",
+      "source_before_sha256": "65eb9239dba164e048426aae5df147c99598f975d0fc445969dd525bb322872f",
+      "source_after_sha256": "68db03f8534a535b3d48db9c9da649cd8a01fc312956681e8c8aff2459ae3c1a",
+      "executable_ast_sha256": "563f3b15fd65b4be4aa52e7b6598d8f2ef35f075d1a0b7c55b7b602878e1aff4",
+      "executable_ast_equal": true,
+      "historical_archive": false
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "tests/test_picard_solver.py",
+      "source_before_sha256": "bbd394c36cb9442486ce9627dac85939c0bfcac4cfac55cc83cc6169d7a29ed4",
+      "source_after_sha256": "bbd394c36cb9442486ce9627dac85939c0bfcac4cfac55cc83cc6169d7a29ed4",
+      "executable_ast_sha256": "032a1d6fa4598931789781c341b714b6a6c9fbe90601c2ba8087807bebf9db4c",
+      "executable_ast_equal": true,
+      "historical_archive": false
+    },
+    {
+      "repo": "sashimi-w-main",
+      "file": "tests/test_power_prescription.py",
+      "source_before_sha256": "a2782a576ae6fc9f7f023a2796bd7d83a35dabc3cc1d77c126bb01976adebbf4",
+      "source_after_sha256": "a2782a576ae6fc9f7f023a2796bd7d83a35dabc3cc1d77c126bb01976adebbf4",
+      "executable_ast_sha256": "2db9dd892971798e9dc9fe9bc24ac63f5c8eceb1cdf3e33614570ee54ef60c90",
+      "executable_ast_equal": true,
+      "historical_archive": false
+    }
+  ]
+}
