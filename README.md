@@ -82,8 +82,10 @@ The shared fixed-cell integral splits at tabulated spectrum knots. Its
 moving-boundary derivative and variance describe the same continuous integral;
 there is no coarse mass interpolation, variance projection or signed-weight
 clipping. Top-hat concentration retains the original numerical calibration.
-The default mass solver retains odeint/LSODA, SciPy tolerance defaults and
-100 redshift output points. The strict survival criterion is c_t > 0.77.
+The default mass solver is `method="picard_table"`, using the shared ITAMAE
+Picard backend. Pass `method="odeint"` for the previous LSODA calculation or
+`method="dop853"` for a direct log-mass reference. The WDM physical rate and
+host history are unchanged. See [shared Picard](docs/shared-picard.md).
 
 The [EPS numerical backport](docs/eps-stability.md) preserves positive variance
 intervals in suppressed WDM tails, evaluates only active support, and anchors

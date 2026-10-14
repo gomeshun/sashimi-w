@@ -18,6 +18,7 @@ import sashimi_w_itamae
 ROOT = Path(__file__).parent
 PARAMETERS = json.loads((ROOT / "golden/wdm_small_catalog.json").read_text())["parameters"]
 PARAMETERS = {key: value for key, value in PARAMETERS.items() if key != "mass_wdm"}
+PARAMETERS = {**PARAMETERS, "method": "odeint"}
 COLUMNS = ["m200_acc", "z_acc", "r_s_acc", "rho_s_acc", "m_bound", "r_s", "rho_s", "c_t"]
 SCALES = [1.0, 1.0, 1e-3, 1e18, 1.0, 1e-3, 1e18, 1.0]
 
@@ -93,7 +94,7 @@ def test_calculation_metadata_and_serialization(population, tmp_path):
     assert (
         catalog.metadata["calculation_specification"] == "sashimi-w:thermal-wdm-q10:2026-09-11:v2"
     )
-    assert catalog.metadata["calculation_parameters"] == PARAMETERS
+    assert catalog.metadata["calculation_parameters"] == {**PARAMETERS, "solver_options": {}}
     assert catalog.metadata["wdm_power_q"] == q
     assert catalog.metadata["variance_identifier"] == model.variance_model().identifier
     assert catalog.metadata["power_identifier"] == model.variance_model().power.identifier

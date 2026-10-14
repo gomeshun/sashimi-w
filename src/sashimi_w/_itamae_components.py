@@ -9,7 +9,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 import numpy as np
-from itamae.evolution import solve_evolution
+from itamae.evolution import PicardDomain, PicardMassLossSolver, solve_evolution
 from itamae.measure import build_accretion_batch
 from itamae.numerics import gauss_hermite_lognormal
 from ._physics import G, H0, Msolar, h, kpc, pOmega, rhocrit0
@@ -72,6 +72,59 @@ class WDMTidalMassLoss:
             * pow(mass / host_mass, exponent)
             * pow(self.model.Hz(z) * (1 + z), -1)
         )
+
+
+class WDMTidalSolver:
+    """WDM coefficient adapter; ITAMAE owns all Picard numerical operations.
+
+    Masses are physical Msun. The historical scalar virial conversion is
+    evaluated independently at each requested redshift, retaining its solve.
+    """
+
+    def __init__(self, law, *, z_min, z_max):
+        self.law = law
+        self.backend = PicardMassLossSolver(
+            self.rate, self.exponent, self.reference_mass,
+            z_min=z_min, z_max=z_max, state_key=self.state_key,
+            domain=PicardDomain((0., 7.), (-24., 3.)))
+
+    def state_key(self):
+        model, history = self.law.model, self.law.history
+        backend = model.itamae_cosmology
+        return (float(model.mass_wdm), model.wdm_power_convention,
+                id(backend), backend.identifier, h, H0, rhocrit0,
+                history.mass, history.N_hermNa, history.sigmafac,
+                tuple(float(np.asarray(x)) for x in history._parameters))
+
+    def reference_mass(self, z):
+        redshift = np.asarray(z, dtype=float)
+        # A 1d mass array with a 1d redshift array is not the old concentration
+        # kernel's paired-input convention; keep the scalar physical calls.
+        flat, inverse = np.unique(redshift.ravel(), return_inverse=True)
+        values = np.asarray([float(np.asarray(self.law.history.mass_virial(float(t))).item())
+                             for t in flat])
+        result = values[inverse].reshape(redshift.shape)
+        return float(result) if result.ndim == 0 else result
+
+    def exponent(self, z):
+        loghost = np.log10(self.backend.Mzvir(z))
+        return (-5.55e-5 * loghost + 1.43e-3) * z + (3.34e-4 * loghost - 8.11e-3)
+
+    def rate(self, z):
+        model = self.law.model
+        loghost = np.log10(self.backend.Mzvir(z))
+        amplitude = 10 ** ((-0.0019 * loghost + 0.045) * z + (0.0097 * loghost - 0.313))
+        omega = model.Omegaz(pOmega, z)
+        dynamic_time = (1.628 * h**-1 * (model.Delc(omega - 1) / 178.)**-0.5
+                        * (model.Hz(z) / H0)**-1 * (86400 * 365 * 1e9))
+        return amplitude / dynamic_time / (model.Hz(z) * (1 + z))
+
+    def mass(self, ma, za, z, *, method="picard_table", **options):
+        if method == "picard_table":
+            return self.backend.endpoint(ma, za, z, **options)
+        if method == "dop853":
+            return self.backend.direct(ma, za, z, **options)
+        raise ValueError(f"Invalid Picard adapter method: {method}")
 
 
 @dataclass(frozen=True)
@@ -139,11 +192,23 @@ class WDMProfileEvolution:
     redshift: float
     N_herm: int
     profile_change: bool
+    method: str = "picard_table"
+    solver_options: dict = field(default_factory=dict)
+    solver: Any = None
 
     def evolve(self, batch, initial, context):
         ma = context["ma"]
-        grid = np.linspace(context["z_acc"], self.redshift, 100)
-        bound_mass = solve_evolution(self.law.rhs, ma, grid, method="odeint")[-1]
+        if self.method == "odeint":
+            options = dict(self.solver_options)
+            rtol, atol = options.pop("rtol", None), options.pop("atol", None)
+            grid = np.linspace(context["z_acc"], self.redshift, 100)
+            bound_mass = solve_evolution(self.law.rhs, ma, grid, method="odeint",
+                                        rtol=rtol, atol=atol, odeint_options=options)[-1]
+        else:
+            solver = self.solver or WDMTidalSolver(
+                self.law, z_min=self.redshift, z_max=context["z_acc"])
+            bound_mass = solver.mass(ma, context["z_acc"], self.redshift,
+                                     method=self.method, **self.solver_options)
         rs_acc = initial["r_s_acc"].reshape(self.N_herm, -1) * _MPC
         rhos_acc = initial["rho_s_acc"].reshape(self.N_herm, -1) * _DENSITY
         if self.profile_change:

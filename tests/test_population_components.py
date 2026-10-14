@@ -25,7 +25,7 @@ def test_canonical_transport_matches_half_mass_solution_and_chunking():
     law = SimpleNamespace(rhs=lambda z, m: np.log(2.0) * m)
     components = PopulationComponents(
         WDMInitialStructure(model, 1),
-        WDMProfileEvolution(model, law, 0.0, 1, False),
+        WDMProfileEvolution(model, law, 0.0, 1, False, method="odeint"),
         WDMSurvival(0.0),
         WDMCatalogColumns(),
     )

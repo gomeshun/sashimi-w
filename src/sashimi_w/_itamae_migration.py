@@ -318,12 +318,15 @@ class Subhalos(WDMPhysics):
         sigmafac=0,
         N_hermNa=200,
         profile_change=True,
+        method="picard_table",
+        **solver_options,
     ) -> WeightedSubhaloCatalog:
         """Calculate one named physical WDM catalog with explicit numerical inputs."""
         parameters = dict(locals())
         parameters.pop("self")
         self._validate_catalog_inputs(parameters)
-        return self._execute_population(parameters).to_catalog(self._catalog_metadata(parameters))
+        execution, diagnostics = self._execute_population(parameters)
+        return execution.to_catalog(self._catalog_metadata(parameters, diagnostics))
 
     def rs_rhos_calc(self, *args: Any, **kwargs: Any):
         """Return the historical tuple format of the current population calculation."""
@@ -353,6 +356,7 @@ class Subhalos(WDMPhysics):
             WDMProfileEvolution,
             WDMSurvival,
             WDMTidalMassLoss,
+            WDMTidalSolver,
         )
 
         p = parameters
@@ -386,28 +390,34 @@ class Subhalos(WDMPhysics):
             self, ma200, ma_by_redshift, zdist, population, p["sigmalogc"], p["N_herm"]
         )
         history = WDMHostHistory(self, p["M0"], p["N_hermNa"], p["sigmafac"])
+        law = WDMTidalMassLoss(self, history)
+        solver = WDMTidalSolver(law, z_min=p["redshift"], z_max=p["zmax"])
         components = PopulationComponents(
             initializer=WDMInitialStructure(self, p["N_herm"]),
             evolver=WDMProfileEvolution(
                 self,
-                WDMTidalMassLoss(self, history),
+                law,
                 p["redshift"],
                 p["N_herm"],
                 p["profile_change"],
+                method=p["method"], solver_options=p["solver_options"], solver=solver,
             ),
             survival=WDMSurvival(),
             columns=WDMCatalogColumns(),
         )
         batches, contexts = zip(*(slices.build(i) for i in range(zdist.size)), strict=True)
-        return components.execute(
+        execution = components.execute(
             batches,
             contexts=contexts,
             diagnostics={"variant": "sashimi-w", "accretion_integral": total},
         )
+        return execution, solver.backend.diagnostics() if p["method"] == "picard_table" else None
 
     @staticmethod
     def _validate_catalog_inputs(parameters: dict[str, Any]) -> None:
         """Reject invalid physical and numerical catalog inputs early."""
+        if parameters["method"] not in {"picard_table", "dop853", "odeint"}:
+            raise ValueError(f"Invalid stripping method: {parameters['method']}")
         for name in ("M0", "redshift", "dz", "zmax", "sigmalogc", "logmamin", "sigmafac"):
             value = np.asarray(parameters[name])
             if value.ndim != 0 or not np.isfinite(float(value)):
@@ -497,7 +507,7 @@ class Subhalos(WDMPhysics):
             metadata=self._catalog_metadata(),
         )
 
-    def _catalog_metadata(self, parameters=None):
+    def _catalog_metadata(self, parameters=None, picard_diagnostics=None):
         backend = BackendConfig(self.itamae_cosmology, self.itamae_units)
         variance = self.variance_model()
         return build_calculation_metadata(
@@ -510,8 +520,11 @@ class Subhalos(WDMPhysics):
             source_identifier="sashimi-w:itamae-migration",
             variance_identifier=variance.identifier,
             power_identifier=variance.power.identifier,
-            solver_identifier="itamae:odeint:scipy-default-tolerances:100-output-points",
+            solver_identifier=("unknown:tuple-conversion" if parameters is None else
+                               f"sashimi-w:tidal-stripping:{parameters['method']}:itamae:v3"),
             extra={
+                "default_stripping_method": "picard_table",
+                "picard_diagnostics": picard_diagnostics,
                 "eps_numerics": "active-support:direct-variance-gap:normalized-zero-limit:v1",
                 "deterministic_scatter_anchor": "exact-z=1",
                 "mass_wdm_keV": float(self.mass_wdm),
