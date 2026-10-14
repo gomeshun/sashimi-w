@@ -183,6 +183,7 @@ class SharpKVariance:
 
         .. [cite-sharp] Schneider (2015), Structure formation with suppressed small-scale perturbations, Eqs. (10)-(12).
             https://doi.org/10.1093/mnras/stv1169
+            Full text: https://arxiv.org/abs/1412.2133
         """
         mass = np.asarray(mass, dtype=float)
         if np.any(~np.isfinite(mass)) or np.any(mass <= 0):
@@ -296,6 +297,11 @@ def invert_nfw_mass_function(y):
     inversion tolerances concern this profile identity, not agreement with simulated halos.
 
     The scalar root solve in logarithmic radius preserves the NFW mass equation. Root tolerances describe numerical inversion, not physical profile accuracy.
+
+    Navarro et al. print the density and circular-speed relations. The potential with zero
+    at infinity and numerical or Lambert-W inversion of the enclosed-mass factor are
+    derived consequences of that profile; these closed forms and solver controls are not
+    equations printed in the cited paper.
 
     References
     ----------

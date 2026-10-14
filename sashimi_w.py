@@ -103,6 +103,12 @@ class subhalos:
 
     The state stores WMAP7-table normalization, the Viel transfer scale and the c=2.5 sharp-k mass mapping. Structure kernels use grams and cm, while host histories use numerical solar masses; public tuple quantities are documented by rs_rhos_calc.
 
+    The input header stores Omega_b=0.0469, Omega_m=0.27, h=0.7, n_s=0.95 and sigma8=0.82.
+    In particular Omega_b and n_s do not equal the Table 1 best-fit values in Komatsu et
+    al. The WMAP7 label supplies historical context; it does not establish that these five
+    inputs reproduce a published WMAP7 parameter column or recover the original CAMB
+    configuration.
+
     References
     ----------
 
@@ -143,6 +149,12 @@ class subhalos:
         numerical physical Msun. Each boundary is explicit; the fixed-gap EPS normalization
         remains an approximation even though the WDM collapse barrier depends on mass.
 
+        The input header stores Omega_b=0.0469, Omega_m=0.27, h=0.7, n_s=0.95 and sigma8=0.82.
+        In particular Omega_b and n_s do not equal the Table 1 best-fit values in Komatsu et
+        al. The WMAP7 label supplies historical context; it does not establish that these five
+        inputs reproduce a published WMAP7 parameter column or recover the original CAMB
+        configuration.
+
         References
         ----------
 
@@ -151,6 +163,7 @@ class subhalos:
 
         .. [cite-sharp] Schneider (2015), Structure formation with suppressed small-scale perturbations, Eqs. (10)-(12).
             https://doi.org/10.1093/mnras/stv1169
+            Full text: https://arxiv.org/abs/1412.2133
 
         .. [cite-constants] Mohr & Taylor (2005), CODATA recommended values of the fundamental physical constants: 2002, Table XXVI.
             https://physics.nist.gov/cuu/pdf/CODATA_RMP2005.pdf
@@ -200,6 +213,7 @@ class subhalos:
 
         .. [cite-sharp] Schneider (2015), Structure formation with suppressed small-scale perturbations, Eqs. (10)-(12).
             https://doi.org/10.1093/mnras/stv1169
+            Full text: https://arxiv.org/abs/1412.2133
         """
         key = (float(self.mass_wdm), float(OmegaM), float(OmegaC), float(h), float(sigma_8))
         if getattr(self, '_variance_key', None) != key:
@@ -420,8 +434,9 @@ class subhalos:
         References
         ----------
 
-        .. [cite-growth] Carroll, Press & Turner (1992), The Cosmological Constant, Section 3.5.
+        .. [cite-growth] Carroll, Press & Turner (1992), The Cosmological Constant, Section 3.5, Eq. (29).
             https://doi.org/10.1146/annurev.aa.30.090192.002435
+            Full text: https://ned.ipac.caltech.edu/level5/Carroll/Carroll3_5.html
         """
         if len(np.atleast_1d(z)) == 2:
             z1    = z[0]
@@ -487,6 +502,7 @@ class subhalos:
 
         .. [cite-sharp] Schneider (2015), Structure formation with suppressed small-scale perturbations, Eqs. (10)-(12).
             https://doi.org/10.1093/mnras/stv1169
+            Full text: https://arxiv.org/abs/1412.2133
         """
         self._prepare_variance()
         mass, redshift = np.broadcast_arrays(np.asarray(M)/Msolar*h,np.asarray(z))
@@ -862,8 +878,9 @@ class subhalos:
         References
         ----------
 
-        .. [cite-growth] Carroll, Press & Turner (1992), The Cosmological Constant, Section 3.5.
+        .. [cite-growth] Carroll, Press & Turner (1992), The Cosmological Constant, Section 3.5, Eq. (29).
             https://doi.org/10.1146/annurev.aa.30.090192.002435
+            Full text: https://ned.ipac.caltech.edu/level5/Carroll/Carroll3_5.html
         """
         Omega_Lz = OmegaL*pow(OmegaL+OmegaM*pow(1+z,3),-1)
         Omega_Mz = 1-Omega_Lz
@@ -898,7 +915,7 @@ class subhalos:
         References
         ----------
 
-        .. [cite-ludlow] Ludlow et al. (2016), The mass-concentration-redshift relation of cold and warm dark matter haloes, Appendix C.
+        .. [cite-ludlow] Ludlow et al. (2016), The mass-concentration-redshift relation of cold and warm dark matter haloes, Eq. (3) and Appendix C, Eqs. (C8)-(C12).
             https://arxiv.org/abs/1601.02624
         """
         return pow(M*pow((1e+10)*pow(h,-1),-1),-1)
@@ -934,8 +951,9 @@ class subhalos:
         References
         ----------
 
-        .. [cite-growth] Carroll, Press & Turner (1992), The Cosmological Constant, Section 3.5.
+        .. [cite-growth] Carroll, Press & Turner (1992), The Cosmological Constant, Section 3.5, Eq. (29).
             https://doi.org/10.1146/annurev.aa.30.090192.002435
+            Full text: https://ned.ipac.caltech.edu/level5/Carroll/Carroll3_5.html
         """
         Omega_Lz = OmegaL*pow(OmegaL+OmegaM*pow(1+z,3),-1)
         Omega_Mz = 1-Omega_Lz
@@ -971,14 +989,15 @@ class subhalos:
         numerical physical Msun. Each boundary is explicit; the fixed-gap EPS normalization
         remains an approximation even though the WDM collapse barrier depends on mass.
 
+        The variance in this history is integrated from the configured WDM spectrum. The
+        Ludlow Appendix C analytic CDM variance fit is not used by this routine; the
+        coefficient 1.686 is already present in Correa et al. Eq. (7).
+
         References
         ----------
 
         .. [cite-correa] Correa et al. (2015), The accretion history of dark matter haloes - III. A physical model for the concentration-mass relation, Section 3 and Appendix B.
             https://arxiv.org/abs/1502.00391
-
-        .. [cite-ludlow] Ludlow et al. (2016), The mass-concentration-redshift relation of cold and warm dark matter haloes, Appendix C.
-            https://arxiv.org/abs/1601.02624
         """
         a = 1.686*np.sqrt(2.0/np.pi)*self.dDdz(0)+1.0
         zf = -0.0064*pow(np.log10(M0),2)+0.0237*np.log10(M0)+1.8837
@@ -1016,14 +1035,15 @@ class subhalos:
         numerical physical Msun. Each boundary is explicit; the fixed-gap EPS normalization
         remains an approximation even though the WDM collapse barrier depends on mass.
 
+        The variance in this history is integrated from the configured WDM spectrum. The
+        Ludlow Appendix C analytic CDM variance fit is not used by this routine; the
+        coefficient 1.686 is already present in Correa et al. Eq. (7).
+
         References
         ----------
 
         .. [cite-correa] Correa et al. (2015), The accretion history of dark matter haloes - III. A physical model for the concentration-mass relation, Section 3 and Appendix B.
             https://arxiv.org/abs/1502.00391
-
-        .. [cite-ludlow] Ludlow et al. (2016), The mass-concentration-redshift relation of cold and warm dark matter haloes, Appendix C.
-            https://arxiv.org/abs/1601.02624
         """
         Mzi0 = self.Mzi(M0,zi)
         zf = -0.0064*pow(np.log10(M0),2)+0.0237*np.log10(M0)+1.8837
@@ -1105,14 +1125,15 @@ class subhalos:
         numerical physical Msun. Each boundary is explicit; the fixed-gap EPS normalization
         remains an approximation even though the WDM collapse barrier depends on mass.
 
+        The variance in this history is integrated from the configured WDM spectrum. The
+        Ludlow Appendix C analytic CDM variance fit is not used by this routine; the
+        coefficient 1.686 is already present in Correa et al. Eq. (7).
+
         References
         ----------
 
         .. [cite-correa] Correa et al. (2015), The accretion history of dark matter haloes - III. A physical model for the concentration-mass relation, Section 3 and Appendix B.
             https://arxiv.org/abs/1502.00391
-
-        .. [cite-ludlow] Ludlow et al. (2016), The mass-concentration-redshift relation of cold and warm dark matter haloes, Appendix C.
-            https://arxiv.org/abs/1601.02624
         """
         Mzi0 = self.Mzi(M0,zi)
         zf = -0.0064*pow(np.log10(M0),2)+0.0237*np.log10(M0)+1.8837
@@ -1236,7 +1257,7 @@ class subhalos:
         References
         ----------
 
-        .. [cite-yang] Yang et al. (2011), An Analytical Model for the Accretion of Dark Matter Subhalos, Eqs. (12)-(14), (21).
+        .. [cite-yang] Yang et al. (2011), An Analytical Model for the Accretion of Dark Matter Subhalos, Eqs. (7)-(16), (21).
             https://arxiv.org/abs/1104.1757
         """
         return pow(2*np.pi,-0.5)*(delc2-delc1)*pow(sig2-sig1,-1.5) \
@@ -1293,7 +1314,7 @@ class subhalos:
         References
         ----------
 
-        .. [cite-yang] Yang et al. (2011), An Analytical Model for the Accretion of Dark Matter Subhalos, Eqs. (12)-(14), (21).
+        .. [cite-yang] Yang et al. (2011), An Analytical Model for the Accretion of Dark Matter Subhalos, Eqs. (7)-(16), (21).
             https://arxiv.org/abs/1104.1757
         """
         zacc_2d = np.asarray(zacc).reshape(-1,1)
@@ -1444,13 +1465,13 @@ class subhalos:
         .. [cite-nfw] Navarro, Frenk & White (1997), A Universal Density Profile from Hierarchical Clustering.
             https://arxiv.org/abs/astro-ph/9611107
 
-        .. [cite-structure] Hiroshima, Ando & Ishiyama (2018), Modeling evolution of dark matter substructure and annihilation boost, Section II, Eqs. (5)-(9).
+        .. [cite-structure] Hiroshima, Ando & Ishiyama (2018), Modeling evolution of dark matter substructure and annihilation boost, Section II, Eqs. (4)-(9), (28), (34).
             https://arxiv.org/abs/1803.07691
 
         .. [cite-scatter] Ishiyama et al. (2013), The Cosmogrid Simulation: Statistical Properties of Small Dark Matter Halos, Eq. (7), Fig. 10.
             https://arxiv.org/abs/1101.2020
 
-        .. [cite-survival] Hayashi et al. (2003), The Structural Evolution of Substructure.
+        .. [cite-survival] Hayashi et al. (2003), The Structural Evolution of Substructure, Section 2.1.
             https://arxiv.org/abs/astro-ph/0203004
         """
         zdist = np.arange(redshift+dz,zmax+dz,dz)
@@ -1636,10 +1657,10 @@ class subhalos:
         .. [cite-scatter] Ishiyama et al. (2013), The Cosmogrid Simulation: Statistical Properties of Small Dark Matter Halos, Eq. (7), Fig. 10.
             https://arxiv.org/abs/1101.2020
 
-        .. [cite-structure] Hiroshima, Ando & Ishiyama (2018), Modeling evolution of dark matter substructure and annihilation boost, Section II, Eqs. (5)-(9).
+        .. [cite-structure] Hiroshima, Ando & Ishiyama (2018), Modeling evolution of dark matter substructure and annihilation boost, Section II, Eqs. (4)-(9), (28), (34).
             https://arxiv.org/abs/1803.07691
 
-        .. [cite-survival] Hayashi et al. (2003), The Structural Evolution of Substructure.
+        .. [cite-survival] Hayashi et al. (2003), The Structural Evolution of Substructure, Section 2.1.
             https://arxiv.org/abs/astro-ph/0203004
         """
         ma200, z_a, rs_a, rhos_a, m0, rs0, rhos0, ct0, weight, survive = self.rs_rhos_calc(
@@ -1773,10 +1794,10 @@ class subhalos:
         .. [cite-scatter] Ishiyama et al. (2013), The Cosmogrid Simulation: Statistical Properties of Small Dark Matter Halos, Eq. (7), Fig. 10.
             https://arxiv.org/abs/1101.2020
 
-        .. [cite-structure] Hiroshima, Ando & Ishiyama (2018), Modeling evolution of dark matter substructure and annihilation boost, Section II, Eqs. (5)-(9).
+        .. [cite-structure] Hiroshima, Ando & Ishiyama (2018), Modeling evolution of dark matter substructure and annihilation boost, Section II, Eqs. (4)-(9), (28), (34).
             https://arxiv.org/abs/1803.07691
 
-        .. [cite-survival] Hayashi et al. (2003), The Structural Evolution of Substructure.
+        .. [cite-survival] Hayashi et al. (2003), The Structural Evolution of Substructure, Section 2.1.
             https://arxiv.org/abs/astro-ph/0203004
         """
         ma200, z_a, rs_a, rhos_a, m0, rs0, rhos0, ct0, weight, survive = self.rs_rhos_calc(
@@ -1907,13 +1928,13 @@ class subhalos:
         .. [cite-nfw] Navarro, Frenk & White (1997), A Universal Density Profile from Hierarchical Clustering.
             https://arxiv.org/abs/astro-ph/9611107
 
-        .. [cite-structure] Hiroshima, Ando & Ishiyama (2018), Modeling evolution of dark matter substructure and annihilation boost, Section II, Eqs. (5)-(9).
+        .. [cite-structure] Hiroshima, Ando & Ishiyama (2018), Modeling evolution of dark matter substructure and annihilation boost, Section II, Eqs. (4)-(9), (28), (34).
             https://arxiv.org/abs/1803.07691
 
         .. [cite-scatter] Ishiyama et al. (2013), The Cosmogrid Simulation: Statistical Properties of Small Dark Matter Halos, Eq. (7), Fig. 10.
             https://arxiv.org/abs/1101.2020
 
-        .. [cite-survival] Hayashi et al. (2003), The Structural Evolution of Substructure.
+        .. [cite-survival] Hayashi et al. (2003), The Structural Evolution of Substructure, Section 2.1.
             https://arxiv.org/abs/astro-ph/0203004
         """
         ma200, z_a, rs_a, rhos_a, m0, rs0, rhos0, ct0, weight, survive = self.rs_rhos_calc(
@@ -1952,10 +1973,11 @@ class TidalStrippingSolver:
 
     Notes
     -----
-    The WDM mass-loss fit is Dekker et al., Appendix C. The code retains the more precise
+    The WDM mass-loss fit is Dekker et al., Appendix C. The code retains the extra-digit
     coefficients of author upstream/main at 99dfc3632eec0126080c0273ddf78f84fe09216c (for
     example -0.313 in log10(A)); the paper prints rounded coefficients (for example -0.31).
-    These are retained upstream coefficients, not a new fit.
+    The extra digits are supported by the upstream source, not printed in Appendix C;
+    no improvement in physical accuracy has been established from those digits.
 
     References
     ----------
@@ -2006,7 +2028,7 @@ class TidalStrippingSolver:
         References
         ----------
 
-        .. [cite-yang] Yang et al. (2011), An Analytical Model for the Accretion of Dark Matter Subhalos, Eqs. (12)-(14), (21).
+        .. [cite-yang] Yang et al. (2011), An Analytical Model for the Accretion of Dark Matter Subhalos, Eqs. (7)-(16), (21).
             https://arxiv.org/abs/1104.1757
 
         .. [cite-correa] Correa et al. (2015), The accretion history of dark matter haloes - III. A physical model for the concentration-mass relation, Section 3 and Appendix B.
@@ -2041,10 +2063,11 @@ class TidalStrippingSolver:
 
         Notes
         -----
-        The WDM mass-loss fit is Dekker et al., Appendix C. The code retains the more precise
+        The WDM mass-loss fit is Dekker et al., Appendix C. The code retains the extra-digit
         coefficients of author upstream/main at 99dfc3632eec0126080c0273ddf78f84fe09216c (for
         example -0.313 in log10(A)); the paper prints rounded coefficients (for example -0.31).
-        These are retained upstream coefficients, not a new fit.
+        The extra digits are supported by the upstream source, not printed in Appendix C;
+        no improvement in physical accuracy has been established from those digits.
 
         The host evolves from its anchor M0. The empirical stripping coefficients are calibrated over a bounded redshift and mass range.
 
@@ -2078,10 +2101,11 @@ class TidalStrippingSolver:
 
         Notes
         -----
-        The WDM mass-loss fit is Dekker et al., Appendix C. The code retains the more precise
+        The WDM mass-loss fit is Dekker et al., Appendix C. The code retains the extra-digit
         coefficients of author upstream/main at 99dfc3632eec0126080c0273ddf78f84fe09216c (for
         example -0.313 in log10(A)); the paper prints rounded coefficients (for example -0.31).
-        These are retained upstream coefficients, not a new fit.
+        The extra digits are supported by the upstream source, not printed in Appendix C;
+        no improvement in physical accuracy has been established from those digits.
 
         The host evolves from its anchor M0. The empirical stripping coefficients are calibrated over a bounded redshift and mass range.
 

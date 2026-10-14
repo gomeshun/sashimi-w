@@ -58,6 +58,7 @@ def test_variance_is_independent_sharp_k_integral(model, mass):
 
     .. [cite-sharp] Schneider (2015), Structure formation with suppressed small-scale perturbations, Eqs. (10)-(12).
         https://doi.org/10.1093/mnras/stv1169
+        Full text: https://arxiv.org/abs/1412.2133
     """
     def raw(m):
         r"""Integrate raw WDM power up to the physical halo cutoff.
@@ -88,6 +89,7 @@ def test_variance_is_independent_sharp_k_integral(model, mass):
 
         .. [cite-sharp] Schneider (2015), Structure formation with suppressed small-scale perturbations, Eqs. (10)-(12).
             https://doi.org/10.1093/mnras/stv1169
+            Full text: https://arxiv.org/abs/1412.2133
         """
         radius = (3*(m*w.h)/(4*np.pi*model.Rhomean_z))**(1/3)
         cutoff = min(2.5/radius, w.k_file[-1])
@@ -122,6 +124,7 @@ def test_variance_is_independent_sharp_k_integral(model, mass):
 
             .. [cite-sharp] Schneider (2015), Structure formation with suppressed small-scale perturbations, Eqs. (10)-(12).
                 https://doi.org/10.1093/mnras/stv1169
+                Full text: https://arxiv.org/abs/1412.2133
             """
             k = np.exp(logk)
             alpha = .049*(1/model.mass_wdm)**1.11*(w.OmegaC/.25)**.11*(w.h/.7)**1.22
@@ -204,10 +207,10 @@ def test_exact_nfw_boundary(model):
     References
     ----------
 
-    .. [cite-survival] Hayashi et al. (2003), The Structural Evolution of Substructure.
+    .. [cite-survival] Hayashi et al. (2003), The Structural Evolution of Substructure, Section 2.1.
         https://arxiv.org/abs/astro-ph/0203004
 
-    .. [cite-structure] Hiroshima, Ando & Ishiyama (2018), Modeling evolution of dark matter substructure and annihilation boost, Section II, Eqs. (5)-(9).
+    .. [cite-structure] Hiroshima, Ando & Ishiyama (2018), Modeling evolution of dark matter substructure and annihilation boost, Section II, Eqs. (4)-(9), (28), (34).
         https://arxiv.org/abs/1803.07691
     """
     from sashimi_w_numerics import invert_nfw_mass_function
