@@ -104,6 +104,7 @@ def make_variance_model(model=None, *, mass_wdm=1.5, wdm_power_convention=None):
 
     .. [cite-sharp] Schneider (2015), Structure formation with suppressed small-scale perturbations, Eqs. (10)-(12).
         https://doi.org/10.1093/mnras/stv1169
+        Full text: https://arxiv.org/abs/1412.2133
     """
     model, selected = _resolve_model(
         model, mass_wdm=mass_wdm, wdm_power_convention=wdm_power_convention
@@ -169,6 +170,7 @@ def make_integrated_variance_model(
 
     .. [cite-sharp] Schneider (2015), Structure formation with suppressed small-scale perturbations, Eqs. (10)-(12).
         https://doi.org/10.1093/mnras/stv1169
+        Full text: https://arxiv.org/abs/1412.2133
     """
     configured, selected_convention = _resolve_model(
         model,

@@ -127,10 +127,14 @@ def _normalized_eps_kernel(barrier_gap, variance_gap, minimum_variance_gap):
     numerical physical Msun. Each boundary is explicit; the fixed-gap EPS normalization
     remains an approximation even though the WDM collapse barrier depends on mass.
 
+    Yang et al. Eqs. (8)-(9) specify support normalization, and Eqs. (12)-(14) give the
+    kernels. The incomplete-gamma evaluation and continuous zero-barrier-gap limit used
+    here are derived evaluations, not additional closed formulas printed in that paper.
+
     References
     ----------
 
-    .. [cite-yang] Yang et al. (2011), An Analytical Model for the Accretion of Dark Matter Subhalos, Eqs. (12)-(14), (21).
+    .. [cite-yang] Yang et al. (2011), An Analytical Model for the Accretion of Dark Matter Subhalos, Eqs. (7)-(16), (21).
         https://arxiv.org/abs/1104.1757
     """
     gap, ds, dsmin = np.broadcast_arrays(barrier_gap, variance_gap, minimum_variance_gap)
@@ -197,6 +201,12 @@ class WDMPhysics:
     numerical physical Msun. Each boundary is explicit; the fixed-gap EPS normalization
     remains an approximation even though the WDM collapse barrier depends on mass.
 
+    The input header stores Omega_b=0.0469, Omega_m=0.27, h=0.7, n_s=0.95 and sigma8=0.82.
+    In particular Omega_b and n_s do not equal the Table 1 best-fit values in Komatsu et
+    al. The WMAP7 label supplies historical context; it does not establish that these five
+    inputs reproduce a published WMAP7 parameter column or recover the original CAMB
+    configuration.
+
     References
     ----------
 
@@ -238,6 +248,12 @@ class WDMPhysics:
         numerical physical Msun. Each boundary is explicit; the fixed-gap EPS normalization
         remains an approximation even though the WDM collapse barrier depends on mass.
 
+        The input header stores Omega_b=0.0469, Omega_m=0.27, h=0.7, n_s=0.95 and sigma8=0.82.
+        In particular Omega_b and n_s do not equal the Table 1 best-fit values in Komatsu et
+        al. The WMAP7 label supplies historical context; it does not establish that these five
+        inputs reproduce a published WMAP7 parameter column or recover the original CAMB
+        configuration.
+
         References
         ----------
 
@@ -246,6 +262,7 @@ class WDMPhysics:
 
         .. [cite-sharp] Schneider (2015), Structure formation with suppressed small-scale perturbations, Eqs. (10)-(12).
             https://doi.org/10.1093/mnras/stv1169
+            Full text: https://arxiv.org/abs/1412.2133
 
         .. [cite-constants] Mohr & Taylor (2005), CODATA recommended values of the fundamental physical constants: 2002, Table XXVI.
             https://physics.nist.gov/cuu/pdf/CODATA_RMP2005.pdf
@@ -452,6 +469,7 @@ class WDMPhysics:
 
         .. [cite-sharp] Schneider (2015), Structure formation with suppressed small-scale perturbations, Eqs. (10)-(12).
             https://doi.org/10.1093/mnras/stv1169
+            Full text: https://arxiv.org/abs/1412.2133
         """
         M = M / Msolar / h
         redshiftvect = np.linspace(0, 7, 8)
@@ -835,7 +853,7 @@ class WDMPhysics:
         References
         ----------
 
-        .. [cite-ludlow] Ludlow et al. (2016), The mass-concentration-redshift relation of cold and warm dark matter haloes, Appendix C.
+        .. [cite-ludlow] Ludlow et al. (2016), The mass-concentration-redshift relation of cold and warm dark matter haloes, Eq. (3) and Appendix C, Eqs. (C8)-(C12).
             https://arxiv.org/abs/1601.02624
         """
         return pow(M * pow(10000000000.0 * pow(h, -1), -1), -1)
@@ -867,14 +885,15 @@ class WDMPhysics:
         numerical physical Msun. Each boundary is explicit; the fixed-gap EPS normalization
         remains an approximation even though the WDM collapse barrier depends on mass.
 
+        The variance in this history is integrated from the configured WDM spectrum. The
+        Ludlow Appendix C analytic CDM variance fit is not used by this routine; the
+        coefficient 1.686 is already present in Correa et al. Eq. (7).
+
         References
         ----------
 
         .. [cite-correa] Correa et al. (2015), The accretion history of dark matter haloes - III. A physical model for the concentration-mass relation, Section 3 and Appendix B.
             https://arxiv.org/abs/1502.00391
-
-        .. [cite-ludlow] Ludlow et al. (2016), The mass-concentration-redshift relation of cold and warm dark matter haloes, Appendix C.
-            https://arxiv.org/abs/1601.02624
         """
         a = 1.686 * np.sqrt(2.0 / np.pi) * self.dDdz(0) + 1.0
         zf = -0.0064 * pow(np.log10(M0), 2) + 0.0237 * np.log10(M0) + 1.8837
@@ -909,14 +928,15 @@ class WDMPhysics:
         numerical physical Msun. Each boundary is explicit; the fixed-gap EPS normalization
         remains an approximation even though the WDM collapse barrier depends on mass.
 
+        The variance in this history is integrated from the configured WDM spectrum. The
+        Ludlow Appendix C analytic CDM variance fit is not used by this routine; the
+        coefficient 1.686 is already present in Correa et al. Eq. (7).
+
         References
         ----------
 
         .. [cite-correa] Correa et al. (2015), The accretion history of dark matter haloes - III. A physical model for the concentration-mass relation, Section 3 and Appendix B.
             https://arxiv.org/abs/1502.00391
-
-        .. [cite-ludlow] Ludlow et al. (2016), The mass-concentration-redshift relation of cold and warm dark matter haloes, Appendix C.
-            https://arxiv.org/abs/1601.02624
         """
         Mzi0 = self.Mzi(M0, zi)
         zf = -0.0064 * pow(np.log10(M0), 2) + 0.0237 * np.log10(M0) + 1.8837
@@ -960,14 +980,15 @@ class WDMPhysics:
         numerical physical Msun. Each boundary is explicit; the fixed-gap EPS normalization
         remains an approximation even though the WDM collapse barrier depends on mass.
 
+        The variance in this history is integrated from the configured WDM spectrum. The
+        Ludlow Appendix C analytic CDM variance fit is not used by this routine; the
+        coefficient 1.686 is already present in Correa et al. Eq. (7).
+
         References
         ----------
 
         .. [cite-correa] Correa et al. (2015), The accretion history of dark matter haloes - III. A physical model for the concentration-mass relation, Section 3 and Appendix B.
             https://arxiv.org/abs/1502.00391
-
-        .. [cite-ludlow] Ludlow et al. (2016), The mass-concentration-redshift relation of cold and warm dark matter haloes, Appendix C.
-            https://arxiv.org/abs/1601.02624
         """
         Mzi0, alpha, beta = parameters
         return Mzi0 * pow(1 + z - zi, alpha) * np.exp(beta * (z - zi))
@@ -1002,14 +1023,15 @@ class WDMPhysics:
         numerical physical Msun. Each boundary is explicit; the fixed-gap EPS normalization
         remains an approximation even though the WDM collapse barrier depends on mass.
 
+        The variance in this history is integrated from the configured WDM spectrum. The
+        Ludlow Appendix C analytic CDM variance fit is not used by this routine; the
+        coefficient 1.686 is already present in Correa et al. Eq. (7).
+
         References
         ----------
 
         .. [cite-correa] Correa et al. (2015), The accretion history of dark matter haloes - III. A physical model for the concentration-mass relation, Section 3 and Appendix B.
             https://arxiv.org/abs/1502.00391
-
-        .. [cite-ludlow] Ludlow et al. (2016), The mass-concentration-redshift relation of cold and warm dark matter haloes, Appendix C.
-            https://arxiv.org/abs/1601.02624
         """
         return self._host_history_mass(self._host_history_parameters(M0, zi), z, zi)
 
@@ -1078,14 +1100,15 @@ class WDMPhysics:
         numerical physical Msun. Each boundary is explicit; the fixed-gap EPS normalization
         remains an approximation even though the WDM collapse barrier depends on mass.
 
+        The variance in this history is integrated from the configured WDM spectrum. The
+        Ludlow Appendix C analytic CDM variance fit is not used by this routine; the
+        coefficient 1.686 is already present in Correa et al. Eq. (7).
+
         References
         ----------
 
         .. [cite-correa] Correa et al. (2015), The accretion history of dark matter haloes - III. A physical model for the concentration-mass relation, Section 3 and Appendix B.
             https://arxiv.org/abs/1502.00391
-
-        .. [cite-ludlow] Ludlow et al. (2016), The mass-concentration-redshift relation of cold and warm dark matter haloes, Appendix C.
-            https://arxiv.org/abs/1601.02624
         """
         Mzi0 = self.Mzi(M0, zi)
         zf = -0.0064 * pow(np.log10(M0), 2) + 0.0237 * np.log10(M0) + 1.8837
@@ -1214,7 +1237,7 @@ class WDMPhysics:
         References
         ----------
 
-        .. [cite-yang] Yang et al. (2011), An Analytical Model for the Accretion of Dark Matter Subhalos, Eqs. (12)-(14), (21).
+        .. [cite-yang] Yang et al. (2011), An Analytical Model for the Accretion of Dark Matter Subhalos, Eqs. (7)-(16), (21).
             https://arxiv.org/abs/1104.1757
         """
         return (
@@ -1275,7 +1298,7 @@ class WDMPhysics:
         References
         ----------
 
-        .. [cite-yang] Yang et al. (2011), An Analytical Model for the Accretion of Dark Matter Subhalos, Eqs. (12)-(14), (21).
+        .. [cite-yang] Yang et al. (2011), An Analytical Model for the Accretion of Dark Matter Subhalos, Eqs. (7)-(16), (21).
             https://arxiv.org/abs/1104.1757
         """
         zacc_2d = np.asarray(zacc).reshape(-1, 1)
@@ -1407,10 +1430,10 @@ class WDMPhysics:
         .. [cite-scatter] Ishiyama et al. (2013), The Cosmogrid Simulation: Statistical Properties of Small Dark Matter Halos, Eq. (7), Fig. 10.
             https://arxiv.org/abs/1101.2020
 
-        .. [cite-structure] Hiroshima, Ando & Ishiyama (2018), Modeling evolution of dark matter substructure and annihilation boost, Section II, Eqs. (5)-(9).
+        .. [cite-structure] Hiroshima, Ando & Ishiyama (2018), Modeling evolution of dark matter substructure and annihilation boost, Section II, Eqs. (4)-(9), (28), (34).
             https://arxiv.org/abs/1803.07691
 
-        .. [cite-survival] Hayashi et al. (2003), The Structural Evolution of Substructure.
+        .. [cite-survival] Hayashi et al. (2003), The Structural Evolution of Substructure, Section 2.1.
             https://arxiv.org/abs/astro-ph/0203004
         """
         ma200, z_a, rs_a, rhos_a, m0, rs0, rhos0, ct0, weight, survive = self.rs_rhos_calc(
@@ -1527,10 +1550,10 @@ class WDMPhysics:
         .. [cite-scatter] Ishiyama et al. (2013), The Cosmogrid Simulation: Statistical Properties of Small Dark Matter Halos, Eq. (7), Fig. 10.
             https://arxiv.org/abs/1101.2020
 
-        .. [cite-structure] Hiroshima, Ando & Ishiyama (2018), Modeling evolution of dark matter substructure and annihilation boost, Section II, Eqs. (5)-(9).
+        .. [cite-structure] Hiroshima, Ando & Ishiyama (2018), Modeling evolution of dark matter substructure and annihilation boost, Section II, Eqs. (4)-(9), (28), (34).
             https://arxiv.org/abs/1803.07691
 
-        .. [cite-survival] Hayashi et al. (2003), The Structural Evolution of Substructure.
+        .. [cite-survival] Hayashi et al. (2003), The Structural Evolution of Substructure, Section 2.1.
             https://arxiv.org/abs/astro-ph/0203004
         """
         ma200, z_a, rs_a, rhos_a, m0, rs0, rhos0, ct0, weight, survive = self.rs_rhos_calc(
@@ -1646,13 +1669,13 @@ class WDMPhysics:
         .. [cite-nfw] Navarro, Frenk & White (1997), A Universal Density Profile from Hierarchical Clustering.
             https://arxiv.org/abs/astro-ph/9611107
 
-        .. [cite-structure] Hiroshima, Ando & Ishiyama (2018), Modeling evolution of dark matter substructure and annihilation boost, Section II, Eqs. (5)-(9).
+        .. [cite-structure] Hiroshima, Ando & Ishiyama (2018), Modeling evolution of dark matter substructure and annihilation boost, Section II, Eqs. (4)-(9), (28), (34).
             https://arxiv.org/abs/1803.07691
 
         .. [cite-scatter] Ishiyama et al. (2013), The Cosmogrid Simulation: Statistical Properties of Small Dark Matter Halos, Eq. (7), Fig. 10.
             https://arxiv.org/abs/1101.2020
 
-        .. [cite-survival] Hayashi et al. (2003), The Structural Evolution of Substructure.
+        .. [cite-survival] Hayashi et al. (2003), The Structural Evolution of Substructure, Section 2.1.
             https://arxiv.org/abs/astro-ph/0203004
         """
         ma200, z_a, rs_a, rhos_a, m0, rs0, rhos0, ct0, weight, survive = self.rs_rhos_calc(

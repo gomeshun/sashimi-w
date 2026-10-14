@@ -517,8 +517,9 @@ class Subhalos(WDMPhysics):
         References
         ----------
 
-        .. [cite-growth] Carroll, Press & Turner (1992), The Cosmological Constant, Section 3.5.
+        .. [cite-growth] Carroll, Press & Turner (1992), The Cosmological Constant, Section 3.5, Eq. (29).
             https://doi.org/10.1146/annurev.aa.30.090192.002435
+            Full text: https://ned.ipac.caltech.edu/level5/Carroll/Carroll3_5.html
         """
         growth = np.asarray(self.itamae_cosmology.growth_factor(z), dtype=float)
         growth0 = float(np.asarray(self.itamae_cosmology.growth_factor(0.0), dtype=float))
@@ -578,8 +579,9 @@ class Subhalos(WDMPhysics):
         References
         ----------
 
-        .. [cite-growth] Carroll, Press & Turner (1992), The Cosmological Constant, Section 3.5.
+        .. [cite-growth] Carroll, Press & Turner (1992), The Cosmological Constant, Section 3.5, Eq. (29).
             https://doi.org/10.1146/annurev.aa.30.090192.002435
+            Full text: https://ned.ipac.caltech.edu/level5/Carroll/Carroll3_5.html
         """
         redshift = np.asarray(z, dtype=float)
         omega_lz = self.omega_lambda / (self.omega_lambda + float(OmegaM) * (1.0 + redshift) ** 3)
@@ -771,6 +773,7 @@ class Subhalos(WDMPhysics):
 
         .. [cite-sharp] Schneider (2015), Structure formation with suppressed small-scale perturbations, Eqs. (10)-(12).
             https://doi.org/10.1093/mnras/stv1169
+            Full text: https://arxiv.org/abs/1412.2133
         """
         return super().conc200(np.asarray(mass_cgs, dtype=float) * float(h) ** 2, z)
 
@@ -805,8 +808,9 @@ class Subhalos(WDMPhysics):
         References
         ----------
 
-        .. [cite-growth] Carroll, Press & Turner (1992), The Cosmological Constant, Section 3.5.
+        .. [cite-growth] Carroll, Press & Turner (1992), The Cosmological Constant, Section 3.5, Eq. (29).
             https://doi.org/10.1146/annurev.aa.30.090192.002435
+            Full text: https://ned.ipac.caltech.edu/level5/Carroll/Carroll3_5.html
         """
         if not np.isclose(Omega_m0 + Omega_l0, 1.0, rtol=0.0, atol=1e-12):
             raise ValueError("The initial ITAMAE WDM adapter supports flat cosmologies only.")
@@ -950,10 +954,10 @@ class Subhalos(WDMPhysics):
         .. [cite-scatter] Ishiyama et al. (2013), The Cosmogrid Simulation: Statistical Properties of Small Dark Matter Halos, Eq. (7), Fig. 10.
             https://arxiv.org/abs/1101.2020
 
-        .. [cite-structure] Hiroshima, Ando & Ishiyama (2018), Modeling evolution of dark matter substructure and annihilation boost, Section II, Eqs. (5)-(9).
+        .. [cite-structure] Hiroshima, Ando & Ishiyama (2018), Modeling evolution of dark matter substructure and annihilation boost, Section II, Eqs. (4)-(9), (28), (34).
             https://arxiv.org/abs/1803.07691
 
-        .. [cite-survival] Hayashi et al. (2003), The Structural Evolution of Substructure.
+        .. [cite-survival] Hayashi et al. (2003), The Structural Evolution of Substructure, Section 2.1.
             https://arxiv.org/abs/astro-ph/0203004
         """
         parameters = dict(locals())
@@ -1000,10 +1004,10 @@ class Subhalos(WDMPhysics):
         .. [cite-scatter] Ishiyama et al. (2013), The Cosmogrid Simulation: Statistical Properties of Small Dark Matter Halos, Eq. (7), Fig. 10.
             https://arxiv.org/abs/1101.2020
 
-        .. [cite-structure] Hiroshima, Ando & Ishiyama (2018), Modeling evolution of dark matter substructure and annihilation boost, Section II, Eqs. (5)-(9).
+        .. [cite-structure] Hiroshima, Ando & Ishiyama (2018), Modeling evolution of dark matter substructure and annihilation boost, Section II, Eqs. (4)-(9), (28), (34).
             https://arxiv.org/abs/1803.07691
 
-        .. [cite-survival] Hayashi et al. (2003), The Structural Evolution of Substructure.
+        .. [cite-survival] Hayashi et al. (2003), The Structural Evolution of Substructure, Section 2.1.
             https://arxiv.org/abs/astro-ph/0203004
         """
         catalog = self.rs_rhos_catalog_calc(*args, **kwargs)
@@ -1058,10 +1062,10 @@ class Subhalos(WDMPhysics):
         .. [cite-scatter] Ishiyama et al. (2013), The Cosmogrid Simulation: Statistical Properties of Small Dark Matter Halos, Eq. (7), Fig. 10.
             https://arxiv.org/abs/1101.2020
 
-        .. [cite-structure] Hiroshima, Ando & Ishiyama (2018), Modeling evolution of dark matter substructure and annihilation boost, Section II, Eqs. (5)-(9).
+        .. [cite-structure] Hiroshima, Ando & Ishiyama (2018), Modeling evolution of dark matter substructure and annihilation boost, Section II, Eqs. (4)-(9), (28), (34).
             https://arxiv.org/abs/1803.07691
 
-        .. [cite-survival] Hayashi et al. (2003), The Structural Evolution of Substructure.
+        .. [cite-survival] Hayashi et al. (2003), The Structural Evolution of Substructure, Section 2.1.
             https://arxiv.org/abs/astro-ph/0203004
         """
         from scipy.integrate import simpson

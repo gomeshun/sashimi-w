@@ -95,7 +95,7 @@ class WDMHostHistory:
         References
         ----------
 
-        .. [cite-yang] Yang et al. (2011), An Analytical Model for the Accretion of Dark Matter Subhalos, Eqs. (12)-(14), (21).
+        .. [cite-yang] Yang et al. (2011), An Analytical Model for the Accretion of Dark Matter Subhalos, Eqs. (7)-(16), (21).
             https://arxiv.org/abs/1104.1757
 
         .. [cite-correa] Correa et al. (2015), The accretion history of dark matter haloes - III. A physical model for the concentration-mass relation, Section 3 and Appendix B.
@@ -130,10 +130,11 @@ class WDMTidalMassLoss:
 
     Notes
     -----
-    The WDM mass-loss fit is Dekker et al., Appendix C. The code retains the more precise
+    The WDM mass-loss fit is Dekker et al., Appendix C. The code retains the extra-digit
     coefficients of author upstream/main at 99dfc3632eec0126080c0273ddf78f84fe09216c (for
     example -0.313 in log10(A)); the paper prints rounded coefficients (for example -0.31).
-    These are retained upstream coefficients, not a new fit.
+    The extra digits are supported by the upstream source, not printed in Appendix C;
+    no improvement in physical accuracy has been established from those digits.
 
     Population stages use physical Msun, Mpc and Msun/Mpc^3. Local structure calls
     explicitly convert to CGS; no time or h conversion is implicit in the shared solver.
@@ -177,10 +178,11 @@ class WDMTidalMassLoss:
 
         Notes
         -----
-        The WDM mass-loss fit is Dekker et al., Appendix C. The code retains the more precise
+        The WDM mass-loss fit is Dekker et al., Appendix C. The code retains the extra-digit
         coefficients of author upstream/main at 99dfc3632eec0126080c0273ddf78f84fe09216c (for
         example -0.313 in log10(A)); the paper prints rounded coefficients (for example -0.31).
-        These are retained upstream coefficients, not a new fit.
+        The extra digits are supported by the upstream source, not printed in Appendix C;
+        no improvement in physical accuracy has been established from those digits.
 
         Population stages use physical Msun, Mpc and Msun/Mpc^3. Local structure calls
         explicitly convert to CGS; no time or h conversion is implicit in the shared solver.
@@ -237,10 +239,11 @@ class WDMTidalSolver:
 
     Notes
     -----
-    The WDM mass-loss fit is Dekker et al., Appendix C. The code retains the more precise
+    The WDM mass-loss fit is Dekker et al., Appendix C. The code retains the extra-digit
     coefficients of author upstream/main at 99dfc3632eec0126080c0273ddf78f84fe09216c (for
     example -0.313 in log10(A)); the paper prints rounded coefficients (for example -0.31).
-    These are retained upstream coefficients, not a new fit.
+    The extra digits are supported by the upstream source, not printed in Appendix C;
+    no improvement in physical accuracy has been established from those digits.
 
     Population stages use physical Msun, Mpc and Msun/Mpc^3. Local structure calls
     explicitly convert to CGS; no time or h conversion is implicit in the shared solver.
@@ -274,10 +277,11 @@ class WDMTidalSolver:
 
         Notes
         -----
-        The WDM mass-loss fit is Dekker et al., Appendix C. The code retains the more precise
+        The WDM mass-loss fit is Dekker et al., Appendix C. The code retains the extra-digit
         coefficients of author upstream/main at 99dfc3632eec0126080c0273ddf78f84fe09216c (for
         example -0.313 in log10(A)); the paper prints rounded coefficients (for example -0.31).
-        These are retained upstream coefficients, not a new fit.
+        The extra digits are supported by the upstream source, not printed in Appendix C;
+        no improvement in physical accuracy has been established from those digits.
 
         Population stages use physical Msun, Mpc and Msun/Mpc^3. Local structure calls
         explicitly convert to CGS; no time or h conversion is implicit in the shared solver.
@@ -386,10 +390,11 @@ class WDMTidalSolver:
 
         Notes
         -----
-        The WDM mass-loss fit is Dekker et al., Appendix C. The code retains the more precise
+        The WDM mass-loss fit is Dekker et al., Appendix C. The code retains the extra-digit
         coefficients of author upstream/main at 99dfc3632eec0126080c0273ddf78f84fe09216c (for
         example -0.313 in log10(A)); the paper prints rounded coefficients (for example -0.31).
-        These are retained upstream coefficients, not a new fit.
+        The extra digits are supported by the upstream source, not printed in Appendix C;
+        no improvement in physical accuracy has been established from those digits.
 
         Population stages use physical Msun, Mpc and Msun/Mpc^3. Local structure calls
         explicitly convert to CGS; no time or h conversion is implicit in the shared solver.
@@ -427,10 +432,11 @@ class WDMTidalSolver:
 
         Notes
         -----
-        The WDM mass-loss fit is Dekker et al., Appendix C. The code retains the more precise
+        The WDM mass-loss fit is Dekker et al., Appendix C. The code retains the extra-digit
         coefficients of author upstream/main at 99dfc3632eec0126080c0273ddf78f84fe09216c (for
         example -0.313 in log10(A)); the paper prints rounded coefficients (for example -0.31).
-        These are retained upstream coefficients, not a new fit.
+        The extra digits are supported by the upstream source, not printed in Appendix C;
+        no improvement in physical accuracy has been established from those digits.
 
         Population stages use physical Msun, Mpc and Msun/Mpc^3. Local structure calls
         explicitly convert to CGS; no time or h conversion is implicit in the shared solver.
@@ -651,7 +657,7 @@ class WDMInitialStructure:
         .. [cite-nfw] Navarro, Frenk & White (1997), A Universal Density Profile from Hierarchical Clustering.
             https://arxiv.org/abs/astro-ph/9611107
 
-        .. [cite-structure] Hiroshima, Ando & Ishiyama (2018), Modeling evolution of dark matter substructure and annihilation boost, Section II, Eqs. (5)-(9).
+        .. [cite-structure] Hiroshima, Ando & Ishiyama (2018), Modeling evolution of dark matter substructure and annihilation boost, Section II, Eqs. (4)-(9), (28), (34).
             https://arxiv.org/abs/1803.07691
         """
         concentration = batch.concentration_acc.reshape(self.N_herm, -1)
@@ -757,7 +763,7 @@ class WDMProfileEvolution:
         .. [cite-tracks] Penarrubia et al. (2010), The impact of dark matter cusps and cores on the satellite galaxy population around spiral galaxies, Eq. (8), Fig. 6.
             https://arxiv.org/abs/1002.3376
 
-        .. [cite-structure] Hiroshima, Ando & Ishiyama (2018), Modeling evolution of dark matter substructure and annihilation boost, Section II, Eqs. (5)-(9).
+        .. [cite-structure] Hiroshima, Ando & Ishiyama (2018), Modeling evolution of dark matter substructure and annihilation boost, Section II, Eqs. (4)-(9), (28), (34).
             https://arxiv.org/abs/1803.07691
 
         .. [cite-nfw] Navarro, Frenk & White (1997), A Universal Density Profile from Hierarchical Clustering.
@@ -835,10 +841,10 @@ class WDMSurvival:
     References
     ----------
 
-    .. [cite-survival] Hayashi et al. (2003), The Structural Evolution of Substructure.
+    .. [cite-survival] Hayashi et al. (2003), The Structural Evolution of Substructure, Section 2.1.
         https://arxiv.org/abs/astro-ph/0203004
 
-    .. [cite-structure] Hiroshima, Ando & Ishiyama (2018), Modeling evolution of dark matter substructure and annihilation boost, Section II, Eqs. (5)-(9).
+    .. [cite-structure] Hiroshima, Ando & Ishiyama (2018), Modeling evolution of dark matter substructure and annihilation boost, Section II, Eqs. (4)-(9), (28), (34).
         https://arxiv.org/abs/1803.07691
     """
 
@@ -882,10 +888,10 @@ class WDMSurvival:
         References
         ----------
 
-        .. [cite-survival] Hayashi et al. (2003), The Structural Evolution of Substructure.
+        .. [cite-survival] Hayashi et al. (2003), The Structural Evolution of Substructure, Section 2.1.
             https://arxiv.org/abs/astro-ph/0203004
 
-        .. [cite-structure] Hiroshima, Ando & Ishiyama (2018), Modeling evolution of dark matter substructure and annihilation boost, Section II, Eqs. (5)-(9).
+        .. [cite-structure] Hiroshima, Ando & Ishiyama (2018), Modeling evolution of dark matter substructure and annihilation boost, Section II, Eqs. (4)-(9), (28), (34).
             https://arxiv.org/abs/1803.07691
         """
         return evolved["c_t"] > self.ct_threshold

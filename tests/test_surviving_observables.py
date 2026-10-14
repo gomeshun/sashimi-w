@@ -36,7 +36,7 @@ def population_model(survive):
     .. [cite-nfw] Navarro, Frenk & White (1997), A Universal Density Profile from Hierarchical Clustering.
         https://arxiv.org/abs/astro-ph/9611107
 
-    .. [cite-structure] Hiroshima, Ando & Ishiyama (2018), Modeling evolution of dark matter substructure and annihilation boost, Section II, Eqs. (5)-(9).
+    .. [cite-structure] Hiroshima, Ando & Ishiyama (2018), Modeling evolution of dark matter substructure and annihilation boost, Section II, Eqs. (4)-(9), (28), (34).
         https://arxiv.org/abs/1803.07691
     """
     model = object.__new__(Subhalos)
