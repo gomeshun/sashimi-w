@@ -16,6 +16,19 @@ from sashimi_w_itamae_components import (
 
 
 def test_canonical_transport_matches_half_mass_solution_and_chunking():
+    """Transport an analytic half-mass WDM evolution through canonical structure stages.
+
+    Notes
+    -----
+    Pass criteria: The bound mass is half the input to 1e-7, radii use the correct units,
+    NFW mass reconstruction agrees to 3e-13, and repeated batches preserve all node values.
+
+    Failure criteria: any mismatch with the stated value, shape or identity requirements
+    fails the test.
+
+    Scope: This controlled calculation does not calibrate a subhalo population against
+    simulations or observations.
+    """
     model = SimpleNamespace(
         fc=nfw_mass_function, _invert_nfw_mass_fraction=invert_nfw_mass_function
     )

@@ -14,13 +14,36 @@ _GOLDEN = Path(__file__).parent / "golden" / "wdm_q10_small_catalog.json"
 
 
 def _fixture_mass_wdm() -> float:
-    """Return the standard WDM particle mass recorded by the q10 fixture."""
+    """Return the standard WDM particle mass recorded by the q10 fixture.
+
+    Returns
+    -------
+    float
+        WDM particle mass in keV recorded by the frozen q10 fixture.
+
+    Notes
+    -----
+    This fixture/helper supports the controlled checks in this test module; its synthetic
+    values are not a calibrated halo model.
+    """
     with _GOLDEN.open(encoding="utf-8") as input_file:
         return float(json.load(input_file)["parameters"]["mass_wdm"])
 
 
 def test_callable_variance_adapter_preserves_standard_model() -> None:
-    """The reproduction adapter must retain native sigma and derivative arrays."""
+    """Preserve the WDM variance and derivative through the callable ITAMAE interface.
+
+    Notes
+    -----
+    Pass criteria: Sigma and derivative equal the standard model, variance equals sigma
+    squared, and metadata distinguish particle mass, q10 and half-mode convention.
+
+    Failure criteria: any mismatch with the stated value, shape or identity requirements
+    fails the test.
+
+    Scope: This controlled calculation does not calibrate a subhalo population against
+    simulations or observations.
+    """
     public = subhalos(mass_wdm=_fixture_mass_wdm(), wdm_power_convention=STANDARD_T2_Q10)
     variance = make_variance_model(public)
     mass = np.array([10000000.0, 1000000000.0, 100000000000.0])
@@ -40,10 +63,33 @@ def test_callable_variance_adapter_preserves_standard_model() -> None:
 
 
 def test_variance_factories_default_to_q10_and_reject_old_models() -> None:
+    """Prevent either variance factory from silently accepting the retired q5 prescription.
+
+    Notes
+    -----
+    Pass criteria: Both factories identify q10 defaults and reject a supplied q5-like model.
+
+    Failure criteria: a stated numerical/identity mismatch, a missing required exception or
+    warning, or an unexpected calculation failure fails the test.
+
+    Scope: This controlled calculation does not calibrate a subhalo population against
+    simulations or observations.
+    """
     assert "q=10" in make_variance_model().identifier
     assert "q=10" in make_integrated_variance_model().identifier
 
     class OldModel:
+        """Represent an explicitly retired q5 prescription so a variance factory must reject it.
+
+        Notes
+        -----
+        Prevent either variance factory from silently accepting the retired q5 prescription.
+        Pass criteria: Both factories identify q10 defaults and reject a supplied q5-like model.
+        Failure occurs when the stated comparison or expected rejection is not met. This
+        controlled calculation does not calibrate a subhalo population against simulations or
+        observations.
+        """
+
         wdm_power_convention = "published-q5"
         wdm_power_q = 5
 
@@ -53,6 +99,19 @@ def test_variance_factories_default_to_q10_and_reject_old_models() -> None:
 
 
 def test_callable_adapter_uses_same_continuous_derivative() -> None:
+    """Forward the same WDM variance slope used by the population model.
+
+    Notes
+    -----
+    Pass criteria: The callable derivative equals the model derivative at two masses and
+    z=2.
+
+    Failure criteria: any mismatch with the stated value, shape or identity requirements
+    fails the test.
+
+    Scope: This controlled calculation does not calibrate a subhalo population against
+    simulations or observations.
+    """
     model = ItamaeSubhalos(mass_wdm=_fixture_mass_wdm(), wdm_power_convention=STANDARD_T2_Q10)
     variance = make_variance_model(model)
     mass = np.array([100000000.0, 10000000000.0])
@@ -60,7 +119,19 @@ def test_callable_adapter_uses_same_continuous_derivative() -> None:
 
 
 def test_integrated_sharp_k_path_is_sigma8_normalized_and_continuous() -> None:
-    """The corrected moving cutoff should produce finite nonzero derivatives."""
+    """Reproduce the current WDM sharp-k normalization and continuous negative slope.
+
+    Notes
+    -----
+    Pass criteria: The implemented reference mass gives sigma_8, unit-converted integration
+    bounds/density agree, and all tested derivatives are finite, distinct and negative.
+
+    Failure criteria: any mismatch with the stated value, shape or identity requirements
+    fails the test.
+
+    Scope: This controlled calculation does not calibrate a subhalo population against
+    simulations or observations.
+    """
     model = ItamaeSubhalos(mass_wdm=_fixture_mass_wdm(), wdm_power_convention=STANDARD_T2_Q10)
     variance = make_integrated_variance_model(model, n_k=1001)
     mass = np.geomspace(100000000.0, 100000000000000.0, 13)
@@ -83,6 +154,19 @@ def test_integrated_sharp_k_path_is_sigma8_normalized_and_continuous() -> None:
 
 
 def test_standard_q10_integrated_variance_formula_and_identifier_are_pinned() -> None:
+    """Keep the current WDM prescription label and normalization identifiable.
+
+    Notes
+    -----
+    Pass criteria: Integrated variance reproduces the current sigma_8 normalization and both
+    adapters contain the specified q10/half-mode labels.
+
+    Failure criteria: any mismatch with the stated value, shape or identity requirements
+    fails the test.
+
+    Scope: This controlled calculation does not calibrate a subhalo population against
+    simulations or observations.
+    """
     model = ItamaeSubhalos(mass_wdm=_fixture_mass_wdm())
     integrated = make_integrated_variance_model(model, n_k=1001)
     assert integrated.sigma(model.MassIn8Mpc / h, 0.0) == pytest.approx(sigma_8, rel=2e-14)
@@ -96,7 +180,24 @@ def test_standard_q10_integrated_variance_formula_and_identifier_are_pinned() ->
 
 @pytest.mark.parametrize("convention", [STANDARD_T2_Q10])
 def test_variance_and_derivative_use_one_continuous_integral(convention) -> None:
-    """Mass interpolation/projection must not decouple sigma from its slope."""
+    """Use one continuous WDM density variance for both sigma and the EPS slope.
+
+    Parameters
+    ----------
+    convention : str
+        Declared WDM power-suppression convention.
+
+    Notes
+    -----
+    Pass criteria: A centered mass finite difference agrees with dS/dM to rtol=4e-8 and
+    callable/native sigma agrees; repeated queries retain the current cache behavior.
+
+    Failure criteria: any mismatch with the stated value, shape or identity requirements
+    fails the test.
+
+    Scope: This controlled calculation does not calibrate a subhalo population against
+    simulations or observations.
+    """
     model = ItamaeSubhalos(mass_wdm=2.0, wdm_power_convention=convention)
     mass = np.geomspace(1000000000.0, 10000000000000.0, 24)
     step = 0.0001
@@ -111,6 +212,19 @@ def test_variance_and_derivative_use_one_continuous_integral(convention) -> None
 
 
 def test_lighter_wdm_has_more_small_scale_power_suppression() -> None:
+    """Recover the expected particle-mass ordering of thermal WDM suppression.
+
+    Notes
+    -----
+    Pass criteria: At 1e8 solar masses a 1-keV particle gives smaller sigma than 5 keV; at
+    1e14 solar masses they agree within 0.3 percent.
+
+    Failure criteria: any mismatch with the stated value, shape or identity requirements
+    fails the test.
+
+    Scope: This controlled calculation does not calibrate a subhalo population against
+    simulations or observations.
+    """
     light = make_integrated_variance_model(
         mass_wdm=1.0, wdm_power_convention=STANDARD_T2_Q10, n_k=1001
     )
@@ -124,6 +238,24 @@ def test_lighter_wdm_has_more_small_scale_power_suppression() -> None:
 
 
 def test_variance_cache_binds_wdm_particle_mass_and_round_trips(tmp_path) -> None:
+    """Avoid reusing variance data for a different WDM mass or physical prescription.
+
+    Parameters
+    ----------
+    tmp_path : pathlib.Path
+        Isolated directory for the test catalogue, cache or provenance files.
+
+    Notes
+    -----
+    Pass criteria: Changing particle mass or historical prescription changes the cache key;
+    exact arrays reload and mismatched keys fail.
+
+    Failure criteria: a stated numerical/identity mismatch, a missing required exception or
+    warning, or an unexpected calculation failure fails the test.
+
+    Scope: This controlled calculation does not calibrate a subhalo population against
+    simulations or observations.
+    """
     model = ItamaeSubhalos(mass_wdm=_fixture_mass_wdm(), wdm_power_convention=STANDARD_T2_Q10)
     variance_model = make_integrated_variance_model(model, n_k=501)
     mass = np.geomspace(100000000.0, 1000000000000.0, 5)
@@ -176,6 +308,19 @@ def test_variance_cache_binds_wdm_particle_mass_and_round_trips(tmp_path) -> Non
 
 
 def test_integrated_power_is_a_snapshot_of_constructor_parameters():
+    """Keep a saved variance object's spectrum fixed after the source model mutates.
+
+    Notes
+    -----
+    Pass criteria: Changing the model suppression scale leaves the constructed power values
+    and identifier exactly unchanged.
+
+    Failure criteria: any mismatch with the stated value, shape or identity requirements
+    fails the test.
+
+    Scope: This controlled calculation does not calibrate a subhalo population against
+    simulations or observations.
+    """
     model = ItamaeSubhalos(2.0)
     variance = make_integrated_variance_model(model, n_k=501)
     k = np.geomspace(0.01, 100, 15)

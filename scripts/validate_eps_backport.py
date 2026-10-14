@@ -27,9 +27,35 @@ CORE = "23d01e8758a88b061b87de9e488c38ec89fd8e4f"
 
 
 def cases():
-    base = dict(M0=1e10, redshift=0.0, dz=0.5, zmax=1.0, N_ma=4,
-                sigmalogc=0.128, N_herm=2, logmamin=6.0, logmamax=8.0,
-                N_hermNa=3, sigmafac=0.0, profile_change=True)
+    """Specify controlled WDM populations spanning particle mass, epoch, profile response and
+    host scatter.
+
+    Returns
+    -------
+    dict
+        Case names mapped to (particle mass in keV, explicit population settings).
+
+    Notes
+    -----
+    This comparison is pinned to the script-declared reference and ITAMAE revisions. Each
+    source is imported in a fresh process. The output records failures as well as finite
+    population/rate differences; reference agreement is historical/numerical evidence, not a
+    calibration of the EPS approximation.
+    """
+    base = dict(
+        M0=1e10,
+        redshift=0.0,
+        dz=0.5,
+        zmax=1.0,
+        N_ma=4,
+        sigmalogc=0.128,
+        N_herm=2,
+        logmamin=6.0,
+        logmamax=8.0,
+        N_hermNa=3,
+        sigmafac=0.0,
+        profile_change=True,
+    )
     result = {"default": (2.0, base), "particle_mass": (4.0, base)}
     for name, changes in {
         "nonzero": dict(redshift=0.5, zmax=1.5),
@@ -38,8 +64,9 @@ def cases():
         "sigma_offset": dict(N_hermNa=1, N_ma=3, zmax=1.5, sigmafac=0.5),
     }.items():
         result[name] = (2.0, base | changes)
-    population = base | dict(M0=1e12, zmax=3.0, N_ma=6, N_herm=3,
-                             logmamin=8.0, logmamax=11.0, N_hermNa=200)
+    population = base | dict(
+        M0=1e12, zmax=3.0, N_ma=6, N_herm=3, logmamin=8.0, logmamax=11.0, N_hermNa=200
+    )
     for mass in (0.5, 2.0, 5.0):
         result[f"quadrature_{mass}"] = (mass, population)
     for sigma in (-0.5, 0.0, 0.5):
@@ -49,9 +76,27 @@ def cases():
 
 
 def snapshot(source, output):
+    """Evaluate one source checkout and save its finite arrays, warnings and failures without
+    changing references.
+
+    Parameters
+    ----------
+    source : pathlib.Path
+        Reference or candidate source checkout imported in a fresh comparison process.
+    output : pathlib.Path
+        JSON snapshot path; the aligned numerical arrays are written to its .npz sibling.
+
+    Notes
+    -----
+    This comparison is pinned to the script-declared reference and ITAMAE revisions. Each
+    source is imported in a fresh process. The output records failures as well as finite
+    population/rate differences; reference agreement is historical/numerical evidence, not a
+    calibration of the EPS approximation.
+    """
     source = source.resolve()
     sys.path.insert(0, str(source / "src" if (source / "src").exists() else source))
     import sashimi_w
+
     arrays, records = {}, {}
     for name, (mass, options) in cases().items():
         record = {"mass_wdm": mass, "parameters": options}
@@ -90,6 +135,27 @@ def snapshot(source, output):
 
 
 def compare(reference, candidate):
+    """Compare survivor counts and bound-mass fractions only where both source runs succeeded.
+
+    Parameters
+    ----------
+    reference : Mapping
+        Reference comparison record with numerical case outcomes and observable values.
+    candidate : Mapping
+        Candidate comparison record with numerical case outcomes and observable values.
+
+    Returns
+    -------
+    dict
+        Per-case statuses, observable values and defined fractional changes.
+
+    Notes
+    -----
+    This comparison is pinned to the script-declared reference and ITAMAE revisions. Each
+    source is imported in a fresh process. The output records failures as well as finite
+    population/rate differences; reference agreement is historical/numerical evidence, not a
+    calibration of the EPS approximation.
+    """
     old, new = reference["catalogs"], candidate["catalogs"]
     records = {}
     for name in old:
@@ -97,8 +163,11 @@ def compare(reference, candidate):
         if old[name]["status"] == new[name]["status"] == "ok":
             for metric in ("survivor_count", "bound_mass_fraction"):
                 a, b = old[name][metric], new[name][metric]
-                record[metric] = {"baseline": a, "candidate": b,
-                                  "relative_change": b / a - 1 if a else None}
+                record[metric] = {
+                    "baseline": a,
+                    "candidate": b,
+                    "relative_change": b / a - 1 if a else None,
+                }
         else:
             record["baseline_error"] = old[name].get("error")
             record["candidate_error"] = new[name].get("error")
@@ -107,6 +176,16 @@ def compare(reference, candidate):
 
 
 def main():
+    """Verify pinned sources and run isolated EPS/population comparisons with durable source
+    hashes.
+
+    Notes
+    -----
+    This comparison is pinned to the script-declared reference and ITAMAE revisions. Each
+    source is imported in a fresh process. The output records failures as well as finite
+    population/rate differences; reference agreement is historical/numerical evidence, not a
+    calibration of the EPS approximation.
+    """
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--baseline-source", type=Path)
     parser.add_argument("--main-source", type=Path)
@@ -117,12 +196,15 @@ def main():
         snapshot(args.snapshot, args.output)
         return
     from itamae.provenance import source_revision
+
     installed_core = source_revision("itamae")
     if installed_core != CORE:
         raise ValueError(f"Expected installed ITAMAE {CORE}, received {installed_core}")
     root = Path(__file__).resolve().parents[1]
     for source, revision in ((args.baseline_source, BASELINE), (args.main_source, MAIN)):
-        actual = subprocess.check_output(["git", "-C", str(source), "rev-parse", "HEAD"], text=True).strip()
+        actual = subprocess.check_output(
+            ["git", "-C", str(source), "rev-parse", "HEAD"], text=True
+        ).strip()
         if actual != revision:
             raise ValueError(f"Expected {revision}, received {actual}")
     sources = {"baseline": args.baseline_source, "main": args.main_source, "candidate": root}
@@ -130,10 +212,15 @@ def main():
     with tempfile.TemporaryDirectory() as temporary:
         for label, source in sources.items():
             output = Path(temporary) / f"{label}.json"
-            env = os.environ | {"MPLCONFIGDIR": str(Path(temporary) / "mpl"),
-                                "XDG_CACHE_HOME": str(Path(temporary) / "cache")}
-            subprocess.run([sys.executable, __file__, "--snapshot", str(source), "--output", str(output)],
-                           check=True, env=env)
+            env = os.environ | {
+                "MPLCONFIGDIR": str(Path(temporary) / "mpl"),
+                "XDG_CACHE_HOME": str(Path(temporary) / "cache"),
+            }
+            subprocess.run(
+                [sys.executable, __file__, "--snapshot", str(source), "--output", str(output)],
+                check=True,
+                env=env,
+            )
             snapshots[label] = json.loads(output.read_text())
             with np.load(output.with_suffix(".npz")) as data:
                 arrays[label] = {k: data[k] for k in data.files}
@@ -146,8 +233,12 @@ def main():
                 metrics = []
                 for i in range(10):
                     old, new = arrays[reference][f"{name}_{i}"], arrays["candidate"][f"{name}_{i}"]
-                    metrics.append(float(np.max(np.abs(new.astype(float) - old.astype(float))) /
-                                         max(np.max(np.abs(old)), np.finfo(float).tiny)))
+                    metrics.append(
+                        float(
+                            np.max(np.abs(new.astype(float) - old.astype(float)))
+                            / max(np.max(np.abs(old)), np.finfo(float).tiny)
+                        )
+                    )
                 differences[reference][name]["tuple_peak_scaled_abs_errors"] = metrics
         rate_differences = {}
         for name in arrays["main"]:
@@ -156,11 +247,15 @@ def main():
                 rate_differences[name] = float(np.max(abs(new - old)) / np.max(old))
     files = ["_physics.py", "_itamae_migration.py", "_itamae_variance.py"]
     report = {
-        "baseline_revision": BASELINE, "standalone_main_revision": MAIN, "itamae_revision": CORE,
-        "candidate_source_sha256": {f: hashlib.sha256((root / "src/sashimi_w" / f).read_bytes()).hexdigest()
-                                    for f in files},
+        "baseline_revision": BASELINE,
+        "standalone_main_revision": MAIN,
+        "itamae_revision": CORE,
+        "candidate_source_sha256": {
+            f: hashlib.sha256((root / "src/sashimi_w" / f).read_bytes()).hexdigest() for f in files
+        },
         "cases": {name: {"mass_wdm": mass, "parameters": p} for name, (mass, p) in cases().items()},
-        "comparisons": differences, "main_rate_peak_scaled_abs_errors": rate_differences,
+        "comparisons": differences,
+        "main_rate_peak_scaled_abs_errors": rate_differences,
         "strict_rate_baseline": snapshots["baseline"]["rates"],
         "strict_rate_candidate": snapshots["candidate"]["rates"],
     }

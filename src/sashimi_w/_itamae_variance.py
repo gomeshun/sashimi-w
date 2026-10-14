@@ -27,6 +27,32 @@ _SHARP_K_CUTOFF = _SHARP_K_MASS_ASSIGNMENT * (9.0 * np.pi / 2.0) ** (1.0 / 3.0)
 
 
 def _resolve_model(model, *, mass_wdm, wdm_power_convention):
+    """Require a configured q10 thermal WDM model before constructing a variance provider.
+
+    Parameters
+    ----------
+    model : object
+        Variant halo/population object supplying its own background, units, structure and
+        accretion prescriptions.
+    mass_wdm : float
+        Positive thermal-relic WDM particle mass, numerical value in keV.
+    wdm_power_convention : str, optional
+        Supported standard-t2-q10 convention: the Viel transfer amplitude is squared in
+        power. Historical published-q5 selectors are rejected.
+
+    Returns
+    -------
+    tuple
+        Resolved model and its supported power-convention identifier.
+
+    Notes
+    -----
+    The current prescription uses the bundled spectrum converted to canonical Mpc units, a
+    sharp-k mass-assignment factor 2.5*(9*pi/2)**(1/3), and its retained sigma8
+    normalization. These are physical/convention choices, distinct from convergence of the
+    integral. The tests pin the chosen prescription; they do not independently establish
+    that it is the uniquely appropriate filter normalization.
+    """
     if model is None:
         if wdm_power_convention is None:
             wdm_power_convention = STANDARD_T2_Q10
@@ -44,7 +70,32 @@ def _resolve_model(model, *, mass_wdm, wdm_power_convention):
 
 
 def make_variance_model(model=None, *, mass_wdm=1.5, wdm_power_convention=None):
-    """Expose the standard continuous WDM variance through the common protocol."""
+    """Expose the standard continuous WDM variance through the common protocol.
+
+    Parameters
+    ----------
+    model : object
+        Variant halo/population object supplying its own background, units, structure and
+        accretion prescriptions.
+    mass_wdm : float
+        Positive thermal-relic WDM particle mass, numerical value in keV.
+    wdm_power_convention : str, optional
+        Supported standard-t2-q10 convention: the Viel transfer amplitude is squared in
+        power. Historical published-q5 selectors are rejected.
+
+    Returns
+    -------
+    CallableVarianceModel
+        Public sigma and dS/dM callbacks of the configured continuous variance calculation.
+
+    Notes
+    -----
+    The current prescription uses the bundled spectrum converted to canonical Mpc units, a
+    sharp-k mass-assignment factor 2.5*(9*pi/2)**(1/3), and its retained sigma8
+    normalization. These are physical/convention choices, distinct from convergence of the
+    integral. The tests pin the chosen prescription; they do not independently establish
+    that it is the uniquely appropriate filter normalization.
+    """
     model, selected = _resolve_model(
         model, mass_wdm=mass_wdm, wdm_power_convention=wdm_power_convention
     )
@@ -74,9 +125,9 @@ def make_integrated_variance_model(
     wdm_power_convention : {"standard-t2-q10"}, optional
         Defaults to the supported q10 thermal WDM specification. Retired q5
         selectors and models are explicitly rejected, without conversion.
-    n_k : int, optional
-        Number of logarithmic integration nodes between the bundled spectrum
-        endpoints and each mass-dependent sharp-k cutoff.
+    n_k : int
+        Number of fixed logarithmic grid nodes across the configured spectrum bounds;
+        spectrum knots also split cells and the final cutoff cell is integrated partially.
 
     Returns
     -------
@@ -86,13 +137,13 @@ def make_integrated_variance_model(
 
     Notes
     -----
-    The bundled table uses ``k`` in ``h/Mpc`` and power in ``(Mpc/h)^3``.
-    This opt-in path converts it to canonical ``1/Mpc`` and ``Mpc^3`` before
-    constructing the ITAMAE model. The mean density is likewise converted from
-    the historical numerical ``(Msun/h)/(Mpc/h)^3`` convention to ``Msun/Mpc^3``.
-    SASHIMI-W defines ``R=R_th/2.5`` and integrates to
-    ``k_c=(9*pi/2)^(1/3)/R``. ITAMAE's ``filter_scale`` therefore receives the
-    combined coefficient ``2.5*(9*pi/2)^(1/3)``, not merely 2.5.
+    The bundled k and P table is converted from h/Mpc and (Mpc/h)^3 to canonical Mpc^-1 and Mpc^3; mean density is converted from Msun*h^2/Mpc^3 by multiplying by h**2. This is the standard continuous variance provider. The retained W prescription sets R=R_th/2.5 and k_c=(9*pi/2)**(1/3)/R, so filter_scale is their product. sigma8 normalization and this filter choice are prescription assumptions, separate from numerical integral convergence.
+
+    The current prescription uses the bundled spectrum converted to canonical Mpc units, a
+    sharp-k mass-assignment factor 2.5*(9*pi/2)**(1/3), and its retained sigma8
+    normalization. These are physical/convention choices, distinct from convergence of the
+    integral. The tests pin the chosen prescription; they do not independently establish
+    that it is the uniquely appropriate filter normalization.
     """
     configured, selected_convention = _resolve_model(
         model,
@@ -121,6 +172,26 @@ def make_integrated_variance_model(
     )
 
     def wdm_power_ratio(wavenumber: Any) -> np.ndarray:
+        """Evaluate a snapshot of the configured thermal suppression in canonical wavenumber units.
+
+        Parameters
+        ----------
+        wavenumber : array_like
+            Canonical Fourier wavenumber in Mpc^-1.
+
+        Returns
+        -------
+        numpy.ndarray
+            Dimensionless q10 power ratio with alpha fixed when the provider is constructed.
+
+        Notes
+        -----
+        The current prescription uses the bundled spectrum converted to canonical Mpc units, a
+        sharp-k mass-assignment factor 2.5*(9*pi/2)**(1/3), and its retained sigma8
+        normalization. These are physical/convention choices, distinct from convergence of the
+        integral. The tests pin the chosen prescription; they do not independently establish
+        that it is the uniquely appropriate filter normalization.
+        """
         k = np.asarray(wavenumber, dtype=float)
         # Snapshot the configured alpha and q rather than retaining a mutable
         # model callback behind an already calculated content identifier.
@@ -158,6 +229,26 @@ def make_integrated_variance_model(
         raise ValueError("The ITAMAE-integrated sigma8 normalization must be positive.")
 
     def normalized_wdm_power_ratio(wavenumber: Any) -> np.ndarray:
+        """Apply the retained sigma8 normalization to the thermal WDM power ratio.
+
+        Parameters
+        ----------
+        wavenumber : array_like
+            Canonical Fourier wavenumber in Mpc^-1.
+
+        Returns
+        -------
+        numpy.ndarray
+            Power suppression divided by normalization**2, with the wavenumber shape.
+
+        Notes
+        -----
+        The current prescription uses the bundled spectrum converted to canonical Mpc units, a
+        sharp-k mass-assignment factor 2.5*(9*pi/2)**(1/3), and its retained sigma8
+        normalization. These are physical/convention choices, distinct from convergence of the
+        integral. The tests pin the chosen prescription; they do not independently establish
+        that it is the uniquely appropriate filter normalization.
+        """
         return wdm_power_ratio(wavenumber) / normalization**2
 
     power = TransferModifiedPowerSpectrum(
@@ -191,12 +282,42 @@ def _sharp_k_variance_gap(variance, smaller_mass, larger_mass):
     normalized canonical spectrum, fixed log cells, spectrum knots and Gauss
     order unchanged. This helper supplies only the EPS gap at redshift zero;
     standard sigma and derivative evaluation still belong to ITAMAE.
+
+    Parameters
+    ----------
+    variance : IntegratedVarianceModel
+        Configured canonical sharp-k provider supplying the spectrum, density, fixed-cell
+        quadrature and mass assignment.
+    smaller_mass : float or array_like
+        Positive ordered halo masses in physical Msun; smaller_mass <= larger_mass defines a
+        nonnegative sharp-k variance interval.
+    larger_mass : float or array_like
+        Positive ordered halo masses in physical Msun; smaller_mass <= larger_mass defines a
+        nonnegative sharp-k variance interval.
+
+    Returns
+    -------
+    numpy.ndarray
+        Nonnegative dimensionless variance interval with broadcast mass shape, including
+        small positive suppressed-tail contributions.
+
+    Notes
+    -----
+    The current prescription uses the bundled spectrum converted to canonical Mpc units, a
+    sharp-k mass-assignment factor 2.5*(9*pi/2)**(1/3), and its retained sigma8
+    normalization. These are physical/convention choices, distinct from convergence of the
+    integral. The tests pin the chosen prescription; they do not independently establish
+    that it is the uniquely appropriate filter normalization.
     """
     small, large = np.broadcast_arrays(
         np.asarray(smaller_mass, dtype=float), np.asarray(larger_mass, dtype=float)
     )
-    if (not np.all(np.isfinite(small)) or not np.all(np.isfinite(large))
-            or np.any(small <= 0) or np.any(small > large)):
+    if (
+        not np.all(np.isfinite(small))
+        or not np.all(np.isfinite(large))
+        or np.any(small <= 0)
+        or np.any(small > large)
+    ):
         raise ValueError("Variance gap requires finite positive ordered masses.")
     if not isinstance(variance.window, SharpKWindow):
         raise TypeError("WDM EPS variance gaps require a sharp-k window.")
@@ -210,6 +331,28 @@ def _sharp_k_variance_gap(variance, smaller_mass, larger_mass):
     fractions, weights = (nodes + 1) / 2, weights / 2
 
     def integrate(left, right):
+        """Integrate complete or partial log-k cells without subtracting large saturated variances.
+
+        Parameters
+        ----------
+        left : array_like
+            Lower log(k/Mpc^-1) edge of each interval.
+        right : array_like
+            Upper log(k/Mpc^-1) edge of each interval.
+
+        Returns
+        -------
+        numpy.ndarray
+            One dimensionless variance contribution per flattened interval.
+
+        Notes
+        -----
+        The current prescription uses the bundled spectrum converted to canonical Mpc units, a
+        sharp-k mass-assignment factor 2.5*(9*pi/2)**(1/3), and its retained sigma8
+        normalization. These are physical/convention choices, distinct from convergence of the
+        integral. The tests pin the chosen prescription; they do not independently establish
+        that it is the uniquely appropriate filter normalization.
+        """
         left, right = np.broadcast_arrays(left, right)
         result = np.empty(left.size)
         left, right = left.reshape(-1), right.reshape(-1)
@@ -225,6 +368,27 @@ def _sharp_k_variance_gap(variance, smaller_mass, larger_mass):
         return result
 
     def cutoff(mass):
+        """Map halo mass to the clipped logarithmic sharp-k cutoff.
+
+        Parameters
+        ----------
+        mass : float or array_like
+            Positive halo mass. Use solar masses with the canonical backend; a supplied variance
+            prescription must use the same mass convention and factors of h.
+
+        Returns
+        -------
+        numpy.ndarray
+            ln(k_c) with k_c clipped to the configured canonical spectrum bounds.
+
+        Notes
+        -----
+        The current prescription uses the bundled spectrum converted to canonical Mpc units, a
+        sharp-k mass-assignment factor 2.5*(9*pi/2)**(1/3), and its retained sigma8
+        normalization. These are physical/convention choices, distinct from convergence of the
+        integral. The tests pin the chosen prescription; they do not independently establish
+        that it is the uniquely appropriate filter normalization.
+        """
         radius = (3 * mass / (4 * np.pi * variance.rho_mean)) ** (1 / 3)
         return np.log(np.clip(variance.filter_scale / radius, variance.k_min, variance.k_max))
 
@@ -245,8 +409,9 @@ def _sharp_k_variance_gap(variance, smaller_mass, larger_mass):
         cumulative[b] - cumulative[a + 1],
         tail[a + 1] - tail[b],
     )
-    result[~same] = (integrate(left[~same], edges[a + 1]) + middle
-                     + integrate(edges[b], right[~same]))
+    result[~same] = (
+        integrate(left[~same], edges[a + 1]) + middle + integrate(edges[b], right[~same])
+    )
     if not np.all(np.isfinite(result)) or np.any(result < 0):
         raise ValueError("Variance gap integration produced invalid values.")
     return result.reshape(small.shape)

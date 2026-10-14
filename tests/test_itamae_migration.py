@@ -25,12 +25,37 @@ SCALES = [1.0, 1.0, 1e-3, 1e18, 1.0, 1e-3, 1e18, 1.0]
 
 @pytest.fixture(scope="module")
 def population():
+    """Compute a shared small q10 WDM catalogue with explicit reference settings.
+
+    Returns
+    -------
+    tuple
+        Power exponent q=10, model and named catalogue.
+
+    Notes
+    -----
+    This fixture/helper supports the controlled checks in this test module; its synthetic
+    values are not a calibrated halo model.
+    """
     q, convention = 10, STANDARD_T2_Q10
     model = Subhalos(2.0, wdm_power_convention=convention)
     return q, model, model.rs_rhos_catalog_calc(**PARAMETERS)
 
 
 def test_standard_import_and_removed_mode():
+    """Select the declared q10 WDM prescription through every supported import.
+
+    Notes
+    -----
+    Pass criteria: Aliases identify the standard model, q=10 is selected and obsolete
+    physics_mode arguments fail.
+
+    Failure criteria: a stated numerical/identity mismatch, a missing required exception or
+    warning, or an unexpected calculation failure fails the test.
+
+    Scope: This controlled calculation does not calibrate a subhalo population against
+    simulations or observations.
+    """
     assert subhalos is Subhalos is sashimi_w_itamae.subhalos
     assert Subhalos(2).wdm_power_q == 10
     for mode in ("legacy", "consistent"):
@@ -39,6 +64,19 @@ def test_standard_import_and_removed_mode():
 
 
 def test_frozen_records_keep_original_mode_and_source_identity():
+    """Keep old WDM catalogue fixtures interpretable after prescription changes.
+
+    Notes
+    -----
+    Pass criteria: Both historical fixture files retain their mode records, source SHAs and
+    provenance schema.
+
+    Failure criteria: any mismatch with the stated value, shape or identity requirements
+    fails the test.
+
+    Scope: This controlled calculation does not calibrate a subhalo population against
+    simulations or observations.
+    """
     for name in ("wdm_small_catalog.json", "wdm_q10_small_catalog.json"):
         fixture = json.loads((ROOT / "golden" / name).read_text())
         provenance = fixture["provenance"]
@@ -49,6 +87,26 @@ def test_frozen_records_keep_original_mode_and_source_identity():
 
 
 def test_full_catalog_matches_independent_reference(population):
+    """Reproduce the preserved q10/odeint WDM population and its physical invariants.
+
+    Parameters
+    ----------
+    population : tuple
+        Shared q10 WDM model and named catalogue evaluated using explicit historical odeint
+        settings.
+
+    Notes
+    -----
+    Pass criteria: Sixteen nodes match the independent reference with documented tolerances;
+    survival uses c_t>0.77, weights are nonnegative, NFW masses reconstruct, and
+    concentration weights normalize.
+
+    Failure criteria: any mismatch with the stated value, shape or identity requirements
+    fails the test.
+
+    Scope: This controlled calculation does not calibrate a subhalo population against
+    simulations or observations.
+    """
     q, model, catalog = population
     path = ROOT / "references" / f"B-all-q{q}.npz"
     provenance = json.loads(path.with_suffix(".json").read_text())
@@ -88,6 +146,28 @@ def test_full_catalog_matches_independent_reference(population):
 
 
 def test_calculation_metadata_and_serialization(population, tmp_path):
+    """Record the WDM particle, background, variance and solver choices with each saved
+    population.
+
+    Parameters
+    ----------
+    population : tuple
+        Shared q10 WDM model and named catalogue evaluated using explicit historical odeint
+        settings.
+    tmp_path : pathlib.Path
+        Isolated directory for the test catalogue, cache or provenance files.
+
+    Notes
+    -----
+    Pass criteria: Metadata match the executed configuration and source identities, and all
+    columns, final weights and metadata round-trip exactly.
+
+    Failure criteria: any mismatch with the stated value, shape or identity requirements
+    fails the test.
+
+    Scope: This controlled calculation does not calibrate a subhalo population against
+    simulations or observations.
+    """
     q, model, catalog = population
     assert set(CALCULATION_METADATA_KEYS) <= set(catalog.metadata)
     assert "physics_mode" not in catalog.metadata
@@ -116,6 +196,28 @@ def test_calculation_metadata_and_serialization(population, tmp_path):
 
 
 def test_tuple_is_only_a_format_conversion(population, monkeypatch):
+    """Keep legacy WDM tuples equivalent to the named catalogue without rerunning evolution.
+
+    Parameters
+    ----------
+    population : tuple
+        Shared q10 WDM model and named catalogue evaluated using explicit historical odeint
+        settings.
+    monkeypatch : pytest.MonkeyPatch
+        Scoped replacement of the particular physical provider or environment under test;
+        restored after the case.
+
+    Notes
+    -----
+    Pass criteria: Conversion from the supplied catalogue and back preserves all physical
+    fields to rtol=3e-16 and final weights exactly.
+
+    Failure criteria: any mismatch with the stated value, shape or identity requirements
+    fails the test.
+
+    Scope: This controlled calculation does not calibrate a subhalo population against
+    simulations or observations.
+    """
     _, model, catalog = population
     monkeypatch.setattr(model, "rs_rhos_catalog_calc", lambda **kw: catalog)
     result = model.rs_rhos_calc(**PARAMETERS)
@@ -130,6 +232,25 @@ def test_tuple_is_only_a_format_conversion(population, monkeypatch):
 
 
 def test_native_astropy_tuple_units(population):
+    """Interpret historical WDM tuple units identically with native and Astropy backends.
+
+    Parameters
+    ----------
+    population : tuple
+        Shared q10 WDM model and named catalogue evaluated using explicit historical odeint
+        settings.
+
+    Notes
+    -----
+    Pass criteria: Both backends produce equal canonical columns and weights from the same
+    historical-unit tuple.
+
+    Failure criteria: any mismatch with the stated value, shape or identity requirements
+    fails the test.
+
+    Scope: This controlled calculation does not calibrate a subhalo population against
+    simulations or observations.
+    """
     _, _, catalog = population
     raw = tuple(catalog.columns[name] / scale for name, scale in zip(COLUMNS, SCALES, strict=True))
     raw += (
@@ -148,6 +269,19 @@ def test_native_astropy_tuple_units(population):
 
 
 def test_growth_derivative_and_physical_mass_boundary():
+    """Use a normalized, differentiably consistent WDM background and mass convention.
+
+    Notes
+    -----
+    Pass criteria: D(0)=1, dD/dz matches a finite difference to 3e-9, relative growth
+    matches D ratios and scalar/vector concentration agrees.
+
+    Failure criteria: any mismatch with the stated value, shape or identity requirements
+    fails the test.
+
+    Scope: This controlled calculation does not calibrate a subhalo population against
+    simulations or observations.
+    """
     model = Subhalos(2)
     assert model.growthD(0.0) == 1.0
     z = np.array([0.0, 0.5, 1.0, 3.0, 5.0])
@@ -172,6 +306,28 @@ def test_growth_derivative_and_physical_mass_boundary():
     ],
 )
 def test_constructor_errors(parameters, error):
+    """Reject unsupported WDM particle masses, power conventions or cosmologies.
+
+    Parameters
+    ----------
+    parameters : object
+        Controlled input supplied by the parametrization or fixture for the specific
+        physical/reference case described below.
+    error : object
+        Controlled input supplied by the parametrization or fixture for the specific
+        physical/reference case described below.
+
+    Notes
+    -----
+    Pass criteria: Zero/infinite particle mass, unknown convention and incompatible Omega_m
+    or h raise ValueError.
+
+    Failure criteria: a stated numerical/identity mismatch, a missing required exception or
+    warning, or an unexpected calculation failure fails the test.
+
+    Scope: This controlled calculation does not calibrate a subhalo population against
+    simulations or observations.
+    """
     arguments = {"mass_wdm": 2.0, "wdm_power_convention": STANDARD_T2_Q10, **parameters}
     with pytest.raises(ValueError, match=error):
         Subhalos(**arguments)
@@ -192,9 +348,49 @@ def test_constructor_errors(parameters, error):
     ],
 )
 def test_catalog_rejects_invalid_inputs_before_work(invalid, monkeypatch):
+    """Reject an unusable WDM population grid before physical execution starts.
+
+    Parameters
+    ----------
+    invalid : object
+        Parametrized input outside the supported physical or numerical domain.
+    monkeypatch : pytest.MonkeyPatch
+        Scoped replacement of the particular physical provider or environment under test;
+        restored after the case.
+
+    Notes
+    -----
+    Pass criteria: Invalid host mass, step, epoch, node counts, mass bounds or profile flag
+    raises an error without calling the population executor.
+
+    Failure criteria: a stated numerical/identity mismatch, a missing required exception or
+    warning, or an unexpected calculation failure fails the test.
+
+    Scope: This controlled calculation does not calibrate a subhalo population against
+    simulations or observations.
+    """
     model = Subhalos(2.0, wdm_power_convention=STANDARD_T2_Q10)
 
     def forbidden(*args, **kwargs):
+        """Fail if an invalid population input reaches numerical evolution.
+
+        Parameters
+        ----------
+        *args : tuple
+            Additional positional parameters forwarded unchanged to the supplied numerical or
+            physical callback.
+        **kwargs : dict
+            Additional keyword options forwarded to the called routine; reserved scientific
+            controls remain owned by that routine.
+
+        Notes
+        -----
+        Reject an unusable WDM population grid before physical execution starts. Pass criteria:
+        Invalid host mass, step, epoch, node counts, mass bounds or profile flag raises an error
+        without calling the population executor. Failure occurs when the stated comparison or
+        expected rejection is not met. This controlled calculation does not calibrate a subhalo
+        population against simulations or observations.
+        """
         raise AssertionError("numerical calculation must not run")
 
     monkeypatch.setattr(model, "_execute_population", forbidden)
