@@ -12,11 +12,12 @@ from itamae.types import WeightedSubhaloCatalog
 from itamae.units import NativeUnits
 from . import _physics as _physics
 from ._physics import OmegaM, WDM_TRANSFER_NU, h, WDMPhysics
+from ._power import POWER_NORMALIZATION, SHARP_K_MASS_ASSIGNMENT
 
 _CANONICAL_SCALE = {"Msun": 1.0, "kpc": 0.001, "Msun/pc3": 1e18, "dimensionless": 1.0}
 _CANONICAL_ASTROPY_UNIT = {"mass": "Msun", "length": "Mpc", "density": "Msun / Mpc3"}
 STANDARD_T2_Q10 = "standard-t2-q10"
-CALCULATION_SPECIFICATION = "sashimi-w:thermal-wdm-q10:2026-09-11:v2"
+CALCULATION_SPECIFICATION = "sashimi-w:thermal-wdm-q10:2026-10-14:v3"
 _CONSISTENT_OMEGA_L = 1.0 - float(OmegaM)
 
 
@@ -1153,7 +1154,7 @@ class Subhalos(WDMPhysics):
             distribution_name="sashimi-w",
             module_file=__file__,
             calculation_specification=CALCULATION_SPECIFICATION,
-            model_identifier=f"sashimi-w:wdm:m_wdm_keV={self.mass_wdm:g}:power={self.wdm_power_convention}:v2",
+            model_identifier=f"sashimi-w:wdm:m_wdm_keV={self.mass_wdm:g}:power={self.wdm_power_convention}:v3",
             backend_identifier=backend.identifier,
             source_identifier="sashimi-w:itamae-migration",
             variance_identifier=variance.identifier,
@@ -1164,6 +1165,10 @@ class Subhalos(WDMPhysics):
                 else f"sashimi-w:tidal-stripping:{parameters['method']}:itamae:v3"
             ),
             extra={
+                "power_normalization": POWER_NORMALIZATION,
+                "sigma8_target": float(_physics.sigma_8),
+                "power_amplitude_divisor": self._power_normalization(),
+                "sharp_k_mass_assignment": SHARP_K_MASS_ASSIGNMENT,
                 "default_stripping_method": "picard_table",
                 "picard_diagnostics": picard_diagnostics,
                 "eps_numerics": "active-support:direct-variance-gap:normalized-zero-limit:v1",

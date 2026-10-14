@@ -75,13 +75,18 @@ The standard background is flat WMAP7 (Omega_m=0.27, h=0.7), with D(0)=1 and
 S(M,z)=D(z)² S(M,0). Nonmatching cosmology parameters are rejected. The table
 uses k in h/Mpc and P in (Mpc/h)³. The shared integral receives physical
 k=h k_table and P=P_table/h³, physical mean density rho=rho_table h², and
-alpha=alpha_table/h. The filter is R=R_th/2.5 with
-k_cut=(9 pi/2)^(1/3)/R. Every accretion redshift uses its own virial-mass row.
+alpha=alpha_table/h. The filter is R=R_th/2.5 with k_cut=1/R.
+One power amplitude is fixed by the top-hat variance at R=8 Mpc/h and z=0;
+both EPS and concentration use it. Sharp-k sigma(M8) is not set equal to
+top-hat sigma8. Every accretion redshift uses its own virial-mass row.
+See [the revised power prescription](docs/w-power-prescription.md) for its
+equations, v3 calculation identity, independent references and numerical limits.
 
 The shared fixed-cell integral splits at tabulated spectrum knots. Its
 moving-boundary derivative and variance describe the same continuous integral;
 there is no coarse mass interpolation, variance projection or signed-weight
-clipping. Top-hat concentration retains the original numerical calibration.
+clipping. Top-hat concentration retains the original Ludlow parameters and
+mass/concentration grids, with the common power amplitude described above.
 The default mass solver is `method="picard_table"`, using the shared ITAMAE
 Picard backend. Pass `method="odeint"` for the previous LSODA calculation or
 `method="dop853"` for a direct log-mass reference. The WDM physical rate and

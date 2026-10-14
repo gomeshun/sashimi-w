@@ -1,0 +1,9 @@
+{
+  "baseline_main": "685bcfde7bf3ac5805492b56070151ba0415a9ca",
+  "baseline_migration": "62b923f81c690c369a97cca567bbe32f1e32d6ba",
+  "baseline_migration_candidate": "465db7a0f24def6ebe065718fe1f5f5fc543c048",
+  "upstream": "99dfc3632eec0126080c0273ddf78f84fe09216c",
+  "family_controller_revision": "e8fc3f5b038c8366a2e6ef99b269f3cf42fbe7f2",
+  "upstream_archive_sha256": "728c6d07c835a4c8129a89c1e70b3ce74a633540b47340acebfc6fa5733a931e",
+  "new_reference_module_sha256": "e9966f0cb76ed37e528b007fde3048fe38f17a454560dbe9e751a5b16c5454bf"
+}

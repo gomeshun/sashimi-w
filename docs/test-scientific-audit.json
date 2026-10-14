@@ -690,5 +690,9 @@
       "limits": "This controlled calculation does not calibrate a subhalo population against simulations or observations.",
       "failure": "Any stated comparison/identity mismatch, missing expected exception/warning, or unexpected calculation error fails the case."
     }
-  ]
+  ],
+  "superseded_by": {
+    "document": "w-power-test-review.md",
+    "scope": "Physical c=2.5/shared-top-hat change after this documentation-only review. Original counts and AST evidence below retain their original code baseline."
+  }
 }

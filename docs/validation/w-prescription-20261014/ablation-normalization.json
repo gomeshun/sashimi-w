@@ -1,0 +1,25 @@
+{
+  "variant": "normalization",
+  "module": "/tmp/sashimi-w-prescription-20261014/main/sashimi_w.py",
+  "parameters": {
+    "M0": 1000000000000.0,
+    "redshift": 0.0,
+    "dz": 0.2,
+    "zmax": 7.0,
+    "N_ma": 128,
+    "N_herm": 3,
+    "N_hermNa": 20,
+    "logmamin": 6,
+    "logmamax": 11,
+    "method": "picard_table"
+  },
+  "mass_wdm_keV": 1.5,
+  "eps_amplitude_divisor": 0.9633008077154326,
+  "c200_M1e10_z0": 6.613366282100932,
+  "counts_bound_mass_gt": {
+    "1000000.0": 3.87900742215154,
+    "10000000.0": 3.5982589164388434,
+    "100000000.0": 2.7955889181025073,
+    "1000000000.0": 1.5737757413544982
+  }
+}

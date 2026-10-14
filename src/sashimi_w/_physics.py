@@ -4,6 +4,7 @@ The shared population controller lives in the standard Subhalos API.
 """
 
 import numpy as np
+from ._power import sigma8_normalization
 from pathlib import Path
 from scipy import optimize
 from scipy import special
@@ -209,6 +210,34 @@ class WDMPhysics:
         self.MassIn8Mpc = 4 / 3 * np.pi * 8**3 * self.Rhomean_z
         self.a = 0.049 * (1 / self.mass_wdm) ** 1.11 * (OmegaC / 0.25) ** 0.11 * (h / 0.7) ** 1.22
 
+    def _power_normalization(self):
+        """Return the common top-hat sigma8 divisor for EPS and concentration.
+
+        Returns
+        -------
+        float
+            Positive amplitude divisor N for P_WDM/N**2, fixed by the
+            top-hat variance at R=8 Mpc/h and redshift zero.
+
+        Raises
+        ------
+        ValueError
+            If the configured suppression length, target or input spectrum
+            cannot define a positive finite top-hat variance.
+
+        Notes
+        -----
+        The bundled k and P table is immutable during a model calculation.
+        Cache by the thermal suppression length and target sigma8 so repeated
+        concentration evaluations do not reintegrate the same spectrum.
+        The divisor never depends on the halo's sharp-k smoothing radius.
+        """
+        key = (float(self.a), float(sigma_8))
+        if getattr(self, "_normalization_key", None) != key:
+            self._normalization = sigma8_normalization(k_file, Pk_file, *key)
+            self._normalization_key = key
+        return self._normalization
+
     def TopHat(self, k, r):
         """Evaluate the retained spherical top-hat Fourier window for the concentration
         calculation.
@@ -305,7 +334,7 @@ class WDMPhysics:
         return sigma_sq_th
 
     def conc200(self, M, z):
-        """Solve the retained Ludlow formation condition on its concentration and mass grids.
+        """Solve the Ludlow formation condition using the common physical power amplitude.
 
         Parameters
         ----------
@@ -335,10 +364,7 @@ class WDMPhysics:
         Sigma_Sq_th = np.zeros(len(self.filter_Mass))
         Sigma_Sq_th = self.integratePk_th(k_min, k_max, R_th)
         Sigma_th = np.sqrt(Sigma_Sq_th)
-        sig_interp_th = interp1d(self.filter_Mass, Sigma_th)
-        MassIn8Mpc = 4 / 3 * np.pi * 8**3 * self.Rhomean_z
-        sig_8_th = sig_interp_th(MassIn8Mpc)
-        normalise_th = sig_8_th / sigma_8
+        normalise_th = self._power_normalization()
         Sigma_th /= normalise_th
         Sigma_Sq_th = Sigma_th**2
         " free model parameters, Ludlow et al. (2016) "

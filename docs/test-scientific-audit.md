@@ -1,5 +1,10 @@
 # Scientific test review: sashimi-w — 2026-10-14
 
+This is the historical documentation-only review before the physical power
+correction. [The subsequent prescription test review](w-power-test-review.md)
+records updated assertions, new independent coverage and unchanged tolerances.
+The executable-AST and pytest counts below describe that earlier revision.
+
 Reviewed **51 test definitions** individually. This count is not the number of parametrized cases. The review proposes future changes; all test bodies, assertions and tolerances are retained.
 
 Executable-code baseline before this documentation change: `619f6c9eee398992be20b9d48663943de481c172`.

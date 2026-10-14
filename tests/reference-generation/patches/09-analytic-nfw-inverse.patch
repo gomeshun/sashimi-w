@@ -1,0 +1,23 @@
+--- a/sashimi_w.py
++++ b/sashimi_w.py
+@@ -1,4 +1,5 @@
+ import numpy as np
++from mpmath import mp
+ from functools import lru_cache
+ import matplotlib.pyplot as plt
+ from scipy import integrate
+@@ -547,9 +548,11 @@
+             else:
+                 rs_z0[iz] = rs_acc[iz]
+                 rhos_z0[iz] = rhos_acc[iz]
+-            ctemp = np.linspace(0,100,1000)
+-            ftemp = interp1d(self.fc(ctemp),ctemp,fill_value='extrapolate')
+-            ct_z0[iz] = ftemp(m0*Msolar/(4*np.pi*rhos_z0[iz]*rs_z0[iz]**3))
++            enclosed = m0*Msolar/(4*np.pi*rhos_z0[iz]*rs_z0[iz]**3)
++            with mp.workdps(50):
++                exact_ct = [float(-1/mp.lambertw(-mp.exp(-1-mp.mpf(float(y))), 0)-1)
++                            for y in enclosed.reshape(-1)]
++            ct_z0[iz] = np.asarray(exact_ct).reshape(enclosed.shape)
+             survive[iz] = np.where(ct_z0[iz]>0.77,1,0)
+             m0_matrix[iz] = m0*np.ones((N_herm,1))
+ 

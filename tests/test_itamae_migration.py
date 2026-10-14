@@ -19,6 +19,7 @@ ROOT = Path(__file__).parent
 PARAMETERS = json.loads((ROOT / "golden/wdm_small_catalog.json").read_text())["parameters"]
 PARAMETERS = {key: value for key, value in PARAMETERS.items() if key != "mass_wdm"}
 PARAMETERS = {**PARAMETERS, "method": "odeint"}
+REFERENCE_SOLVER_OPTIONS = {"rtol": 1e-11, "atol": 1e-13}
 COLUMNS = ["m200_acc", "z_acc", "r_s_acc", "rho_s_acc", "m_bound", "r_s", "rho_s", "c_t"]
 SCALES = [1.0, 1.0, 1e-3, 1e18, 1.0, 1e-3, 1e18, 1.0]
 
@@ -34,12 +35,15 @@ def population():
 
     Notes
     -----
-    This fixture/helper supports the controlled checks in this test module; its synthetic
-    values are not a calibrated halo model.
+    The c=2.5/shared-top-hat reference and product both use odeint rtol=1e-11
+    and atol=1e-13 (physical Msun) to resolve the retained comparison
+    tolerance. Refining the independent reference by a factor ten changes
+    bound masses by at most 7.2e-11 relatively. These controls do not bound
+    the total model error or calibrate a subhalo population.
     """
     q, convention = 10, STANDARD_T2_Q10
     model = Subhalos(2.0, wdm_power_convention=convention)
-    return q, model, model.rs_rhos_catalog_calc(**PARAMETERS)
+    return q, model, model.rs_rhos_catalog_calc(**PARAMETERS, **REFERENCE_SOLVER_OPTIONS)
 
 
 def test_standard_import_and_removed_mode():
@@ -87,7 +91,7 @@ def test_frozen_records_keep_original_mode_and_source_identity():
 
 
 def test_full_catalog_matches_independent_reference(population):
-    """Reproduce the preserved q10/odeint WDM population and its physical invariants.
+    """Reproduce the c=2.5/shared-top-hat WDM population and physical invariants.
 
     Parameters
     ----------
@@ -108,7 +112,7 @@ def test_full_catalog_matches_independent_reference(population):
     simulations or observations.
     """
     q, model, catalog = population
-    path = ROOT / "references" / f"B-all-q{q}.npz"
+    path = ROOT / "references" / f"B-top-hat-c2.5-q{q}.npz"
     provenance = json.loads(path.with_suffix(".json").read_text())
     assert provenance["role"] == "B"
     assert hashlib.sha256(path.read_bytes()).hexdigest() == provenance["artifact_sha256"]
@@ -172,9 +176,12 @@ def test_calculation_metadata_and_serialization(population, tmp_path):
     assert set(CALCULATION_METADATA_KEYS) <= set(catalog.metadata)
     assert "physics_mode" not in catalog.metadata
     assert (
-        catalog.metadata["calculation_specification"] == "sashimi-w:thermal-wdm-q10:2026-09-11:v2"
+        catalog.metadata["calculation_specification"] == "sashimi-w:thermal-wdm-q10:2026-10-14:v3"
     )
-    assert catalog.metadata["calculation_parameters"] == {**PARAMETERS, "solver_options": {}}
+    assert catalog.metadata["calculation_parameters"] == {**PARAMETERS, "solver_options": REFERENCE_SOLVER_OPTIONS}
+    assert catalog.metadata["power_normalization"] == "wdm-top-hat:R=8-Mpc/h:z=0:v1"
+    assert catalog.metadata["sharp_k_mass_assignment"] == 2.5
+    assert catalog.metadata["power_amplitude_divisor"] == model._power_normalization()
     assert catalog.metadata["wdm_power_q"] == q
     assert catalog.metadata["variance_identifier"] == model.variance_model().identifier
     assert catalog.metadata["power_identifier"] == model.variance_model().power.identifier

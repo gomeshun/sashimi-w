@@ -1,9 +1,8 @@
 """Variance adapter for the SASHIMI-W ITAMAE migration.
 
-The WDM transfer function, tabulated WMAP7 spectrum, sharp-k filtering,
-interpolation tables, and concentration calibration remain in ``sashimi_w.py``.
-This module exposes the resulting mass variance through ITAMAE's common
-interface without changing those physical choices.
+The WDM transfer and WMAP7 spectrum belong to this variant. The corrected
+Schneider mass assignment uses k_cut=2.5/R_th; EPS and concentration share
+one top-hat sigma8 amplitude. ITAMAE supplies the continuous sharp-k integral.
 """
 
 from __future__ import annotations
@@ -20,10 +19,10 @@ from itamae.power import (
 from itamae.variance import CallableVarianceModel, IntegratedVarianceModel
 from ._itamae_migration import ItamaeSubhalos, STANDARD_T2_Q10, CALCULATION_SPECIFICATION
 from ._physics import Pk_file, WDM_TRANSFER_NU, h, k_file, sigma_8
+from ._power import POWER_NORMALIZATION, SHARP_K_MASS_ASSIGNMENT
 
 
-_SHARP_K_MASS_ASSIGNMENT = 2.5
-_SHARP_K_CUTOFF = _SHARP_K_MASS_ASSIGNMENT * (9.0 * np.pi / 2.0) ** (1.0 / 3.0)
+_SHARP_K_CUTOFF = SHARP_K_MASS_ASSIGNMENT
 
 
 def _resolve_model(model, *, mass_wdm, wdm_power_convention):
@@ -48,7 +47,7 @@ def _resolve_model(model, *, mass_wdm, wdm_power_convention):
     Notes
     -----
     The current prescription uses the bundled spectrum converted to canonical Mpc units, a
-    sharp-k mass-assignment factor 2.5*(9*pi/2)**(1/3), and its retained sigma8
+    sharp-k mass-assignment factor 2.5, and one top-hat sigma8
     normalization. These are physical/convention choices, distinct from convergence of the
     integral. The tests pin the chosen prescription; they do not independently establish
     that it is the uniquely appropriate filter normalization.
@@ -91,7 +90,7 @@ def make_variance_model(model=None, *, mass_wdm=1.5, wdm_power_convention=None):
     Notes
     -----
     The current prescription uses the bundled spectrum converted to canonical Mpc units, a
-    sharp-k mass-assignment factor 2.5*(9*pi/2)**(1/3), and its retained sigma8
+    sharp-k mass-assignment factor 2.5, and one top-hat sigma8
     normalization. These are physical/convention choices, distinct from convergence of the
     integral. The tests pin the chosen prescription; they do not independently establish
     that it is the uniquely appropriate filter normalization.
@@ -137,10 +136,16 @@ def make_integrated_variance_model(
 
     Notes
     -----
-    The bundled k and P table is converted from h/Mpc and (Mpc/h)^3 to canonical Mpc^-1 and Mpc^3; mean density is converted from Msun*h^2/Mpc^3 by multiplying by h**2. This is the standard continuous variance provider. The retained W prescription sets R=R_th/2.5 and k_c=(9*pi/2)**(1/3)/R, so filter_scale is their product. sigma8 normalization and this filter choice are prescription assumptions, separate from numerical integral convergence.
+    The bundled k and P table is converted from h/Mpc and (Mpc/h)**3 to
+    canonical Mpc**-1 and Mpc**3. Multiplication by h**2 converts the
+    numerical mean density to Msun/Mpc**3. The Schneider mapping
+    M=(4*pi/3)*rho*(2.5*R)**3 gives k_cut=2.5/R_th. The physical
+    spectrum is normalized once under a top-hat of radius 8 Mpc/h;
+    the same amplitude is used by the concentration calculation.
+    In particular, sharp-k sigma(M8) is not forced to equal sigma8.
 
     The current prescription uses the bundled spectrum converted to canonical Mpc units, a
-    sharp-k mass-assignment factor 2.5*(9*pi/2)**(1/3), and its retained sigma8
+    sharp-k mass-assignment factor 2.5, and one top-hat sigma8
     normalization. These are physical/convention choices, distinct from convergence of the
     integral. The tests pin the chosen prescription; they do not independently establish
     that it is the uniquely appropriate filter normalization.
@@ -155,7 +160,6 @@ def make_integrated_variance_model(
     canonical_power = np.asarray(Pk_file, dtype=float) / hubble**3
     canonical_rho_mean = float(configured.Rhomean_z) * hubble**2
     canonical_alpha = float(configured.a) / hubble
-    sigma8_mass = float(configured.MassIn8Mpc) / hubble
     q = float(configured.wdm_power_q)
     formula_role = str(configured.wdm_power_formula_role)
     half_mode_definition = str(configured.half_mode_definition)
@@ -187,7 +191,7 @@ def make_integrated_variance_model(
         Notes
         -----
         The current prescription uses the bundled spectrum converted to canonical Mpc units, a
-        sharp-k mass-assignment factor 2.5*(9*pi/2)**(1/3), and its retained sigma8
+        sharp-k mass-assignment factor 2.5, and one top-hat sigma8
         normalization. These are physical/convention choices, distinct from convergence of the
         integral. The tests pin the chosen prescription; they do not independently establish
         that it is the uniquely appropriate filter normalization.
@@ -198,19 +202,6 @@ def make_integrated_variance_model(
         return (1.0 + (canonical_alpha * k) ** (2.0 * WDM_TRANSFER_NU)) ** (-q / WDM_TRANSFER_NU)
 
     particle_mass = float(configured.mass_wdm)
-    raw_power = TransferModifiedPowerSpectrum(
-        base,
-        wdm_power_ratio,
-        ratio_identifier=(
-            f"{CALCULATION_SPECIFICATION}:wdm-power-ratio:unnormalized:"
-            f"m_wdm_keV={particle_mass:.17g};"
-            f"alpha_Mpc={canonical_alpha:.17g};"
-            f"nu={WDM_TRANSFER_NU:.17g};"
-            f"convention={selected_convention};"
-            f"formula-role={formula_role};q={q:.17g};"
-            f"half-mode={half_mode_definition}"
-        ),
-    )
     integration_options = {
         "window": SharpKWindow(),
         "rho_mean": canonical_rho_mean,
@@ -219,17 +210,10 @@ def make_integrated_variance_model(
         "n_k": n_k,
         "filter_scale": _SHARP_K_CUTOFF,
     }
-    raw_variance = IntegratedVarianceModel(
-        power=raw_power,
-        **integration_options,
-    )
-    raw_sigma8 = float(raw_variance.sigma(sigma8_mass, 0.0))
-    normalization = raw_sigma8 / float(sigma_8)
-    if not np.isfinite(normalization) or normalization <= 0.0:
-        raise ValueError("The ITAMAE-integrated sigma8 normalization must be positive.")
+    normalization = configured._power_normalization()
 
     def normalized_wdm_power_ratio(wavenumber: Any) -> np.ndarray:
-        """Apply the retained sigma8 normalization to the thermal WDM power ratio.
+        """Apply the common top-hat sigma8 normalization to the thermal WDM power ratio.
 
         Parameters
         ----------
@@ -244,7 +228,7 @@ def make_integrated_variance_model(
         Notes
         -----
         The current prescription uses the bundled spectrum converted to canonical Mpc units, a
-        sharp-k mass-assignment factor 2.5*(9*pi/2)**(1/3), and its retained sigma8
+        sharp-k mass-assignment factor 2.5, and one top-hat sigma8
         normalization. These are physical/convention choices, distinct from convergence of the
         integral. The tests pin the chosen prescription; they do not independently establish
         that it is the uniquely appropriate filter normalization.
@@ -262,6 +246,7 @@ def make_integrated_variance_model(
             f"convention={selected_convention};"
             f"formula-role={formula_role};q={q:.17g};"
             f"half-mode={half_mode_definition};"
+            f"normalization={POWER_NORMALIZATION};sigma8-target={float(sigma_8):.17g};"
             f"sigma8-normalization={normalization:.17g}"
         ),
     )
@@ -304,7 +289,7 @@ def _sharp_k_variance_gap(variance, smaller_mass, larger_mass):
     Notes
     -----
     The current prescription uses the bundled spectrum converted to canonical Mpc units, a
-    sharp-k mass-assignment factor 2.5*(9*pi/2)**(1/3), and its retained sigma8
+    sharp-k mass-assignment factor 2.5, and one top-hat sigma8
     normalization. These are physical/convention choices, distinct from convergence of the
     integral. The tests pin the chosen prescription; they do not independently establish
     that it is the uniquely appropriate filter normalization.
@@ -348,7 +333,7 @@ def _sharp_k_variance_gap(variance, smaller_mass, larger_mass):
         Notes
         -----
         The current prescription uses the bundled spectrum converted to canonical Mpc units, a
-        sharp-k mass-assignment factor 2.5*(9*pi/2)**(1/3), and its retained sigma8
+        sharp-k mass-assignment factor 2.5, and one top-hat sigma8
         normalization. These are physical/convention choices, distinct from convergence of the
         integral. The tests pin the chosen prescription; they do not independently establish
         that it is the uniquely appropriate filter normalization.
@@ -384,7 +369,7 @@ def _sharp_k_variance_gap(variance, smaller_mass, larger_mass):
         Notes
         -----
         The current prescription uses the bundled spectrum converted to canonical Mpc units, a
-        sharp-k mass-assignment factor 2.5*(9*pi/2)**(1/3), and its retained sigma8
+        sharp-k mass-assignment factor 2.5, and one top-hat sigma8
         normalization. These are physical/convention choices, distinct from convergence of the
         integral. The tests pin the chosen prescription; they do not independently establish
         that it is the uniquely appropriate filter normalization.

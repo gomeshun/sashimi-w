@@ -5,10 +5,11 @@ import json
 from pathlib import Path
 import numpy as np
 import pytest
+from scipy.integrate import quad
 from itamae.variance import load_variance_cache, save_variance_cache, variance_cache_key
 from sashimi_w_itamae_migration import ItamaeSubhalos, STANDARD_T2_Q10
 from sashimi_w_itamae_variance import make_integrated_variance_model, make_variance_model
-from sashimi_w import h, k_file, sigma_8, subhalos
+from sashimi_w import h, k_file, Pk_file, sigma_8, subhalos
 
 _GOLDEN = Path(__file__).parent / "golden" / "wdm_q10_small_catalog.json"
 
@@ -119,12 +120,16 @@ def test_callable_adapter_uses_same_continuous_derivative() -> None:
 
 
 def test_integrated_sharp_k_path_is_sigma8_normalized_and_continuous() -> None:
-    """Reproduce the current WDM sharp-k normalization and continuous negative slope.
+    """Resolve the sharp-k mass assignment independently of the sigma8 window.
 
     Notes
     -----
-    Pass criteria: The implemented reference mass gives sigma_8, unit-converted integration
-    bounds/density agree, and all tested derivatives are finite, distinct and negative.
+    QUADPACK integrates linearly interpolated q10 table power over each
+    original k interval, up to 2.5/R_th for three physical halo masses.
+    Pass at rtol=2e-11 against the shared Gauss integral, with consistent
+    density/k units and finite, distinct, negative slopes. The independent
+    top-hat amplitude is checked in test_power_prescription.py. Thus the
+    tolerance measures numerical integration agreement, not calibration.
 
     Failure criteria: any mismatch with the stated value, shape or identity requirements
     fails the test.
@@ -136,7 +141,36 @@ def test_integrated_sharp_k_path_is_sigma8_normalized_and_continuous() -> None:
     variance = make_integrated_variance_model(model, n_k=1001)
     mass = np.geomspace(100000000.0, 100000000000000.0, 13)
     derivative = variance.dvariance_dmass(mass, 0.0)
-    assert variance.sigma(model.MassIn8Mpc / h, 0.0) == pytest.approx(sigma_8, rel=2e-14)
+    def integrand(logk):
+        """Return dimensionless q10 table power per logarithmic wavenumber.
+
+        Parameters
+        ----------
+        logk : float
+            Natural logarithm of k in h/Mpc.
+
+        Returns
+        -------
+        float
+            Raw k**3 P_WDM(k)/(2*pi**2), before amplitude normalization.
+
+        Notes
+        -----
+        Used only for the independent adaptive cutoff integral in this
+        test. The enclosing test states the numerical pass/failure limits.
+        """
+        k = np.exp(logk)
+        ratio = (1 + (model.a * k)**(2 * 1.12))**(-10 / 1.12)
+        return k**3 * np.interp(k, k_file, Pk_file) * ratio / (2 * np.pi**2)
+
+    for physical_mass in (1e8, 1e11, model.MassIn8Mpc / h):
+        radius = (3 * physical_mass * h / (4 * np.pi * model.Rhomean_z))**(1 / 3)
+        cutoff = min(2.5 / radius, k_file[-1])
+        knots = np.log(np.r_[k_file[k_file < cutoff], cutoff])
+        raw = sum(quad(integrand, left, right, epsabs=0, epsrel=2e-12)[0]
+                  for left, right in zip(knots[:-1], knots[1:]))
+        expected = raw / model._power_normalization()**2
+        np.testing.assert_allclose(variance.variance(physical_mass), expected, rtol=2e-11)
     assert variance.rho_mean == pytest.approx(model.Rhomean_z * h**2)
     assert variance.k_min == pytest.approx(k_file[0] * h)
     assert variance.k_max == pytest.approx(k_file[-1] * h)
@@ -144,7 +178,8 @@ def test_integrated_sharp_k_path_is_sigma8_normalized_and_continuous() -> None:
     assert np.all(derivative < 0.0)
     assert np.unique(derivative).size == derivative.size
     assert "integrated-variance:v3" in variance.identifier
-    assert "filter_scale=6.0449698275617605" in variance.identifier
+    assert "filter_scale=2.5" in variance.identifier
+    assert "normalization=wdm-top-hat:R=8-Mpc/h:z=0:v1" in variance.identifier
     assert "wdm-power-ratio" in variance.identifier
     assert "convention=standard-t2-q10" in variance.identifier
     assert "formula-role=viel-transfer-amplitude-squared" in variance.identifier
@@ -158,8 +193,10 @@ def test_standard_q10_integrated_variance_formula_and_identifier_are_pinned() ->
 
     Notes
     -----
-    Pass criteria: Integrated variance reproduces the current sigma_8 normalization and both
-    adapters contain the specified q10/half-mode labels.
+    Pass criteria: Sharp-k sigma(M8) differs from top-hat sigma8 and both
+    adapters identify the v3 q10/half-mode prescription. The 5 percent
+    separation rejects the old forced sharp-k normalization; it is not an
+    uncertainty estimate. Independent amplitude accuracy is tested separately.
 
     Failure criteria: any mismatch with the stated value, shape or identity requirements
     fails the test.
@@ -169,9 +206,9 @@ def test_standard_q10_integrated_variance_formula_and_identifier_are_pinned() ->
     """
     model = ItamaeSubhalos(mass_wdm=_fixture_mass_wdm())
     integrated = make_integrated_variance_model(model, n_k=1001)
-    assert integrated.sigma(model.MassIn8Mpc / h, 0.0) == pytest.approx(sigma_8, rel=2e-14)
+    assert abs(integrated.sigma(model.MassIn8Mpc / h, 0.0) / sigma_8 - 1) > 0.05
     for variance in [integrated, make_variance_model(model)]:
-        assert "thermal-wdm-q10:2026-09-11:v2" in variance.identifier
+        assert "thermal-wdm-q10:2026-10-14:v3" in variance.identifier
         assert "convention=standard-t2-q10" in variance.identifier
         assert "formula-role=viel-transfer-amplitude-squared" in variance.identifier
         assert "q=10" in variance.identifier
@@ -261,7 +298,7 @@ def test_variance_cache_binds_wdm_particle_mass_and_round_trips(tmp_path) -> Non
     mass = np.geomspace(100000000.0, 1000000000000.0, 5)
     variance = variance_model.variance(mass)
     settings = {
-        "calculation_specification": "sashimi-w:thermal-wdm-q10:2026-09-11:v2",
+        "calculation_specification": "sashimi-w:thermal-wdm-q10:2026-10-14:v3",
         "mass_wdm_keV": model.mass_wdm,
         "wdm_power_convention": model.wdm_power_convention,
         "wdm_power_formula_role": model.wdm_power_formula_role,
@@ -281,14 +318,14 @@ def test_variance_cache_binds_wdm_particle_mass_and_round_trips(tmp_path) -> Non
         settings={**settings, "mass_wdm_keV": 3.0},
     )
     assert key != changed
-    # Reconstruct the exact old q10 identifier (same numeric controls, prior
-    # specification) rather than running a retired model inside the product.
+    # Alter the declared specification in a synthetic stale identifier;
+    # this does not reconstruct or execute a historical power spectrum.
     old_identifier = variance_model.identifier.replace(
+        "sashimi-w:thermal-wdm-q10:2026-10-14:v3:wdm-power-ratio:",
         "sashimi-w:thermal-wdm-q10:2026-09-11:v2:wdm-power-ratio:",
-        "sashimi-w:wdm-power-ratio:",
     )
     assert old_identifier != variance_model.identifier
-    old_settings = {**settings, "calculation_specification": "sashimi-w:wdm:2026-09-10:v1"}
+    old_settings = {**settings, "calculation_specification": "sashimi-w:thermal-wdm-q10:2026-09-11:v2"}
     old_key = variance_cache_key(
         old_identifier,
         mass,
