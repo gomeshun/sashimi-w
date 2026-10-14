@@ -91,7 +91,7 @@ def test_frozen_records_keep_original_mode_and_source_identity():
 
 
 def test_full_catalog_matches_independent_reference(population):
-    """Reproduce the c=2.5/shared-top-hat WDM population and physical invariants.
+    r"""Reproduce the c=2.5/shared-top-hat WDM population and physical invariants.
 
     Parameters
     ----------
@@ -101,6 +101,11 @@ def test_full_catalog_matches_independent_reference(population):
 
     Notes
     -----
+    The literature threshold rt/rs > 0.77 follows the Hayashi et al. disruption prescription
+    adopted by Hiroshima et al. A caller-supplied threshold takes precedence in variants
+    that expose it (C and SI currently default to 0). This is a model selection rule; an
+    exact-boundary test does not calibrate disruption physics.
+
     Pass criteria: Sixteen nodes match the independent reference with documented tolerances;
     survival uses c_t>0.77, weights are nonnegative, NFW masses reconstruct, and
     concentration weights normalize.
@@ -110,6 +115,15 @@ def test_full_catalog_matches_independent_reference(population):
 
     Scope: This controlled calculation does not calibrate a subhalo population against
     simulations or observations.
+
+    References
+    ----------
+
+    .. [cite-survival] Hayashi et al. (2003), The Structural Evolution of Substructure.
+        https://arxiv.org/abs/astro-ph/0203004
+
+    .. [cite-structure] Hiroshima, Ando & Ishiyama (2018), Modeling evolution of dark matter substructure and annihilation boost, Section II, Eqs. (5)-(9).
+        https://arxiv.org/abs/1803.07691
     """
     q, model, catalog = population
     path = ROOT / "references" / f"B-top-hat-c2.5-q{q}.npz"

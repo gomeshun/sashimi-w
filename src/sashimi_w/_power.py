@@ -40,7 +40,7 @@ def top_hat_window(x):
 
 
 def sigma8_normalization(k, power, alpha, sigma8, *, radius=8.0, order=16):
-    """Return the single amplitude divisor for the q10 WDM power spectrum.
+    r"""Return the single amplitude divisor for the q10 WDM power spectrum.
 
     Parameters
     ----------
@@ -74,10 +74,20 @@ def sigma8_normalization(k, power, alpha, sigma8, *, radius=8.0, order=16):
 
     Notes
     -----
+    Viel et al. give the thermal-relic amplitude T = [1+(alpha*k)**(2*nu)]**(-5/nu),
+    nu=1.12, and alpha=0.049*(m/keV)**(-1.11)*(Omega_WDM/0.25)**0.11*(h/0.7)**1.22 in Mpc/h.
+    Power uses T**2, hence exponent -10/nu; k is in h/Mpc.
+
     T(k)**2=[1+(alpha*k)**(2*1.12)]**(-10/1.12). The radius belongs to
     the conventional sigma8 definition, not to M=(4*pi/3)*rho*(2.5 R)**3.
     The finite table and fixed quadrature have numerical limits; agreement
     with an independent integral does not calibrate the halo model.
+
+    References
+    ----------
+
+    .. [cite-viel] Viel et al. (2005), Constraining warm dark matter candidates including sterile neutrinos and light gravitinos with WMAP and the Lyman-alpha forest, Eqs. (6)-(7).
+        https://arxiv.org/abs/astro-ph/0501562
     """
     k, power = np.asarray(k, dtype=float), np.asarray(power, dtype=float)
     if (k.ndim != 1 or k.size < 2 or power.shape != k.shape

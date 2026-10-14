@@ -32,10 +32,14 @@ def test_retired_q5_is_rejected_instead_of_reinterpreted(factory):
 
 
 def test_public_default_is_q10_and_old_constant_is_removed():
-    """Expose the adopted WDM power prescription as fixed model state.
+    r"""Expose the adopted WDM power prescription as fixed model state.
 
     Notes
     -----
+    Viel et al. give the thermal-relic amplitude T = [1+(alpha*k)**(2*nu)]**(-5/nu),
+    nu=1.12, and alpha=0.049*(m/keV)**(-1.11)*(Omega_WDM/0.25)**0.11*(h/0.7)**1.22 in Mpc/h.
+    Power uses T**2, hence exponent -10/nu; k is in h/Mpc.
+
     Pass criteria: The default reports q10/standard-t2-q10, the old constant is absent and
     prescription fields cannot be reassigned.
 
@@ -44,6 +48,12 @@ def test_public_default_is_q10_and_old_constant_is_removed():
 
     Scope: This controlled calculation does not calibrate a subhalo population against
     simulations or observations.
+
+    References
+    ----------
+
+    .. [cite-viel] Viel et al. (2005), Constraining warm dark matter candidates including sterile neutrinos and light gravitinos with WMAP and the Lyman-alpha forest, Eqs. (6)-(7).
+        https://arxiv.org/abs/astro-ph/0501562
     """
     model = Subhalos(2.0)
     assert model.wdm_power_q == 10

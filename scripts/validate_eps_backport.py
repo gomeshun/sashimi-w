@@ -27,7 +27,7 @@ CORE = "23d01e8758a88b061b87de9e488c38ec89fd8e4f"
 
 
 def cases():
-    """Specify controlled WDM populations spanning particle mass, epoch, profile response and
+    r"""Specify controlled WDM populations spanning particle mass, epoch, profile response and
     host scatter.
 
     Returns
@@ -37,10 +37,24 @@ def cases():
 
     Notes
     -----
+    The retained default scatter sigma(log10(c)) = 0.128 dex is the Ishiyama et al. Eq. (7),
+    Fig. 10 value for z=0 halos of 1e9 to 1e10 solar masses; Hiroshima et al. adopt the
+    rounded value 0.13 dex. Using one value across masses and redshifts is a model
+    assumption, not a quadrature error or a new calibration.
+
     This comparison is pinned to the script-declared reference and ITAMAE revisions. Each
     source is imported in a fresh process. The output records failures as well as finite
     population/rate differences; reference agreement is historical/numerical evidence, not a
     calibration of the EPS approximation.
+
+    References
+    ----------
+
+    .. [cite-scatter] Ishiyama et al. (2013), The Cosmogrid Simulation: Statistical Properties of Small Dark Matter Halos, Eq. (7), Fig. 10.
+        https://arxiv.org/abs/1101.2020
+
+    .. [cite-structure] Hiroshima, Ando & Ishiyama (2018), Modeling evolution of dark matter substructure and annihilation boost, Section II, Eqs. (5)-(9).
+        https://arxiv.org/abs/1803.07691
     """
     base = dict(
         M0=1e10,

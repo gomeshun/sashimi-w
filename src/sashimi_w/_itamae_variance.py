@@ -69,7 +69,7 @@ def _resolve_model(model, *, mass_wdm, wdm_power_convention):
 
 
 def make_variance_model(model=None, *, mass_wdm=1.5, wdm_power_convention=None):
-    """Expose the standard continuous WDM variance through the common protocol.
+    r"""Expose the standard continuous WDM variance through the common protocol.
 
     Parameters
     ----------
@@ -89,11 +89,21 @@ def make_variance_model(model=None, *, mass_wdm=1.5, wdm_power_convention=None):
 
     Notes
     -----
+    The sharp-k mass assignment M=(4*pi/3)*rho*(c*R)**3 with c=2.5 follows Schneider. This
+    calibrated mass mapping is distinct from the real-space top-hat radius used to define
+    sigma8.
+
     The current prescription uses the bundled spectrum converted to canonical Mpc units, a
     sharp-k mass-assignment factor 2.5, and one top-hat sigma8
     normalization. These are physical/convention choices, distinct from convergence of the
     integral. The tests pin the chosen prescription; they do not independently establish
     that it is the uniquely appropriate filter normalization.
+
+    References
+    ----------
+
+    .. [cite-sharp] Schneider (2015), Structure formation with suppressed small-scale perturbations, Eqs. (10)-(12).
+        https://doi.org/10.1093/mnras/stv1169
     """
     model, selected = _resolve_model(
         model, mass_wdm=mass_wdm, wdm_power_convention=wdm_power_convention
@@ -112,7 +122,7 @@ def make_integrated_variance_model(
     wdm_power_convention: str | None = None,
     n_k: int = 4097,
 ) -> IntegratedVarianceModel:
-    """Compose SASHIMI-W physics with ITAMAE's corrected sharp-k integrator.
+    r"""Compose SASHIMI-W physics with ITAMAE's corrected sharp-k integrator.
 
     Parameters
     ----------
@@ -136,6 +146,10 @@ def make_integrated_variance_model(
 
     Notes
     -----
+    The sharp-k mass assignment M=(4*pi/3)*rho*(c*R)**3 with c=2.5 follows Schneider. This
+    calibrated mass mapping is distinct from the real-space top-hat radius used to define
+    sigma8.
+
     The bundled k and P table is converted from h/Mpc and (Mpc/h)**3 to
     canonical Mpc**-1 and Mpc**3. Multiplication by h**2 converts the
     numerical mean density to Msun/Mpc**3. The Schneider mapping
@@ -149,6 +163,12 @@ def make_integrated_variance_model(
     normalization. These are physical/convention choices, distinct from convergence of the
     integral. The tests pin the chosen prescription; they do not independently establish
     that it is the uniquely appropriate filter normalization.
+
+    References
+    ----------
+
+    .. [cite-sharp] Schneider (2015), Structure formation with suppressed small-scale perturbations, Eqs. (10)-(12).
+        https://doi.org/10.1093/mnras/stv1169
     """
     configured, selected_convention = _resolve_model(
         model,
@@ -176,7 +196,7 @@ def make_integrated_variance_model(
     )
 
     def wdm_power_ratio(wavenumber: Any) -> np.ndarray:
-        """Evaluate a snapshot of the configured thermal suppression in canonical wavenumber units.
+        r"""Evaluate a snapshot of the configured thermal suppression in canonical wavenumber units.
 
         Parameters
         ----------
@@ -190,11 +210,21 @@ def make_integrated_variance_model(
 
         Notes
         -----
+        Viel et al. give the thermal-relic amplitude T = [1+(alpha*k)**(2*nu)]**(-5/nu),
+        nu=1.12, and alpha=0.049*(m/keV)**(-1.11)*(Omega_WDM/0.25)**0.11*(h/0.7)**1.22 in Mpc/h.
+        Power uses T**2, hence exponent -10/nu; k is in h/Mpc.
+
         The current prescription uses the bundled spectrum converted to canonical Mpc units, a
         sharp-k mass-assignment factor 2.5, and one top-hat sigma8
         normalization. These are physical/convention choices, distinct from convergence of the
         integral. The tests pin the chosen prescription; they do not independently establish
         that it is the uniquely appropriate filter normalization.
+
+        References
+        ----------
+
+        .. [cite-viel] Viel et al. (2005), Constraining warm dark matter candidates including sterile neutrinos and light gravitinos with WMAP and the Lyman-alpha forest, Eqs. (6)-(7).
+            https://arxiv.org/abs/astro-ph/0501562
         """
         k = np.asarray(wavenumber, dtype=float)
         # Snapshot the configured alpha and q rather than retaining a mutable
@@ -213,7 +243,7 @@ def make_integrated_variance_model(
     normalization = configured._power_normalization()
 
     def normalized_wdm_power_ratio(wavenumber: Any) -> np.ndarray:
-        """Apply the common top-hat sigma8 normalization to the thermal WDM power ratio.
+        r"""Apply the common top-hat sigma8 normalization to the thermal WDM power ratio.
 
         Parameters
         ----------
@@ -227,11 +257,21 @@ def make_integrated_variance_model(
 
         Notes
         -----
+        Viel et al. give the thermal-relic amplitude T = [1+(alpha*k)**(2*nu)]**(-5/nu),
+        nu=1.12, and alpha=0.049*(m/keV)**(-1.11)*(Omega_WDM/0.25)**0.11*(h/0.7)**1.22 in Mpc/h.
+        Power uses T**2, hence exponent -10/nu; k is in h/Mpc.
+
         The current prescription uses the bundled spectrum converted to canonical Mpc units, a
         sharp-k mass-assignment factor 2.5, and one top-hat sigma8
         normalization. These are physical/convention choices, distinct from convergence of the
         integral. The tests pin the chosen prescription; they do not independently establish
         that it is the uniquely appropriate filter normalization.
+
+        References
+        ----------
+
+        .. [cite-viel] Viel et al. (2005), Constraining warm dark matter candidates including sterile neutrinos and light gravitinos with WMAP and the Lyman-alpha forest, Eqs. (6)-(7).
+            https://arxiv.org/abs/astro-ph/0501562
         """
         return wdm_power_ratio(wavenumber) / normalization**2
 

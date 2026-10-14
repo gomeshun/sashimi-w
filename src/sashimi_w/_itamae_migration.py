@@ -22,7 +22,7 @@ _CONSISTENT_OMEGA_L = 1.0 - float(OmegaM)
 
 
 class Subhalos(WDMPhysics):
-    """Thermal WDM with the Viel transfer amplitude squared and a fixed specification.
+    r"""Thermal WDM with the Viel transfer amplitude squared and a fixed specification.
 
     Canonical catalogs use Msun, Mpc and Msun/Mpc^3. Tuple conversion uses the
     historical Msun, kpc and Msun/pc^3 format. No legacy calculation is provided.
@@ -43,10 +43,20 @@ class Subhalos(WDMPhysics):
 
     Notes
     -----
+    Viel et al. give the thermal-relic amplitude T = [1+(alpha*k)**(2*nu)]**(-5/nu),
+    nu=1.12, and alpha=0.049*(m/keV)**(-1.11)*(Omega_WDM/0.25)**0.11*(h/0.7)**1.22 in Mpc/h.
+    Power uses T**2, hence exponent -10/nu; k is in h/Mpc.
+
     The supported power ratio is T(k)**2=[1+(alpha*k)**(2*nu)]**(-10/nu), with nu=1.12.
     Canonical catalogues use Msun, Mpc and Msun/Mpc^3; the compatibility tuple uses Msun,
     kpc and Msun/pc^3. No historical q5 calculation is silently converted to this
     specification.
+
+    References
+    ----------
+
+    .. [cite-viel] Viel et al. (2005), Constraining warm dark matter candidates including sterile neutrinos and light gravitinos with WMAP and the Lyman-alpha forest, Eqs. (6)-(7).
+        https://arxiv.org/abs/astro-ph/0501562
     """
 
     def __init__(
@@ -57,7 +67,7 @@ class Subhalos(WDMPhysics):
         cosmology_backend: Any | None = None,
         unit_backend: Any | None = None,
     ) -> None:
-        """Select the q10 thermal WDM model, compatible WMAP7 background and catalogue unit
+        r"""Select the q10 thermal WDM model, compatible WMAP7 background and catalogue unit
         boundary.
 
         Parameters
@@ -76,10 +86,20 @@ class Subhalos(WDMPhysics):
 
         Notes
         -----
+        Viel et al. give the thermal-relic amplitude T = [1+(alpha*k)**(2*nu)]**(-5/nu),
+        nu=1.12, and alpha=0.049*(m/keV)**(-1.11)*(Omega_WDM/0.25)**0.11*(h/0.7)**1.22 in Mpc/h.
+        Power uses T**2, hence exponent -10/nu; k is in h/Mpc.
+
         The supported power ratio is T(k)**2=[1+(alpha*k)**(2*nu)]**(-10/nu), with nu=1.12.
         Canonical catalogues use Msun, Mpc and Msun/Mpc^3; the compatibility tuple uses Msun,
         kpc and Msun/pc^3. No historical q5 calculation is silently converted to this
         specification.
+
+        References
+        ----------
+
+        .. [cite-viel] Viel et al. (2005), Constraining warm dark matter candidates including sterile neutrinos and light gravitinos with WMAP and the Lyman-alpha forest, Eqs. (6)-(7).
+            https://arxiv.org/abs/astro-ph/0501562
         """
         try:
             particle_mass = float(mass_wdm)
@@ -192,7 +212,7 @@ class Subhalos(WDMPhysics):
         return 0.25
 
     def transfer_amplitude(self, k: Any):
-        """Viel transfer amplitude T=sqrt(P_WDM/P_CDM), for k in h/Mpc.
+        r"""Viel transfer amplitude T=sqrt(P_WDM/P_CDM), for k in h/Mpc.
 
         Parameters
         ----------
@@ -206,16 +226,26 @@ class Subhalos(WDMPhysics):
 
         Notes
         -----
+        Viel et al. give the thermal-relic amplitude T = [1+(alpha*k)**(2*nu)]**(-5/nu),
+        nu=1.12, and alpha=0.049*(m/keV)**(-1.11)*(Omega_WDM/0.25)**0.11*(h/0.7)**1.22 in Mpc/h.
+        Power uses T**2, hence exponent -10/nu; k is in h/Mpc.
+
         The supported power ratio is T(k)**2=[1+(alpha*k)**(2*nu)]**(-10/nu), with nu=1.12.
         Canonical catalogues use Msun, Mpc and Msun/Mpc^3; the compatibility tuple uses Msun,
         kpc and Msun/pc^3. No historical q5 calculation is silently converted to this
         specification.
+
+        References
+        ----------
+
+        .. [cite-viel] Viel et al. (2005), Constraining warm dark matter candidates including sterile neutrinos and light gravitinos with WMAP and the Lyman-alpha forest, Eqs. (6)-(7).
+            https://arxiv.org/abs/astro-ph/0501562
         """
         wavenumber = np.asarray(k, dtype=float)
         return (1.0 + (self.a * wavenumber) ** (2.0 * WDM_TRANSFER_NU)) ** (-5.0 / WDM_TRANSFER_NU)
 
     def power_ratio(self, k: Any):
-        """Thermal WDM/CDM power ratio T^2, for k in h/Mpc.
+        r"""Thermal WDM/CDM power ratio T^2, for k in h/Mpc.
 
         Evaluate exponent -10/nu directly to retain the existing q10 floating
         point operation order. It equals transfer_amplitude(k)**2 to roundoff.
@@ -232,15 +262,25 @@ class Subhalos(WDMPhysics):
 
         Notes
         -----
+        Viel et al. give the thermal-relic amplitude T = [1+(alpha*k)**(2*nu)]**(-5/nu),
+        nu=1.12, and alpha=0.049*(m/keV)**(-1.11)*(Omega_WDM/0.25)**0.11*(h/0.7)**1.22 in Mpc/h.
+        Power uses T**2, hence exponent -10/nu; k is in h/Mpc.
+
         The supported power ratio is T(k)**2=[1+(alpha*k)**(2*nu)]**(-10/nu), with nu=1.12.
         Canonical catalogues use Msun, Mpc and Msun/Mpc^3; the compatibility tuple uses Msun,
         kpc and Msun/pc^3. No historical q5 calculation is silently converted to this
         specification.
+
+        References
+        ----------
+
+        .. [cite-viel] Viel et al. (2005), Constraining warm dark matter candidates including sterile neutrinos and light gravitinos with WMAP and the Lyman-alpha forest, Eqs. (6)-(7).
+            https://arxiv.org/abs/astro-ph/0501562
         """
         return self._wdm_power_ratio(k)
 
     def _wdm_power_ratio(self, k: Any, *, alpha: Any | None = None):
-        """Single q10 power hook for sharp-k variance and top-hat concentration.
+        r"""Single q10 power hook for sharp-k variance and top-hat concentration.
 
         Parameters
         ----------
@@ -256,10 +296,20 @@ class Subhalos(WDMPhysics):
 
         Notes
         -----
+        Viel et al. give the thermal-relic amplitude T = [1+(alpha*k)**(2*nu)]**(-5/nu),
+        nu=1.12, and alpha=0.049*(m/keV)**(-1.11)*(Omega_WDM/0.25)**0.11*(h/0.7)**1.22 in Mpc/h.
+        Power uses T**2, hence exponent -10/nu; k is in h/Mpc.
+
         The supported power ratio is T(k)**2=[1+(alpha*k)**(2*nu)]**(-10/nu), with nu=1.12.
         Canonical catalogues use Msun, Mpc and Msun/Mpc^3; the compatibility tuple uses Msun,
         kpc and Msun/pc^3. No historical q5 calculation is silently converted to this
         specification.
+
+        References
+        ----------
+
+        .. [cite-viel] Viel et al. (2005), Constraining warm dark matter candidates including sterile neutrinos and light gravitinos with WMAP and the Lyman-alpha forest, Eqs. (6)-(7).
+            https://arxiv.org/abs/astro-ph/0501562
         """
         selected_alpha = self.a if alpha is None else alpha
         wavenumber = np.asarray(k, dtype=float)
@@ -268,7 +318,7 @@ class Subhalos(WDMPhysics):
         )
 
     def half_mode_wavenumber(self, *, power_ratio: float = 0.25) -> float:
-        """Return k in h/Mpc at an explicit power-ratio threshold.
+        r"""Return k in h/Mpc at an explicit power-ratio threshold.
 
         The default is amplitude half (T=1/2, power=1/4), preserving the old
         q10 numerical scale. Use power_ratio=0.5 for power half. This diagnostic
@@ -287,10 +337,20 @@ class Subhalos(WDMPhysics):
 
         Notes
         -----
+        Viel et al. give the thermal-relic amplitude T = [1+(alpha*k)**(2*nu)]**(-5/nu),
+        nu=1.12, and alpha=0.049*(m/keV)**(-1.11)*(Omega_WDM/0.25)**0.11*(h/0.7)**1.22 in Mpc/h.
+        Power uses T**2, hence exponent -10/nu; k is in h/Mpc.
+
         The supported power ratio is T(k)**2=[1+(alpha*k)**(2*nu)]**(-10/nu), with nu=1.12.
         Canonical catalogues use Msun, Mpc and Msun/Mpc^3; the compatibility tuple uses Msun,
         kpc and Msun/pc^3. No historical q5 calculation is silently converted to this
         specification.
+
+        References
+        ----------
+
+        .. [cite-viel] Viel et al. (2005), Constraining warm dark matter candidates including sterile neutrinos and light gravitinos with WMAP and the Lyman-alpha forest, Eqs. (6)-(7).
+            https://arxiv.org/abs/astro-ph/0501562
         """
         value = np.asarray(power_ratio)
         if value.ndim != 0 or value.dtype.kind not in "iuf" or not np.isfinite(value):
@@ -430,7 +490,7 @@ class Subhalos(WDMPhysics):
         return np.asarray(self.itamae_cosmology.omega_m(redshift), dtype=float)
 
     def growthD(self, z: Any):
-        """Return the normalized WMAP7 growth factor.
+        r"""Return the normalized WMAP7 growth factor.
 
         Parameters
         ----------
@@ -445,10 +505,20 @@ class Subhalos(WDMPhysics):
 
         Notes
         -----
+        The factors 5/2, 4/7 and 1/70 belong to the Carroll--Press--Turner growth approximation.
+        Redshift derivatives differentiate that approximation; they are not a separate growth
+        calibration.
+
         The supported power ratio is T(k)**2=[1+(alpha*k)**(2*nu)]**(-10/nu), with nu=1.12.
         Canonical catalogues use Msun, Mpc and Msun/Mpc^3; the compatibility tuple uses Msun,
         kpc and Msun/pc^3. No historical q5 calculation is silently converted to this
         specification.
+
+        References
+        ----------
+
+        .. [cite-growth] Carroll, Press & Turner (1992), The Cosmological Constant, Section 3.5.
+            https://doi.org/10.1146/annurev.aa.30.090192.002435
         """
         growth = np.asarray(self.itamae_cosmology.growth_factor(z), dtype=float)
         growth0 = float(np.asarray(self.itamae_cosmology.growth_factor(0.0), dtype=float))
@@ -481,7 +551,7 @@ class Subhalos(WDMPhysics):
         return -self.omega_lambda * 3.0 * float(OmegaM) * (1.0 + redshift) ** 2 / denominator**2
 
     def dDdz(self, z: Any):
-        """Differentiate the selected Carroll-Press-Turner growth factor.
+        r"""Differentiate the selected Carroll-Press-Turner growth factor.
 
         Parameters
         ----------
@@ -496,10 +566,20 @@ class Subhalos(WDMPhysics):
 
         Notes
         -----
+        The factors 5/2, 4/7 and 1/70 belong to the Carroll--Press--Turner growth approximation.
+        Redshift derivatives differentiate that approximation; they are not a separate growth
+        calibration.
+
         The supported power ratio is T(k)**2=[1+(alpha*k)**(2*nu)]**(-10/nu), with nu=1.12.
         Canonical catalogues use Msun, Mpc and Msun/Mpc^3; the compatibility tuple uses Msun,
         kpc and Msun/pc^3. No historical q5 calculation is silently converted to this
         specification.
+
+        References
+        ----------
+
+        .. [cite-growth] Carroll, Press & Turner (1992), The Cosmological Constant, Section 3.5.
+            https://doi.org/10.1146/annurev.aa.30.090192.002435
         """
         redshift = np.asarray(z, dtype=float)
         omega_lz = self.omega_lambda / (self.omega_lambda + float(OmegaM) * (1.0 + redshift) ** 3)
@@ -648,7 +728,7 @@ class Subhalos(WDMPhysics):
         return float(result) if result.ndim == 0 else result
 
     def conc200(self, mass_cgs: Any, z: Any):
-        """Ludlow concentration for CGS physical mass.
+        r"""Ludlow concentration for CGS physical mass.
 
         The kernel uses M/Msolar/h; multiplying by h squared before that
         boundary implements M_filter[Msun/h] = h M_physical[Msun].
@@ -669,15 +749,33 @@ class Subhalos(WDMPhysics):
 
         Notes
         -----
+        The formation model adopts C=650, f=0.02 and spherical barrier 1.686 from Ludlow et al.
+        The implementation evaluates NFW enclosed masses while the original calibration uses
+        Einasto profiles; retaining C is a model adaptation, not a recalibration. Trial counts
+        and root-search limits are numerical choices.
+
+        The sharp-k mass assignment M=(4*pi/3)*rho*(c*R)**3 with c=2.5 follows Schneider. This
+        calibrated mass mapping is distinct from the real-space top-hat radius used to define
+        sigma8.
+
         The supported power ratio is T(k)**2=[1+(alpha*k)**(2*nu)]**(-10/nu), with nu=1.12.
         Canonical catalogues use Msun, Mpc and Msun/Mpc^3; the compatibility tuple uses Msun,
         kpc and Msun/pc^3. No historical q5 calculation is silently converted to this
         specification.
+
+        References
+        ----------
+
+        .. [cite-formation] Ludlow et al. (2016), The mass-concentration-redshift relation of cold and warm dark matter haloes, Section 4.3, Eqs. (6)-(7).
+            https://arxiv.org/abs/1601.02624
+
+        .. [cite-sharp] Schneider (2015), Structure formation with suppressed small-scale perturbations, Eqs. (10)-(12).
+            https://doi.org/10.1093/mnras/stv1169
         """
         return super().conc200(np.asarray(mass_cgs, dtype=float) * float(h) ** 2, z)
 
     def linear_growth_factor(self, Omega_m0: float, Omega_l0: float, z: Any):
-        """Return the established interval-aware linear growth factor using ITAMAE.
+        r"""Return the established interval-aware linear growth factor using ITAMAE.
 
         Parameters
         ----------
@@ -695,10 +793,20 @@ class Subhalos(WDMPhysics):
 
         Notes
         -----
+        The factors 5/2, 4/7 and 1/70 belong to the Carroll--Press--Turner growth approximation.
+        Redshift derivatives differentiate that approximation; they are not a separate growth
+        calibration.
+
         The supported power ratio is T(k)**2=[1+(alpha*k)**(2*nu)]**(-10/nu), with nu=1.12.
         Canonical catalogues use Msun, Mpc and Msun/Mpc^3; the compatibility tuple uses Msun,
         kpc and Msun/pc^3. No historical q5 calculation is silently converted to this
         specification.
+
+        References
+        ----------
+
+        .. [cite-growth] Carroll, Press & Turner (1992), The Cosmological Constant, Section 3.5.
+            https://doi.org/10.1146/annurev.aa.30.090192.002435
         """
         if not np.isclose(Omega_m0 + Omega_l0, 1.0, rtol=0.0, atol=1e-12):
             raise ValueError("The initial ITAMAE WDM adapter supports flat cosmologies only.")
@@ -772,7 +880,7 @@ class Subhalos(WDMPhysics):
         method="picard_table",
         **solver_options,
     ) -> WeightedSubhaloCatalog:
-        """Calculate one named physical WDM catalog with explicit numerical inputs.
+        r"""Calculate one named physical WDM catalog with explicit numerical inputs.
 
         Parameters
         ----------
@@ -822,10 +930,31 @@ class Subhalos(WDMPhysics):
 
         Notes
         -----
+        The retained default scatter sigma(log10(c)) = 0.128 dex is the Ishiyama et al. Eq. (7),
+        Fig. 10 value for z=0 halos of 1e9 to 1e10 solar masses; Hiroshima et al. adopt the
+        rounded value 0.13 dex. Using one value across masses and redshifts is a model
+        assumption, not a quadrature error or a new calibration. The literature threshold rt/rs
+        > 0.77 follows the Hayashi et al. disruption prescription adopted by Hiroshima et al. A
+        caller-supplied threshold takes precedence in variants that expose it (C and SI
+        currently default to 0). This is a model selection rule; an exact-boundary test does not
+        calibrate disruption physics.
+
         Host M0 is physical M200 at z=0. All accretion nodes are retained and weight_final
         applies the strict survival mask. The retained arange(target+dz,zmax+dz,dz) convention
         can exceed a non-aligned zmax by less than one nominal step. A wholly zero-measure WDM
         population remains zero rather than being renormalized to NaN.
+
+        References
+        ----------
+
+        .. [cite-scatter] Ishiyama et al. (2013), The Cosmogrid Simulation: Statistical Properties of Small Dark Matter Halos, Eq. (7), Fig. 10.
+            https://arxiv.org/abs/1101.2020
+
+        .. [cite-structure] Hiroshima, Ando & Ishiyama (2018), Modeling evolution of dark matter substructure and annihilation boost, Section II, Eqs. (5)-(9).
+            https://arxiv.org/abs/1803.07691
+
+        .. [cite-survival] Hayashi et al. (2003), The Structural Evolution of Substructure.
+            https://arxiv.org/abs/astro-ph/0203004
         """
         parameters = dict(locals())
         parameters.pop("self")
@@ -834,7 +963,7 @@ class Subhalos(WDMPhysics):
         return execution.to_catalog(self._catalog_metadata(parameters, diagnostics))
 
     def rs_rhos_calc(self, *args: Any, **kwargs: Any):
-        """Return the historical tuple format of the current population calculation.
+        r"""Return the historical tuple format of the current population calculation.
 
         Parameters
         ----------
@@ -851,10 +980,31 @@ class Subhalos(WDMPhysics):
 
         Notes
         -----
+        The retained default scatter sigma(log10(c)) = 0.128 dex is the Ishiyama et al. Eq. (7),
+        Fig. 10 value for z=0 halos of 1e9 to 1e10 solar masses; Hiroshima et al. adopt the
+        rounded value 0.13 dex. Using one value across masses and redshifts is a model
+        assumption, not a quadrature error or a new calibration. The literature threshold rt/rs
+        > 0.77 follows the Hayashi et al. disruption prescription adopted by Hiroshima et al. A
+        caller-supplied threshold takes precedence in variants that expose it (C and SI
+        currently default to 0). This is a model selection rule; an exact-boundary test does not
+        calibrate disruption physics.
+
         The supported power ratio is T(k)**2=[1+(alpha*k)**(2*nu)]**(-10/nu), with nu=1.12.
         Canonical catalogues use Msun, Mpc and Msun/Mpc^3; the compatibility tuple uses Msun,
         kpc and Msun/pc^3. No historical q5 calculation is silently converted to this
         specification.
+
+        References
+        ----------
+
+        .. [cite-scatter] Ishiyama et al. (2013), The Cosmogrid Simulation: Statistical Properties of Small Dark Matter Halos, Eq. (7), Fig. 10.
+            https://arxiv.org/abs/1101.2020
+
+        .. [cite-structure] Hiroshima, Ando & Ishiyama (2018), Modeling evolution of dark matter substructure and annihilation boost, Section II, Eqs. (5)-(9).
+            https://arxiv.org/abs/1803.07691
+
+        .. [cite-survival] Hayashi et al. (2003), The Structural Evolution of Substructure.
+            https://arxiv.org/abs/astro-ph/0203004
         """
         catalog = self.rs_rhos_catalog_calc(*args, **kwargs)
         columns = catalog.columns
@@ -872,7 +1022,7 @@ class Subhalos(WDMPhysics):
         )
 
     def _execute_population(self, parameters):
-        """Assemble EPS slices and evolve the WDM NFW population through the common executor.
+        r"""Assemble EPS slices and evolve the WDM NFW population through the common executor.
 
         Parameters
         ----------
@@ -888,10 +1038,31 @@ class Subhalos(WDMPhysics):
 
         Notes
         -----
+        The retained default scatter sigma(log10(c)) = 0.128 dex is the Ishiyama et al. Eq. (7),
+        Fig. 10 value for z=0 halos of 1e9 to 1e10 solar masses; Hiroshima et al. adopt the
+        rounded value 0.13 dex. Using one value across masses and redshifts is a model
+        assumption, not a quadrature error or a new calibration. The literature threshold rt/rs
+        > 0.77 follows the Hayashi et al. disruption prescription adopted by Hiroshima et al. A
+        caller-supplied threshold takes precedence in variants that expose it (C and SI
+        currently default to 0). This is a model selection rule; an exact-boundary test does not
+        calibrate disruption physics.
+
         The supported power ratio is T(k)**2=[1+(alpha*k)**(2*nu)]**(-10/nu), with nu=1.12.
         Canonical catalogues use Msun, Mpc and Msun/Mpc^3; the compatibility tuple uses Msun,
         kpc and Msun/pc^3. No historical q5 calculation is silently converted to this
         specification.
+
+        References
+        ----------
+
+        .. [cite-scatter] Ishiyama et al. (2013), The Cosmogrid Simulation: Statistical Properties of Small Dark Matter Halos, Eq. (7), Fig. 10.
+            https://arxiv.org/abs/1101.2020
+
+        .. [cite-structure] Hiroshima, Ando & Ishiyama (2018), Modeling evolution of dark matter substructure and annihilation boost, Section II, Eqs. (5)-(9).
+            https://arxiv.org/abs/1803.07691
+
+        .. [cite-survival] Hayashi et al. (2003), The Structural Evolution of Substructure.
+            https://arxiv.org/abs/astro-ph/0203004
         """
         from scipy.integrate import simpson
         from itamae.execution import PopulationComponents

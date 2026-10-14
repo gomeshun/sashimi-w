@@ -8,7 +8,7 @@ from sashimi_w_physics import G, km, kpc, Msolar, pc, s
 
 
 def population_model(survive):
-    """Construct a synthetic population with known weights and a caller-selected survival mask.
+    r"""Construct a synthetic population with known weights and a caller-selected survival mask.
 
     Parameters
     ----------
@@ -23,8 +23,21 @@ def population_model(survive):
 
     Notes
     -----
+    The NFW profile is from Navarro et al. The rounded factors rmax/rs = 2.163 (2.1626 where
+    explicitly used) and 4.625 are NFW maximum-circular-speed identities, as written in
+    Hiroshima et al., Eqs. (5)-(7), rather than independent empirical fits.
+
     This fixture/helper supports the controlled checks in this test module; its synthetic
     values are not a calibrated halo model.
+
+    References
+    ----------
+
+    .. [cite-nfw] Navarro, Frenk & White (1997), A Universal Density Profile from Hierarchical Clustering.
+        https://arxiv.org/abs/astro-ph/9611107
+
+    .. [cite-structure] Hiroshima, Ando & Ishiyama (2018), Modeling evolution of dark matter substructure and annihilation boost, Section II, Eqs. (5)-(9).
+        https://arxiv.org/abs/1803.07691
     """
     model = object.__new__(Subhalos)
     size = len(survive)

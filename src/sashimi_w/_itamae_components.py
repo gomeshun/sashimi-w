@@ -66,7 +66,7 @@ class WDMHostHistory:
         object.__setattr__(self, "_parameters", self.model._host_history_parameters(self.mass, 0))
 
     def mass_virial(self, z):
-        """Evaluate the WDM virial host mass with the prescribed deterministic offset when
+        r"""Evaluate the WDM virial host mass with the prescribed deterministic offset when
         selected.
 
         Parameters
@@ -82,10 +82,24 @@ class WDMHostHistory:
 
         Notes
         -----
+        The median host history follows Correa et al.; the 0.12/0.15 log-mass scatter follows
+        Yang et al., Eq. (21). The deterministic low-redshift scatter is anchored at z=1 by the
+        retained upstream implementation; that extension is not quoted as a separate paper
+        calibration.
+
         Population stages use physical Msun, Mpc and Msun/Mpc^3. Local structure calls
         explicitly convert to CGS; no time or h conversion is implicit in the shared solver.
         Redshift decreases from accretion to observation, so the positive dm/dz law removes
         mass.
+
+        References
+        ----------
+
+        .. [cite-yang] Yang et al. (2011), An Analytical Model for the Accretion of Dark Matter Subhalos, Eqs. (12)-(14), (21).
+            https://arxiv.org/abs/1104.1757
+
+        .. [cite-correa] Correa et al. (2015), The accretion history of dark matter haloes - III. A physical model for the concentration-mass relation, Section 3 and Appendix B.
+            https://arxiv.org/abs/1502.00391
         """
         model = self.model
         mass = model._host_history_mass(self._parameters, z, 0)
@@ -103,7 +117,7 @@ class WDMHostHistory:
 
 @dataclass(frozen=True)
 class WDMTidalMassLoss:
-    """Supply the WDM-owned redshift tidal-loss law on a prepared host history.
+    r"""Supply the WDM-owned redshift tidal-loss law on a prepared host history.
 
     Parameters
     ----------
@@ -116,10 +130,27 @@ class WDMTidalMassLoss:
 
     Notes
     -----
+    The WDM mass-loss fit is Dekker et al., Appendix C. The code retains the more precise
+    coefficients of author upstream/main at 99dfc3632eec0126080c0273ddf78f84fe09216c (for
+    example -0.313 in log10(A)); the paper prints rounded coefficients (for example -0.31).
+    These are retained upstream coefficients, not a new fit.
+
     Population stages use physical Msun, Mpc and Msun/Mpc^3. Local structure calls
     explicitly convert to CGS; no time or h conversion is implicit in the shared solver.
     Redshift decreases from accretion to observation, so the positive dm/dz law removes
     mass.
+
+    References
+    ----------
+
+    .. [cite-wtidal] Dekker et al. (2022), Warm dark matter constraints using Milky-Way satellite observations and subhalo evolution modeling, Appendix C.
+        https://arxiv.org/abs/2111.13137
+
+    .. [cite-time] Jiang & van den Bosch (2016), Statistics of Dark Matter Substructure: I. Model and Universal Fitting Functions, Eq. (2).
+        https://arxiv.org/abs/1403.6827
+
+    .. [cite-virial] Bryan & Norman (1998), Statistical Properties of X-ray Clusters: Analytic and Numerical Comparisons, Eq. (6).
+        https://arxiv.org/abs/astro-ph/9710107
     """
 
     model: Any
@@ -127,7 +158,7 @@ class WDMTidalMassLoss:
 
     def rhs(self, z, mass):
         # Keep the supplied WDM fitting functions and arithmetic grouping.
-        """Evaluate dm/dz from the WDM amplitude, mass-ratio exponent and virial dynamical time.
+        r"""Evaluate dm/dz from the WDM amplitude, mass-ratio exponent and virial dynamical time.
 
         Parameters
         ----------
@@ -146,10 +177,27 @@ class WDMTidalMassLoss:
 
         Notes
         -----
+        The WDM mass-loss fit is Dekker et al., Appendix C. The code retains the more precise
+        coefficients of author upstream/main at 99dfc3632eec0126080c0273ddf78f84fe09216c (for
+        example -0.313 in log10(A)); the paper prints rounded coefficients (for example -0.31).
+        These are retained upstream coefficients, not a new fit.
+
         Population stages use physical Msun, Mpc and Msun/Mpc^3. Local structure calls
         explicitly convert to CGS; no time or h conversion is implicit in the shared solver.
         Redshift decreases from accretion to observation, so the positive dm/dz law removes
         mass.
+
+        References
+        ----------
+
+        .. [cite-wtidal] Dekker et al. (2022), Warm dark matter constraints using Milky-Way satellite observations and subhalo evolution modeling, Appendix C.
+            https://arxiv.org/abs/2111.13137
+
+        .. [cite-time] Jiang & van den Bosch (2016), Statistics of Dark Matter Substructure: I. Model and Universal Fitting Functions, Eq. (2).
+            https://arxiv.org/abs/1403.6827
+
+        .. [cite-virial] Bryan & Norman (1998), Statistical Properties of X-ray Clusters: Analytic and Numerical Comparisons, Eq. (6).
+            https://arxiv.org/abs/astro-ph/9710107
         """
         host_mass = self.history.mass_virial(z)
         log_host_mass = np.log10(host_mass)
@@ -173,7 +221,7 @@ class WDMTidalMassLoss:
 
 
 class WDMTidalSolver:
-    """WDM coefficient adapter; ITAMAE owns all Picard numerical operations.
+    r"""WDM coefficient adapter; ITAMAE owns all Picard numerical operations.
 
     Masses are physical Msun. The historical scalar virial conversion is
     evaluated independently at each requested redshift, retaining its solve.
@@ -189,14 +237,31 @@ class WDMTidalSolver:
 
     Notes
     -----
+    The WDM mass-loss fit is Dekker et al., Appendix C. The code retains the more precise
+    coefficients of author upstream/main at 99dfc3632eec0126080c0273ddf78f84fe09216c (for
+    example -0.313 in log10(A)); the paper prints rounded coefficients (for example -0.31).
+    These are retained upstream coefficients, not a new fit.
+
     Population stages use physical Msun, Mpc and Msun/Mpc^3. Local structure calls
     explicitly convert to CGS; no time or h conversion is implicit in the shared solver.
     Redshift decreases from accretion to observation, so the positive dm/dz law removes
     mass.
+
+    References
+    ----------
+
+    .. [cite-wtidal] Dekker et al. (2022), Warm dark matter constraints using Milky-Way satellite observations and subhalo evolution modeling, Appendix C.
+        https://arxiv.org/abs/2111.13137
+
+    .. [cite-time] Jiang & van den Bosch (2016), Statistics of Dark Matter Substructure: I. Model and Universal Fitting Functions, Eq. (2).
+        https://arxiv.org/abs/1403.6827
+
+    .. [cite-virial] Bryan & Norman (1998), Statistical Properties of X-ray Clusters: Analytic and Numerical Comparisons, Eq. (6).
+        https://arxiv.org/abs/astro-ph/9710107
     """
 
     def __init__(self, law, *, z_min, z_max):
-        """Bind WDM-owned coefficients to the shared guarded endpoint integrator.
+        r"""Bind WDM-owned coefficients to the shared guarded endpoint integrator.
 
         Parameters
         ----------
@@ -209,10 +274,27 @@ class WDMTidalSolver:
 
         Notes
         -----
+        The WDM mass-loss fit is Dekker et al., Appendix C. The code retains the more precise
+        coefficients of author upstream/main at 99dfc3632eec0126080c0273ddf78f84fe09216c (for
+        example -0.313 in log10(A)); the paper prints rounded coefficients (for example -0.31).
+        These are retained upstream coefficients, not a new fit.
+
         Population stages use physical Msun, Mpc and Msun/Mpc^3. Local structure calls
         explicitly convert to CGS; no time or h conversion is implicit in the shared solver.
         Redshift decreases from accretion to observation, so the positive dm/dz law removes
         mass.
+
+        References
+        ----------
+
+        .. [cite-wtidal] Dekker et al. (2022), Warm dark matter constraints using Milky-Way satellite observations and subhalo evolution modeling, Appendix C.
+            https://arxiv.org/abs/2111.13137
+
+        .. [cite-time] Jiang & van den Bosch (2016), Statistics of Dark Matter Substructure: I. Model and Universal Fitting Functions, Eq. (2).
+            https://arxiv.org/abs/1403.6827
+
+        .. [cite-virial] Bryan & Norman (1998), Statistical Properties of X-ray Clusters: Analytic and Numerical Comparisons, Eq. (6).
+            https://arxiv.org/abs/astro-ph/9710107
         """
         self.law = law
         self.backend = PicardMassLossSolver(
@@ -289,7 +371,7 @@ class WDMTidalSolver:
         return float(result) if result.ndim == 0 else result
 
     def exponent(self, z):
-        """Evaluate the fitted WDM mass-ratio exponent at each host epoch.
+        r"""Evaluate the fitted WDM mass-ratio exponent at each host epoch.
 
         Parameters
         ----------
@@ -304,16 +386,33 @@ class WDMTidalSolver:
 
         Notes
         -----
+        The WDM mass-loss fit is Dekker et al., Appendix C. The code retains the more precise
+        coefficients of author upstream/main at 99dfc3632eec0126080c0273ddf78f84fe09216c (for
+        example -0.313 in log10(A)); the paper prints rounded coefficients (for example -0.31).
+        These are retained upstream coefficients, not a new fit.
+
         Population stages use physical Msun, Mpc and Msun/Mpc^3. Local structure calls
         explicitly convert to CGS; no time or h conversion is implicit in the shared solver.
         Redshift decreases from accretion to observation, so the positive dm/dz law removes
         mass.
+
+        References
+        ----------
+
+        .. [cite-wtidal] Dekker et al. (2022), Warm dark matter constraints using Milky-Way satellite observations and subhalo evolution modeling, Appendix C.
+            https://arxiv.org/abs/2111.13137
+
+        .. [cite-time] Jiang & van den Bosch (2016), Statistics of Dark Matter Substructure: I. Model and Universal Fitting Functions, Eq. (2).
+            https://arxiv.org/abs/1403.6827
+
+        .. [cite-virial] Bryan & Norman (1998), Statistical Properties of X-ray Clusters: Analytic and Numerical Comparisons, Eq. (6).
+            https://arxiv.org/abs/astro-ph/9710107
         """
         loghost = np.log10(self.backend.Mzvir(z))
         return (-5.55e-5 * loghost + 1.43e-3) * z + (3.34e-4 * loghost - 8.11e-3)
 
     def rate(self, z):
-        """Evaluate the fitted WDM log-mass loss coefficient per unit redshift.
+        r"""Evaluate the fitted WDM log-mass loss coefficient per unit redshift.
 
         Parameters
         ----------
@@ -328,10 +427,27 @@ class WDMTidalSolver:
 
         Notes
         -----
+        The WDM mass-loss fit is Dekker et al., Appendix C. The code retains the more precise
+        coefficients of author upstream/main at 99dfc3632eec0126080c0273ddf78f84fe09216c (for
+        example -0.313 in log10(A)); the paper prints rounded coefficients (for example -0.31).
+        These are retained upstream coefficients, not a new fit.
+
         Population stages use physical Msun, Mpc and Msun/Mpc^3. Local structure calls
         explicitly convert to CGS; no time or h conversion is implicit in the shared solver.
         Redshift decreases from accretion to observation, so the positive dm/dz law removes
         mass.
+
+        References
+        ----------
+
+        .. [cite-wtidal] Dekker et al. (2022), Warm dark matter constraints using Milky-Way satellite observations and subhalo evolution modeling, Appendix C.
+            https://arxiv.org/abs/2111.13137
+
+        .. [cite-time] Jiang & van den Bosch (2016), Statistics of Dark Matter Substructure: I. Model and Universal Fitting Functions, Eq. (2).
+            https://arxiv.org/abs/1403.6827
+
+        .. [cite-virial] Bryan & Norman (1998), Statistical Properties of X-ray Clusters: Analytic and Numerical Comparisons, Eq. (6).
+            https://arxiv.org/abs/astro-ph/9710107
         """
         model = self.law.model
         loghost = np.log10(self.backend.Mzvir(z))
@@ -502,7 +618,7 @@ class WDMInitialStructure:
     N_herm: int
 
     def initialize(self, batch, context):
-        """Convert NFW scale radius/density from CGS to canonical stage arrays.
+        r"""Convert NFW scale radius/density from CGS to canonical stage arrays.
 
         Parameters
         ----------
@@ -520,10 +636,23 @@ class WDMInitialStructure:
 
         Notes
         -----
+        The NFW profile is from Navarro et al. The rounded factors rmax/rs = 2.163 (2.1626 where
+        explicitly used) and 4.625 are NFW maximum-circular-speed identities, as written in
+        Hiroshima et al., Eqs. (5)-(7), rather than independent empirical fits.
+
         Population stages use physical Msun, Mpc and Msun/Mpc^3. Local structure calls
         explicitly convert to CGS; no time or h conversion is implicit in the shared solver.
         Redshift decreases from accretion to observation, so the positive dm/dz law removes
         mass.
+
+        References
+        ----------
+
+        .. [cite-nfw] Navarro, Frenk & White (1997), A Universal Density Profile from Hierarchical Clustering.
+            https://arxiv.org/abs/astro-ph/9611107
+
+        .. [cite-structure] Hiroshima, Ando & Ishiyama (2018), Modeling evolution of dark matter substructure and annihilation boost, Section II, Eqs. (5)-(9).
+            https://arxiv.org/abs/1803.07691
         """
         concentration = batch.concentration_acc.reshape(self.N_herm, -1)
         radius_cgs = context["rvir_cgs"] / concentration
@@ -585,7 +714,7 @@ class WDMProfileEvolution:
     solver: Any = None
 
     def evolve(self, batch, initial, context):
-        """Evolve bound mass, scale parameters and the mass-conserving NFW tidal radius.
+        r"""Evolve bound mass, scale parameters and the mass-conserving NFW tidal radius.
 
         Parameters
         ----------
@@ -606,10 +735,33 @@ class WDMProfileEvolution:
 
         Notes
         -----
+        The factors 2**0.4*mu**0.3/(1+mu)**0.4 and 2**(-0.3)*mu**0.4*(1+mu)**0.3 are the cuspy
+        tidal tracks of Penarrubia et al., reproduced in Hiroshima et al., Eqs. (8)-(9), with mu
+        the retained bound-mass fraction. The NFW profile is from Navarro et al. The rounded
+        factors rmax/rs = 2.163 (2.1626 where explicitly used) and 4.625 are NFW maximum-
+        circular-speed identities, as written in Hiroshima et al., Eqs. (5)-(7), rather than
+        independent empirical fits.
+
+        The NFW profile is from Navarro et al. The rounded factors rmax/rs = 2.163 (2.1626 where
+        explicitly used) and 4.625 are NFW maximum-circular-speed identities, as written in
+        Hiroshima et al., Eqs. (5)-(7), rather than independent empirical fits.
+
         Population stages use physical Msun, Mpc and Msun/Mpc^3. Local structure calls
         explicitly convert to CGS; no time or h conversion is implicit in the shared solver.
         Redshift decreases from accretion to observation, so the positive dm/dz law removes
         mass.
+
+        References
+        ----------
+
+        .. [cite-tracks] Penarrubia et al. (2010), The impact of dark matter cusps and cores on the satellite galaxy population around spiral galaxies, Eq. (8), Fig. 6.
+            https://arxiv.org/abs/1002.3376
+
+        .. [cite-structure] Hiroshima, Ando & Ishiyama (2018), Modeling evolution of dark matter substructure and annihilation boost, Section II, Eqs. (5)-(9).
+            https://arxiv.org/abs/1803.07691
+
+        .. [cite-nfw] Navarro, Frenk & White (1997), A Universal Density Profile from Hierarchical Clustering.
+            https://arxiv.org/abs/astro-ph/9611107
         """
         ma = context["ma"]
         if self.method == "odeint":
@@ -660,7 +812,7 @@ class WDMProfileEvolution:
 
 @dataclass(frozen=True)
 class WDMSurvival:
-    """Select surviving WDM nodes by the strict tidal-concentration threshold.
+    r"""Select surviving WDM nodes by the strict tidal-concentration threshold.
 
     Parameters
     ----------
@@ -670,16 +822,30 @@ class WDMSurvival:
 
     Notes
     -----
+    The literature threshold rt/rs > 0.77 follows the Hayashi et al. disruption prescription
+    adopted by Hiroshima et al. A caller-supplied threshold takes precedence in variants
+    that expose it (C and SI currently default to 0). This is a model selection rule; an
+    exact-boundary test does not calibrate disruption physics.
+
     Population stages use physical Msun, Mpc and Msun/Mpc^3. Local structure calls
     explicitly convert to CGS; no time or h conversion is implicit in the shared solver.
     Redshift decreases from accretion to observation, so the positive dm/dz law removes
     mass.
+
+    References
+    ----------
+
+    .. [cite-survival] Hayashi et al. (2003), The Structural Evolution of Substructure.
+        https://arxiv.org/abs/astro-ph/0203004
+
+    .. [cite-structure] Hiroshima, Ando & Ishiyama (2018), Modeling evolution of dark matter substructure and annihilation boost, Section II, Eqs. (5)-(9).
+        https://arxiv.org/abs/1803.07691
     """
 
     ct_threshold: float = 0.77
 
     def select(self, batch, initial, evolved, context):
-        """Apply c_t > ct_threshold without changing generation weights or physical columns.
+        r"""Apply c_t > ct_threshold without changing generation weights or physical columns.
 
         Parameters
         ----------
@@ -703,10 +869,24 @@ class WDMSurvival:
 
         Notes
         -----
+        The literature threshold rt/rs > 0.77 follows the Hayashi et al. disruption prescription
+        adopted by Hiroshima et al. A caller-supplied threshold takes precedence in variants
+        that expose it (C and SI currently default to 0). This is a model selection rule; an
+        exact-boundary test does not calibrate disruption physics.
+
         Population stages use physical Msun, Mpc and Msun/Mpc^3. Local structure calls
         explicitly convert to CGS; no time or h conversion is implicit in the shared solver.
         Redshift decreases from accretion to observation, so the positive dm/dz law removes
         mass.
+
+        References
+        ----------
+
+        .. [cite-survival] Hayashi et al. (2003), The Structural Evolution of Substructure.
+            https://arxiv.org/abs/astro-ph/0203004
+
+        .. [cite-structure] Hiroshima, Ando & Ishiyama (2018), Modeling evolution of dark matter substructure and annihilation boost, Section II, Eqs. (5)-(9).
+            https://arxiv.org/abs/1803.07691
         """
         return evolved["c_t"] > self.ct_threshold
 

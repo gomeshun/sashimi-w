@@ -64,10 +64,14 @@ def test_callable_variance_adapter_preserves_standard_model() -> None:
 
 
 def test_variance_factories_default_to_q10_and_reject_old_models() -> None:
-    """Prevent either variance factory from silently accepting the retired q5 prescription.
+    r"""Prevent either variance factory from silently accepting the retired q5 prescription.
 
     Notes
     -----
+    Viel et al. give the thermal-relic amplitude T = [1+(alpha*k)**(2*nu)]**(-5/nu),
+    nu=1.12, and alpha=0.049*(m/keV)**(-1.11)*(Omega_WDM/0.25)**0.11*(h/0.7)**1.22 in Mpc/h.
+    Power uses T**2, hence exponent -10/nu; k is in h/Mpc.
+
     Pass criteria: Both factories identify q10 defaults and reject a supplied q5-like model.
 
     Failure criteria: a stated numerical/identity mismatch, a missing required exception or
@@ -75,20 +79,36 @@ def test_variance_factories_default_to_q10_and_reject_old_models() -> None:
 
     Scope: This controlled calculation does not calibrate a subhalo population against
     simulations or observations.
+
+    References
+    ----------
+
+    .. [cite-viel] Viel et al. (2005), Constraining warm dark matter candidates including sterile neutrinos and light gravitinos with WMAP and the Lyman-alpha forest, Eqs. (6)-(7).
+        https://arxiv.org/abs/astro-ph/0501562
     """
     assert "q=10" in make_variance_model().identifier
     assert "q=10" in make_integrated_variance_model().identifier
 
     class OldModel:
-        """Represent an explicitly retired q5 prescription so a variance factory must reject it.
+        r"""Represent an explicitly retired q5 prescription so a variance factory must reject it.
 
         Notes
         -----
+        Viel et al. give the thermal-relic amplitude T = [1+(alpha*k)**(2*nu)]**(-5/nu),
+        nu=1.12, and alpha=0.049*(m/keV)**(-1.11)*(Omega_WDM/0.25)**0.11*(h/0.7)**1.22 in Mpc/h.
+        Power uses T**2, hence exponent -10/nu; k is in h/Mpc.
+
         Prevent either variance factory from silently accepting the retired q5 prescription.
         Pass criteria: Both factories identify q10 defaults and reject a supplied q5-like model.
         Failure occurs when the stated comparison or expected rejection is not met. This
         controlled calculation does not calibrate a subhalo population against simulations or
         observations.
+
+        References
+        ----------
+
+        .. [cite-viel] Viel et al. (2005), Constraining warm dark matter candidates including sterile neutrinos and light gravitinos with WMAP and the Lyman-alpha forest, Eqs. (6)-(7).
+            https://arxiv.org/abs/astro-ph/0501562
         """
 
         wdm_power_convention = "published-q5"
@@ -120,10 +140,14 @@ def test_callable_adapter_uses_same_continuous_derivative() -> None:
 
 
 def test_integrated_sharp_k_path_is_sigma8_normalized_and_continuous() -> None:
-    """Resolve the sharp-k mass assignment independently of the sigma8 window.
+    r"""Resolve the sharp-k mass assignment independently of the sigma8 window.
 
     Notes
     -----
+    Viel et al. give the thermal-relic amplitude T = [1+(alpha*k)**(2*nu)]**(-5/nu),
+    nu=1.12, and alpha=0.049*(m/keV)**(-1.11)*(Omega_WDM/0.25)**0.11*(h/0.7)**1.22 in Mpc/h.
+    Power uses T**2, hence exponent -10/nu; k is in h/Mpc.
+
     QUADPACK integrates linearly interpolated q10 table power over each
     original k interval, up to 2.5/R_th for three physical halo masses.
     Pass at rtol=2e-11 against the shared Gauss integral, with consistent
@@ -136,13 +160,19 @@ def test_integrated_sharp_k_path_is_sigma8_normalized_and_continuous() -> None:
 
     Scope: This controlled calculation does not calibrate a subhalo population against
     simulations or observations.
+
+    References
+    ----------
+
+    .. [cite-viel] Viel et al. (2005), Constraining warm dark matter candidates including sterile neutrinos and light gravitinos with WMAP and the Lyman-alpha forest, Eqs. (6)-(7).
+        https://arxiv.org/abs/astro-ph/0501562
     """
     model = ItamaeSubhalos(mass_wdm=_fixture_mass_wdm(), wdm_power_convention=STANDARD_T2_Q10)
     variance = make_integrated_variance_model(model, n_k=1001)
     mass = np.geomspace(100000000.0, 100000000000000.0, 13)
     derivative = variance.dvariance_dmass(mass, 0.0)
     def integrand(logk):
-        """Return dimensionless q10 table power per logarithmic wavenumber.
+        r"""Return dimensionless q10 table power per logarithmic wavenumber.
 
         Parameters
         ----------
@@ -156,8 +186,18 @@ def test_integrated_sharp_k_path_is_sigma8_normalized_and_continuous() -> None:
 
         Notes
         -----
+        Viel et al. give the thermal-relic amplitude T = [1+(alpha*k)**(2*nu)]**(-5/nu),
+        nu=1.12, and alpha=0.049*(m/keV)**(-1.11)*(Omega_WDM/0.25)**0.11*(h/0.7)**1.22 in Mpc/h.
+        Power uses T**2, hence exponent -10/nu; k is in h/Mpc.
+
         Used only for the independent adaptive cutoff integral in this
         test. The enclosing test states the numerical pass/failure limits.
+
+        References
+        ----------
+
+        .. [cite-viel] Viel et al. (2005), Constraining warm dark matter candidates including sterile neutrinos and light gravitinos with WMAP and the Lyman-alpha forest, Eqs. (6)-(7).
+            https://arxiv.org/abs/astro-ph/0501562
         """
         k = np.exp(logk)
         ratio = (1 + (model.a * k)**(2 * 1.12))**(-10 / 1.12)
@@ -189,10 +229,14 @@ def test_integrated_sharp_k_path_is_sigma8_normalized_and_continuous() -> None:
 
 
 def test_standard_q10_integrated_variance_formula_and_identifier_are_pinned() -> None:
-    """Keep the current WDM prescription label and normalization identifiable.
+    r"""Keep the current WDM prescription label and normalization identifiable.
 
     Notes
     -----
+    Viel et al. give the thermal-relic amplitude T = [1+(alpha*k)**(2*nu)]**(-5/nu),
+    nu=1.12, and alpha=0.049*(m/keV)**(-1.11)*(Omega_WDM/0.25)**0.11*(h/0.7)**1.22 in Mpc/h.
+    Power uses T**2, hence exponent -10/nu; k is in h/Mpc.
+
     Pass criteria: Sharp-k sigma(M8) differs from top-hat sigma8 and both
     adapters identify the v3 q10/half-mode prescription. The 5 percent
     separation rejects the old forced sharp-k normalization; it is not an
@@ -203,6 +247,12 @@ def test_standard_q10_integrated_variance_formula_and_identifier_are_pinned() ->
 
     Scope: This controlled calculation does not calibrate a subhalo population against
     simulations or observations.
+
+    References
+    ----------
+
+    .. [cite-viel] Viel et al. (2005), Constraining warm dark matter candidates including sterile neutrinos and light gravitinos with WMAP and the Lyman-alpha forest, Eqs. (6)-(7).
+        https://arxiv.org/abs/astro-ph/0501562
     """
     model = ItamaeSubhalos(mass_wdm=_fixture_mass_wdm())
     integrated = make_integrated_variance_model(model, n_k=1001)
