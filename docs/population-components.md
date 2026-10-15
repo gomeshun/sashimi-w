@@ -1,5 +1,8 @@
 # WDM stages through the shared executor
 
+Update 2026-10-14: [shared ITAMAE Picard](shared-picard.md) is the default
+tidal solver. The odeint description below records the original migration.
+
 Update 2026-09-11: q10 is now the sole supported thermal-WDM product prescription.
 The q5 results below are historical; see [adoption](q10-adoption.md).
 

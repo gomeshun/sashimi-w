@@ -4,6 +4,7 @@ The shared population controller lives in the standard Subhalos API.
 """
 
 import numpy as np
+from ._power import sigma8_normalization
 from pathlib import Path
 from scipy import optimize
 from scipy import special
@@ -25,7 +26,9 @@ Msolar = 1.988435e33 * gram
 GeV = 1.7827e-24 * gram
 keV = 1e-06 * GeV
 " WMAP7 "
-filename_PS = Path(__file__).resolve().parent / "data" / "WMAP7_camb_matterpower_z0_extrapolated.dat"
+filename_PS = (
+    Path(__file__).resolve().parent / "data" / "WMAP7_camb_matterpower_z0_extrapolated.dat"
+)
 PowerSpectrum = np.genfromtxt(filename_PS, skip_header=5)
 Pk_file, k_file = (PowerSpectrum[:, 0], PowerSpectrum[:, 1])
 k_min = k_file.min() * 1.15
@@ -54,6 +57,31 @@ def _cumulative_above(values, weights, bins=10000):
     Bins select display thresholds only; totals and the strict cumulative counts
     are evaluated from the selected samples, so no first-bin count is lost.
     Empty selections retain a finite zero curve on NumPy's default [0, 1] grid.
+
+    Parameters
+    ----------
+    values : Mapping or array_like
+        Named physical fields or aligned numerical values supplied by the caller; each
+        population field must refer to the same nodes.
+    weights : Mapping or array_like
+        Explicit nonnegative statistical factors, or the quadrature weights stated by the
+        calling routine. They are not inferred from node spacing.
+    bins : int or array_like
+        Histogram bin count or edges in the selected column units, forwarded to
+        numpy.histogram.
+
+    Returns
+    -------
+    tuple
+        Total selected weight, histogram right-edge thresholds and exact strict weighted
+        counts N(value>x).
+
+    Notes
+    -----
+    The public WDM model uses the bundled WMAP7 spectrum and q10 thermal suppression.
+    Retained structure kernels use CGS mass/radius/density, while host histories and EPS use
+    numerical physical Msun. Each boundary is explicit; the fixed-gap EPS normalization
+    remains an approximation even though the WDM collapse barrier depends on mass.
     """
     values, weights = np.asarray(values), np.asarray(weights)
     thresholds = np.histogram_bin_edges(values, bins=bins)[1:]
@@ -65,14 +93,57 @@ def _cumulative_above(values, weights, bins=10000):
 
 
 def _normalized_eps_kernel(barrier_gap, variance_gap, minimum_variance_gap):
-    """Stable F/B for the retained fixed-gap EPS normalization.
+    r"""Stable F/B for the retained fixed-gap EPS normalization.
 
     At a zero barrier gap both numerator and erf normalization vanish; their
     ratio tends to sqrt(dsmin)/(2*ds**1.5). This is not a moving-barrier solver.
+
+    Parameters
+    ----------
+    barrier_gap : array_like
+        Nonnegative dimensionless collapse-barrier difference delta_a-delta_host in the
+        retained EPS approximation.
+    variance_gap : array_like
+        Strictly positive dimensionless S differences at the query or maximum allowed
+        accretion mass, evaluated without subtracting saturated variances.
+    minimum_variance_gap : array_like
+        Strictly positive dimensionless S differences at the query or maximum allowed
+        accretion mass, evaluated without subtracting saturated variances.
+
+    Returns
+    -------
+    numpy.ndarray
+        Finite-support-normalized EPS kernel on positive variance support, with broadcast
+        input shape.
+
+    Notes
+    -----
+    The EPS accretion kernel and, where used, host-history scatter 0.12-0.15*log10(Ma/M0)
+    follow Yang et al., Eqs. (12)-(14), (21). Finite-gap normalization and zero-barrier
+    limits are numerical treatments of that kernel, not new empirical fits.
+
+    The public WDM model uses the bundled WMAP7 spectrum and q10 thermal suppression.
+    Retained structure kernels use CGS mass/radius/density, while host histories and EPS use
+    numerical physical Msun. Each boundary is explicit; the fixed-gap EPS normalization
+    remains an approximation even though the WDM collapse barrier depends on mass.
+
+    Yang et al. Eqs. (8)-(9) specify support normalization, and Eqs. (12)-(14) give the
+    kernels. The incomplete-gamma evaluation and continuous zero-barrier-gap limit used
+    here are derived evaluations, not additional closed formulas printed in that paper.
+
+    References
+    ----------
+
+    .. [cite-yang] Yang et al. (2011), An Analytical Model for the Accretion of Dark Matter Subhalos, Eqs. (7)-(16), (21).
+        https://arxiv.org/abs/1104.1757
     """
     gap, ds, dsmin = np.broadcast_arrays(barrier_gap, variance_gap, minimum_variance_gap)
-    if (not all(np.all(np.isfinite(x)) for x in (gap, ds, dsmin))
-            or np.any(gap < 0) or np.any(ds <= 0) or np.any(dsmin <= 0)):
+    if (
+        not all(np.all(np.isfinite(x)) for x in (gap, ds, dsmin))
+        or np.any(gap < 0)
+        or np.any(ds <= 0)
+        or np.any(dsmin <= 0)
+    ):
         raise ValueError("WDM EPS requires nonnegative barrier and positive variance gaps.")
     ratio = gap / np.sqrt(2 * dsmin)
     values = np.empty_like(gap, dtype=float)
@@ -81,7 +152,9 @@ def _normalized_eps_kernel(barrier_gap, variance_gap, minimum_variance_gap):
     # Logarithms also protect the normalized zero/small-gap limit against
     # intermediate underflow in ds**1.5 on saturated WDM tails.
     values[small_gap] = np.exp(
-        0.5 * np.log(dsmin[small_gap]) - np.log(2.0) - 1.5 * np.log(ds[small_gap])
+        0.5 * np.log(dsmin[small_gap])
+        - np.log(2.0)
+        - 1.5 * np.log(ds[small_gap])
         - gap[small_gap] ** 2 / (2 * ds[small_gap])
         - np.log1p(-t / 3 + t * t / 10 - t * t * t / 42)
     )
@@ -92,8 +165,10 @@ def _normalized_eps_kernel(barrier_gap, variance_gap, minimum_variance_gap):
     active = exponent < 1e150
     ordinary = np.zeros(exponent.shape)
     ordinary[active] = np.exp(
-        np.log(gap[regular][active]) - 1.5 * np.log(ds[regular][active])
-        - 0.5 * np.log(2 * np.pi) - 0.5 * exponent[active] ** 2
+        np.log(gap[regular][active])
+        - 1.5 * np.log(ds[regular][active])
+        - 0.5 * np.log(2 * np.pi)
+        - 0.5 * exponent[active] ** 2
         - np.log(special.erf(ratio[regular][active]))
     )
     values[regular] = ordinary
@@ -103,7 +178,98 @@ def _normalized_eps_kernel(barrier_gap, variance_gap, minimum_variance_gap):
 
 
 class WDMPhysics:
+    r"""Retain WDM host, concentration, EPS and observable prescriptions with explicit unit
+    boundaries.
+
+    Parameters
+    ----------
+    mass_wdm : float
+        Positive thermal-relic WDM particle mass, numerical value in keV.
+
+    Notes
+    -----
+    Viel et al. give the thermal-relic amplitude T = [1+(alpha*k)**(2*nu)]**(-5/nu),
+    nu=1.12, and alpha=0.049*(m/keV)**(-1.11)*(Omega_WDM/0.25)**0.11*(h/0.7)**1.22 in Mpc/h.
+    Power uses T**2, hence exponent -10/nu; k is in h/Mpc.
+
+    The inherited module constant G=6.6742e-8 cm**3/g/s**2 matches CODATA 2002. Background
+    numbers come from the stored WMAP7-labelled CAMB-table header, associated with Komatsu
+    et al.; the paper citation alone does not recover the exact original CAMB settings.
+
+    The public WDM model uses the bundled WMAP7 spectrum and q10 thermal suppression.
+    Retained structure kernels use CGS mass/radius/density, while host histories and EPS use
+    numerical physical Msun. Each boundary is explicit; the fixed-gap EPS normalization
+    remains an approximation even though the WDM collapse barrier depends on mass.
+
+    The input header stores Omega_b=0.0469, Omega_m=0.27, h=0.7, n_s=0.95 and sigma8=0.82.
+    In particular Omega_b and n_s do not equal the Table 1 best-fit values in Komatsu et
+    al. The WMAP7 label supplies historical context; it does not establish that these five
+    inputs reproduce a published WMAP7 parameter column or recover the original CAMB
+    configuration.
+
+    References
+    ----------
+
+    .. [cite-viel] Viel et al. (2005), Constraining warm dark matter candidates including sterile neutrinos and light gravitinos with WMAP and the Lyman-alpha forest, Eqs. (6)-(7).
+        https://arxiv.org/abs/astro-ph/0501562
+
+    .. [cite-constants] Mohr & Taylor (2005), CODATA recommended values of the fundamental physical constants: 2002, Table XXVI.
+        https://physics.nist.gov/cuu/pdf/CODATA_RMP2005.pdf
+
+    .. [cite-wmap] Komatsu et al. (2011), Seven-Year Wilkinson Microwave Anisotropy Probe Observations: Cosmological Interpretation.
+        https://arxiv.org/abs/1001.4538
+    """
+
     def __init__(self, mass_wdm=1.5):
+        r"""Read the bundled WMAP7 normalization and prepare the thermal transfer/mass-assignment
+        scales.
+
+        Parameters
+        ----------
+        mass_wdm : float
+            Positive thermal-relic WDM particle mass, numerical value in keV.
+
+        Notes
+        -----
+        Viel et al. give the thermal-relic amplitude T = [1+(alpha*k)**(2*nu)]**(-5/nu),
+        nu=1.12, and alpha=0.049*(m/keV)**(-1.11)*(Omega_WDM/0.25)**0.11*(h/0.7)**1.22 in Mpc/h.
+        Power uses T**2, hence exponent -10/nu; k is in h/Mpc.
+
+        The sharp-k mass assignment M=(4*pi/3)*rho*(c*R)**3 with c=2.5 follows Schneider. This
+        calibrated mass mapping is distinct from the real-space top-hat radius used to define
+        sigma8.
+
+        The inherited module constant G=6.6742e-8 cm**3/g/s**2 matches CODATA 2002. Background
+        numbers come from the stored WMAP7-labelled CAMB-table header, associated with Komatsu
+        et al.; the paper citation alone does not recover the exact original CAMB settings.
+
+        The public WDM model uses the bundled WMAP7 spectrum and q10 thermal suppression.
+        Retained structure kernels use CGS mass/radius/density, while host histories and EPS use
+        numerical physical Msun. Each boundary is explicit; the fixed-gap EPS normalization
+        remains an approximation even though the WDM collapse barrier depends on mass.
+
+        The input header stores Omega_b=0.0469, Omega_m=0.27, h=0.7, n_s=0.95 and sigma8=0.82.
+        In particular Omega_b and n_s do not equal the Table 1 best-fit values in Komatsu et
+        al. The WMAP7 label supplies historical context; it does not establish that these five
+        inputs reproduce a published WMAP7 parameter column or recover the original CAMB
+        configuration.
+
+        References
+        ----------
+
+        .. [cite-viel] Viel et al. (2005), Constraining warm dark matter candidates including sterile neutrinos and light gravitinos with WMAP and the Lyman-alpha forest, Eqs. (6)-(7).
+            https://arxiv.org/abs/astro-ph/0501562
+
+        .. [cite-sharp] Schneider (2015), Structure formation with suppressed small-scale perturbations, Eqs. (10)-(12).
+            https://doi.org/10.1093/mnras/stv1169
+            Full text: https://arxiv.org/abs/1412.2133
+
+        .. [cite-constants] Mohr & Taylor (2005), CODATA recommended values of the fundamental physical constants: 2002, Table XXVI.
+            https://physics.nist.gov/cuu/pdf/CODATA_RMP2005.pdf
+
+        .. [cite-wmap] Komatsu et al. (2011), Seven-Year Wilkinson Microwave Anisotropy Probe Observations: Cosmological Interpretation.
+            https://arxiv.org/abs/1001.4538
+        """
         self.mass_wdm = mass_wdm
         self.G_units = G * (Msolar / Mpc) * (s**2 / km**2)
         self.Rhocrit_z = 3.0 / (8.0 * np.pi * self.G_units) * 10000.0
@@ -118,10 +284,102 @@ class WDMPhysics:
         self.MassIn8Mpc = 4 / 3 * np.pi * 8**3 * self.Rhomean_z
         self.a = 0.049 * (1 / self.mass_wdm) ** 1.11 * (OmegaC / 0.25) ** 0.11 * (h / 0.7) ** 1.22
 
+    def _power_normalization(self):
+        r"""Return the common top-hat sigma8 divisor for EPS and concentration.
+
+        Returns
+        -------
+        float
+            Positive amplitude divisor N for P_WDM/N**2, fixed by the
+            top-hat variance at R=8 Mpc/h and redshift zero.
+
+        Raises
+        ------
+        ValueError
+            If the configured suppression length, target or input spectrum
+            cannot define a positive finite top-hat variance.
+
+        Notes
+        -----
+        Viel et al. give the thermal-relic amplitude T = [1+(alpha*k)**(2*nu)]**(-5/nu),
+        nu=1.12, and alpha=0.049*(m/keV)**(-1.11)*(Omega_WDM/0.25)**0.11*(h/0.7)**1.22 in Mpc/h.
+        Power uses T**2, hence exponent -10/nu; k is in h/Mpc.
+
+        The bundled k and P table is immutable during a model calculation.
+        Cache by the thermal suppression length and target sigma8 so repeated
+        concentration evaluations do not reintegrate the same spectrum.
+        The divisor never depends on the halo's sharp-k smoothing radius.
+
+        References
+        ----------
+
+        .. [cite-viel] Viel et al. (2005), Constraining warm dark matter candidates including sterile neutrinos and light gravitinos with WMAP and the Lyman-alpha forest, Eqs. (6)-(7).
+            https://arxiv.org/abs/astro-ph/0501562
+        """
+        key = (float(self.a), float(sigma_8))
+        if getattr(self, "_normalization_key", None) != key:
+            self._normalization = sigma8_normalization(k_file, Pk_file, *key)
+            self._normalization_key = key
+        return self._normalization
+
     def TopHat(self, k, r):
+        """Evaluate the retained spherical top-hat Fourier window for the concentration
+        calculation.
+
+        Parameters
+        ----------
+        k : array_like
+            Wavenumber in h/Mpc for the bundled power table.
+        r : array_like
+            Top-hat smoothing radius in Mpc/h; k*r is dimensionless.
+
+        Returns
+        -------
+        array_like
+            Dimensionless 3*[sin(kr)/(kr)-cos(kr)]/(kr)**2. This historical expression does not
+            provide a separate k*r=0 series.
+
+        Notes
+        -----
+        The public WDM model uses the bundled WMAP7 spectrum and q10 thermal suppression.
+        Retained structure kernels use CGS mass/radius/density, while host histories and EPS use
+        numerical physical Msun. Each boundary is explicit; the fixed-gap EPS normalization
+        remains an approximation even though the WDM collapse barrier depends on mass.
+        """
         return 3.0 / (k * r) ** 2 * (np.sin(k * r) / (k * r) - np.cos(k * r))
 
     def SigmaIntegrand(self, k, r):
+        r"""Form the WDM top-hat variance integrand under the concentration prescription.
+
+        Parameters
+        ----------
+        k : array_like
+            Wavenumber in h/Mpc for the bundled power table.
+        r : array_like
+            Top-hat smoothing radius in Mpc/h; k*r is dimensionless.
+
+        Returns
+        -------
+        array_like
+            k**2*P_CDM(k)*T_WDM(k)**2*W_TH(k*r)**2, before dk/(2*pi**2).
+
+        Notes
+        -----
+        Viel et al. give the thermal-relic amplitude T = [1+(alpha*k)**(2*nu)]**(-5/nu),
+        nu=1.12, and alpha=0.049*(m/keV)**(-1.11)*(Omega_WDM/0.25)**0.11*(h/0.7)**1.22 in Mpc/h.
+        Power uses T**2, hence exponent -10/nu; k is in h/Mpc.
+
+        The public WDM model uses the bundled WMAP7 spectrum and q10 thermal suppression.
+        Retained structure kernels use CGS mass/radius/density, while host histories and EPS use
+        numerical physical Msun. Each boundary is explicit; the fixed-gap EPS normalization
+        remains an approximation even though the WDM collapse barrier depends on mass.
+
+        References
+        ----------
+
+        .. [cite-viel] Viel et al. (2005), Constraining warm dark matter candidates including sterile neutrinos and light gravitinos with WMAP and the Lyman-alpha forest, Eqs. (6)-(7).
+            https://arxiv.org/abs/astro-ph/0501562
+        """
         om_wdm = OmegaM - OmegaB
         a = 0.049 * (1 / self.mass_wdm) ** 1.11 * (om_wdm / 0.25) ** 0.11 * (h / 0.7) ** 1.22
         return k**2 * Pk_interp(k) * self.TopHat(k, r) ** 2 * self._wdm_power_ratio(k, alpha=a)
@@ -129,6 +387,30 @@ class WDMPhysics:
     " Integration function "
 
     def integratePk_th(self, kmin, kmax, r):
+        """Integrate the retained 500-node top-hat variance rule for concentration formation.
+
+        Parameters
+        ----------
+        kmin : float
+            Positive wavenumber integration bounds in the bundled spectrum convention h/Mpc.
+        kmax : float
+            Positive wavenumber integration bounds in the bundled spectrum convention h/Mpc.
+        r : array_like
+            Top-hat smoothing radius in Mpc/h; k*r is dimensionless.
+
+        Returns
+        -------
+        numpy.ndarray
+            Dimensionless unnormalized top-hat variance, one value per supplied smoothing
+            radius.
+
+        Notes
+        -----
+        The public WDM model uses the bundled WMAP7 spectrum and q10 thermal suppression.
+        Retained structure kernels use CGS mass/radius/density, while host histories and EPS use
+        numerical physical Msun. Each boundary is explicit; the fixed-gap EPS normalization
+        remains an approximation even though the WDM collapse barrier depends on mass.
+        """
         log_k_min_th = np.log10(kmin)
         log_k_max_th = np.log10(kmax)
         dlogk_th = (log_k_max_th - log_k_min_th) / (500 - 1)
@@ -146,16 +428,56 @@ class WDMPhysics:
         return sigma_sq_th
 
     def conc200(self, M, z):
+        r"""Solve the Ludlow formation condition using the common physical power amplitude.
+
+        Parameters
+        ----------
+        M : float or array_like
+            CGS input interpreted by the retained kernel as M/Msolar/h in the filter mass grid.
+            The public Subhalos.conc200 boundary supplies physical mass times h**2 to implement
+            M_filter=h*M_physical.
+        z : float or array_like
+            Dimensionless redshift. The cosmological background requires z > -1; population
+            nodes use nonnegative redshifts.
+
+        Returns
+        -------
+        float or numpy.ndarray
+            Dimensionless c200 from interpolation over the real formation trials.
+
+        Notes
+        -----
+        The formation model adopts C=650, f=0.02 and spherical barrier 1.686 from Ludlow et al.
+        The implementation evaluates NFW enclosed masses while the original calibration uses
+        Einasto profiles; retaining C is a model adaptation, not a recalibration. Trial counts
+        and root-search limits are numerical choices.
+
+        The sharp-k mass assignment M=(4*pi/3)*rho*(c*R)**3 with c=2.5 follows Schneider. This
+        calibrated mass mapping is distinct from the real-space top-hat radius used to define
+        sigma8.
+
+        The public WDM model uses the bundled WMAP7 spectrum and q10 thermal suppression.
+        Retained structure kernels use CGS mass/radius/density, while host histories and EPS use
+        numerical physical Msun. Each boundary is explicit; the fixed-gap EPS normalization
+        remains an approximation even though the WDM collapse barrier depends on mass.
+
+        References
+        ----------
+
+        .. [cite-formation] Ludlow et al. (2016), The mass-concentration-redshift relation of cold and warm dark matter haloes, Section 4.3, Eqs. (6)-(7).
+            https://arxiv.org/abs/1601.02624
+
+        .. [cite-sharp] Schneider (2015), Structure formation with suppressed small-scale perturbations, Eqs. (10)-(12).
+            https://doi.org/10.1093/mnras/stv1169
+            Full text: https://arxiv.org/abs/1412.2133
+        """
         M = M / Msolar / h
         redshiftvect = np.linspace(0, 7, 8)
         R_th = cbrt(self.filter_Mass / (4 / 3 * np.pi * self.Rhomean_z))
         Sigma_Sq_th = np.zeros(len(self.filter_Mass))
         Sigma_Sq_th = self.integratePk_th(k_min, k_max, R_th)
         Sigma_th = np.sqrt(Sigma_Sq_th)
-        sig_interp_th = interp1d(self.filter_Mass, Sigma_th)
-        MassIn8Mpc = 4 / 3 * np.pi * 8**3 * self.Rhomean_z
-        sig_8_th = sig_interp_th(MassIn8Mpc)
-        normalise_th = sig_8_th / sigma_8
+        normalise_th = self._power_normalization()
         Sigma_th /= normalise_th
         Sigma_Sq_th = Sigma_th**2
         " free model parameters, Ludlow et al. (2016) "
@@ -236,11 +558,46 @@ class WDMPhysics:
 
     @staticmethod
     def _real_formation_trials(concentration, density_ratio, redshift):
-        """Drop the same non-real trials before evaluating background growth.
+        r"""Drop the same non-real trials before evaluating background growth.
 
         The original fractional exponent is preserved. Trials with nonpositive
         radicand have no supported finite z > -1 and were already discarded as
         non-finite values by the final concentration interpolation.
+
+        Parameters
+        ----------
+        concentration : array_like
+            Positive dimensionless halo concentration aligned with the accretion nodes; its
+            radius definition (r200/r_s or rvir/r_s) must match the supplied mass and structural
+            prescription.
+        density_ratio : array_like
+            Dimensionless formation-density ratio associated with each trial concentration.
+        redshift : float or array_like
+            Dimensionless redshift. The cosmological background requires z > -1; population
+            nodes use nonnegative redshifts.
+
+        Returns
+        -------
+        tuple of numpy.ndarray
+            Concentrations, density ratios and formation redshifts for positive finite radicands
+            only.
+
+        Notes
+        -----
+        The density-to-formation-epoch relation follows Ludlow et al., Section 4.3. The retained
+        exponent 0.3333 approximates one third; removing non-real trials is a numerical-domain
+        restriction, not a fitted physical coefficient.
+
+        The public WDM model uses the bundled WMAP7 spectrum and q10 thermal suppression.
+        Retained structure kernels use CGS mass/radius/density, while host histories and EPS use
+        numerical physical Msun. Each boundary is explicit; the fixed-gap EPS normalization
+        remains an approximation even though the WDM collapse barrier depends on mass.
+
+        References
+        ----------
+
+        .. [cite-formation] Ludlow et al. (2016), The mass-concentration-redshift relation of cold and warm dark matter haloes, Section 4.3, Eqs. (6)-(7).
+            https://arxiv.org/abs/1601.02624
         """
         omega_lambda = 1.0 - OmegaM
         radicand = (
@@ -256,12 +613,91 @@ class WDMPhysics:
         return concentration[valid], density_ratio[valid], radicand[valid] ** 0.3333 - 1.0
 
     def fc(self, x):
+        r"""Evaluate the NFW enclosed-mass function for WDM profile normalization.
+
+        Parameters
+        ----------
+        x : array_like
+            Dimensionless NFW radius ratio r/r_s or concentration.
+
+        Returns
+        -------
+        array_like
+            ln(1+x)-x/(1+x), dimensionless.
+
+        Notes
+        -----
+        The enclosed-mass factor ln(1+c)-c/(1+c) follows the NFW density profile. Algebraic
+        inversion tolerances concern this profile identity, not agreement with simulated halos.
+
+        The public WDM model uses the bundled WMAP7 spectrum and q10 thermal suppression.
+        Retained structure kernels use CGS mass/radius/density, while host histories and EPS use
+        numerical physical Msun. Each boundary is explicit; the fixed-gap EPS normalization
+        remains an approximation even though the WDM collapse barrier depends on mass.
+
+        References
+        ----------
+
+        .. [cite-nfw] Navarro, Frenk & White (1997), A Universal Density Profile from Hierarchical Clustering.
+            https://arxiv.org/abs/astro-ph/9611107
+        """
         return np.log(1 + x) - x * pow(1 + x, -1)
 
     def rhocrit(self, z):
+        """Evaluate critical density in the retained WDM CGS structure convention.
+
+        Parameters
+        ----------
+        z : float or array_like
+            Dimensionless redshift. The cosmological background requires z > -1; population
+            nodes use nonnegative redshifts.
+
+        Returns
+        -------
+        array_like
+            3*H(z)**2/(8*pi*G), in g/cm^3.
+
+        Notes
+        -----
+        The public WDM model uses the bundled WMAP7 spectrum and q10 thermal suppression.
+        Retained structure kernels use CGS mass/radius/density, while host histories and EPS use
+        numerical physical Msun. Each boundary is explicit; the fixed-gap EPS normalization
+        remains an approximation even though the WDM collapse barrier depends on mass.
+        """
         return 3.0 * pow(self.Hz(z), 2) * pow(np.pi * 8.0 * G, -1)
 
     def Mvir_from_M200(self, M200, z):
+        r"""Solve the NFW overdensity conversion from M200 to virial mass in CGS units.
+
+        Parameters
+        ----------
+        M200 : float or array_like
+            Physical M200 in grams, using the retained CGS structure-kernel interface.
+        z : float or array_like
+            Dimensionless redshift. The cosmological background requires z > -1; population
+            nodes use nonnegative redshifts.
+
+        Returns
+        -------
+        numpy.ndarray
+            Virial mass in grams under the retained concentration prescription.
+
+        Notes
+        -----
+        The enclosed-mass factor ln(1+c)-c/(1+c) follows the NFW density profile. Algebraic
+        inversion tolerances concern this profile identity, not agreement with simulated halos.
+
+        The public WDM model uses the bundled WMAP7 spectrum and q10 thermal suppression.
+        Retained structure kernels use CGS mass/radius/density, while host histories and EPS use
+        numerical physical Msun. Each boundary is explicit; the fixed-gap EPS normalization
+        remains an approximation even though the WDM collapse barrier depends on mass.
+
+        References
+        ----------
+
+        .. [cite-nfw] Navarro, Frenk & White (1997), A Universal Density Profile from Hierarchical Clustering.
+            https://arxiv.org/abs/astro-ph/9611107
+        """
         gz = self.g(z)
         c200 = self.conc200(M200, z)
         r200 = (3.0 * M200 / (4 * np.pi * 200 * rhocrit0 * gz)) ** (1.0 / 3.0)
@@ -276,6 +712,38 @@ class WDMPhysics:
         return Mvir
 
     def Mvir_from_M200_fit(self, M200, z):
+        r"""Apply the retained fitted NFW virial-mass conversion in CGS units.
+
+        Parameters
+        ----------
+        M200 : float or array_like
+            Physical M200 in grams, using the retained CGS structure-kernel interface.
+        z : float or array_like
+            Dimensionless redshift. The cosmological background requires z > -1; population
+            nodes use nonnegative redshifts.
+
+        Returns
+        -------
+        array_like
+            Virial mass in grams.
+
+        Notes
+        -----
+        The inverse mass-conversion approximation, including coefficients 0.5116, -0.4283,
+        -3.13e-3 and -3.52e-5 where used, is Hu & Kravtsov, Appendix C. It is an approximate NFW
+        inversion, not the exact root-solved conversion.
+
+        The public WDM model uses the bundled WMAP7 spectrum and q10 thermal suppression.
+        Retained structure kernels use CGS mass/radius/density, while host histories and EPS use
+        numerical physical Msun. Each boundary is explicit; the fixed-gap EPS normalization
+        remains an approximation even though the WDM collapse barrier depends on mass.
+
+        References
+        ----------
+
+        .. [cite-conversion] Hu & Kravtsov (2003), Sample Variance Considerations for Cluster Surveys, Appendix C.
+            https://arxiv.org/abs/astro-ph/0203169
+        """
         a1 = 0.5116
         a2 = -0.4283
         a3 = -0.00313
@@ -283,9 +751,67 @@ class WDMPhysics:
         Oz = self.Omegaz(pOmega, z)
 
         def ffunc(x):
+            r"""Form the dimensionless NFW mean-density mapping in inverse concentration.
+
+            Parameters
+            ----------
+            x : array_like
+                Positive inverse NFW concentration.
+
+            Returns
+            -------
+            array_like
+                x**3*[ln(1+1/x)-1/(1+x)].
+
+            Notes
+            -----
+            The inverse mass-conversion approximation, including coefficients 0.5116, -0.4283,
+            -3.13e-3 and -3.52e-5 where used, is Hu & Kravtsov, Appendix C. It is an approximate NFW
+            inversion, not the exact root-solved conversion.
+
+            The public WDM model uses the bundled WMAP7 spectrum and q10 thermal suppression.
+            Retained structure kernels use CGS mass/radius/density, while host histories and EPS use
+            numerical physical Msun. Each boundary is explicit; the fixed-gap EPS normalization
+            remains an approximation even though the WDM collapse barrier depends on mass.
+
+            References
+            ----------
+
+            .. [cite-conversion] Hu & Kravtsov (2003), Sample Variance Considerations for Cluster Surveys, Appendix C.
+                https://arxiv.org/abs/astro-ph/0203169
+            """
             return np.power(x, 3.0) * (np.log(1.0 + 1.0 / x) - 1.0 / (1.0 + x))
 
         def xfunc(f):
+            r"""Invert the retained mean-density mapping with its fitted inverse-concentration relation.
+
+            Parameters
+            ----------
+            f : array_like
+                Positive dimensionless NFW mean-density mapping.
+
+            Returns
+            -------
+            array_like
+                Approximate inverse concentration associated with f.
+
+            Notes
+            -----
+            The inverse mass-conversion approximation, including coefficients 0.5116, -0.4283,
+            -3.13e-3 and -3.52e-5 where used, is Hu & Kravtsov, Appendix C. It is an approximate NFW
+            inversion, not the exact root-solved conversion.
+
+            The public WDM model uses the bundled WMAP7 spectrum and q10 thermal suppression.
+            Retained structure kernels use CGS mass/radius/density, while host histories and EPS use
+            numerical physical Msun. Each boundary is explicit; the fixed-gap EPS normalization
+            remains an approximation even though the WDM collapse barrier depends on mass.
+
+            References
+            ----------
+
+            .. [cite-conversion] Hu & Kravtsov (2003), Sample Variance Considerations for Cluster Surveys, Appendix C.
+                https://arxiv.org/abs/astro-ph/0203169
+            """
             p = a2 + a3 * np.log(f) + a4 * np.power(np.log(f), 2.0)
             return np.power(a1 * np.power(f, 2.0 * p) + (3.0 / 4.0) ** 2, -0.5) + 2.0 * f
 
@@ -301,9 +827,74 @@ class WDMPhysics:
         )
 
     def xi(self, M):
+        r"""Form the inverse numerical halo mass relative to 1e10/h solar masses.
+
+        Parameters
+        ----------
+        M : float or array_like
+            Physical halo mass in Msun for the EPS/linear-variance convention.
+
+        Returns
+        -------
+        array_like
+            (1e10/h)/M, dimensionless for M supplied in Msun.
+
+        Notes
+        -----
+        The coefficients 22.26, 1.53, 3.36 and exponents 0.292, 0.275, 0.198 are the variance
+        fit in Ludlow et al., Appendix C. Its argument uses M in solar masses divided by h.
+        Derivatives are analytic derivatives of this retained fit.
+
+        The public WDM model uses the bundled WMAP7 spectrum and q10 thermal suppression.
+        Retained structure kernels use CGS mass/radius/density, while host histories and EPS use
+        numerical physical Msun. Each boundary is explicit; the fixed-gap EPS normalization
+        remains an approximation even though the WDM collapse barrier depends on mass.
+
+        References
+        ----------
+
+        .. [cite-ludlow] Ludlow et al. (2016), The mass-concentration-redshift relation of cold and warm dark matter haloes, Eq. (3) and Appendix C, Eqs. (C8)-(C12).
+            https://arxiv.org/abs/1601.02624
+        """
         return pow(M * pow(10000000000.0 * pow(h, -1), -1), -1)
 
     def Mzi(self, M0, z):
+        r"""Evaluate the median WDM host M200 history anchored at z=0.
+
+        Parameters
+        ----------
+        M0 : float
+            Positive z=0 host M200 in physical Msun.
+        z : float or array_like
+            Dimensionless redshift. The cosmological background requires z > -1; population
+            nodes use nonnegative redshifts.
+
+        Returns
+        -------
+        array_like
+            Host M200(z) in physical Msun.
+
+        Notes
+        -----
+        The mass-history coefficients, including q = 4.137 / zf**0.9476 and the polynomial for
+        zf, follow Correa et al., Section 3. Their original calibration is retained while the
+        configured background is used; changing the background does not recalibrate the fit.
+
+        The public WDM model uses the bundled WMAP7 spectrum and q10 thermal suppression.
+        Retained structure kernels use CGS mass/radius/density, while host histories and EPS use
+        numerical physical Msun. Each boundary is explicit; the fixed-gap EPS normalization
+        remains an approximation even though the WDM collapse barrier depends on mass.
+
+        The variance in this history is integrated from the configured WDM spectrum. The
+        Ludlow Appendix C analytic CDM variance fit is not used by this routine; the
+        coefficient 1.686 is already present in Correa et al. Eq. (7).
+
+        References
+        ----------
+
+        .. [cite-correa] Correa et al. (2015), The accretion history of dark matter haloes - III. A physical model for the concentration-mass relation, Section 3 and Appendix B.
+            https://arxiv.org/abs/1502.00391
+        """
         a = 1.686 * np.sqrt(2.0 / np.pi) * self.dDdz(0) + 1.0
         zf = -0.0064 * pow(np.log10(M0), 2) + 0.0237 * np.log10(M0) + 1.8837
         q = 4.137 * pow(zf, -0.9476)
@@ -311,7 +902,42 @@ class WDMPhysics:
         return M0 * pow(1 + z, a * fM0) * np.exp(-fM0 * z)
 
     def _host_history_parameters(self, M0, zi):
-        """Prepare the WDM history coefficients for a fixed host and anchor."""
+        r"""Prepare the WDM history coefficients for a fixed host and anchor.
+
+        Parameters
+        ----------
+        M0 : float
+            Positive z=0 host M200 in physical Msun.
+        zi : float or array_like
+            Dimensionless redshift. The cosmological background requires z > -1; population
+            nodes use nonnegative redshifts.
+
+        Returns
+        -------
+        tuple
+            Reference-epoch M200, alpha and beta of M(z)=M(zi)*(1+z-zi)**alpha*exp[beta*(z-zi)].
+
+        Notes
+        -----
+        The mass-history coefficients, including q = 4.137 / zf**0.9476 and the polynomial for
+        zf, follow Correa et al., Section 3. Their original calibration is retained while the
+        configured background is used; changing the background does not recalibrate the fit.
+
+        The public WDM model uses the bundled WMAP7 spectrum and q10 thermal suppression.
+        Retained structure kernels use CGS mass/radius/density, while host histories and EPS use
+        numerical physical Msun. Each boundary is explicit; the fixed-gap EPS normalization
+        remains an approximation even though the WDM collapse barrier depends on mass.
+
+        The variance in this history is integrated from the configured WDM spectrum. The
+        Ludlow Appendix C analytic CDM variance fit is not used by this routine; the
+        coefficient 1.686 is already present in Correa et al. Eq. (7).
+
+        References
+        ----------
+
+        .. [cite-correa] Correa et al. (2015), The accretion history of dark matter haloes - III. A physical model for the concentration-mass relation, Section 3 and Appendix B.
+            https://arxiv.org/abs/1502.00391
+        """
         Mzi0 = self.Mzi(M0, zi)
         zf = -0.0064 * pow(np.log10(M0), 2) + 0.0237 * np.log10(M0) + 1.8837
         q = 4.137 * pow(zf, -0.9476)
@@ -324,17 +950,166 @@ class WDMPhysics:
 
     @staticmethod
     def _host_history_mass(parameters, z, zi):
-        """Evaluate prepared coefficients with the original arithmetic."""
+        r"""Evaluate prepared coefficients with the original arithmetic.
+
+        Parameters
+        ----------
+        parameters : Mapping or tuple
+            Explicit population settings or prepared host-history coefficients, as specified by
+            the owning routine.
+        z : float or array_like
+            Dimensionless redshift. The cosmological background requires z > -1; population
+            nodes use nonnegative redshifts.
+        zi : float or array_like
+            Dimensionless redshift. The cosmological background requires z > -1; population
+            nodes use nonnegative redshifts.
+
+        Returns
+        -------
+        array_like
+            Host M200(z) in physical Msun from the prepared coefficients.
+
+        Notes
+        -----
+        The mass-history coefficients, including q = 4.137 / zf**0.9476 and the polynomial for
+        zf, follow Correa et al., Section 3. Their original calibration is retained while the
+        configured background is used; changing the background does not recalibrate the fit.
+
+        The public WDM model uses the bundled WMAP7 spectrum and q10 thermal suppression.
+        Retained structure kernels use CGS mass/radius/density, while host histories and EPS use
+        numerical physical Msun. Each boundary is explicit; the fixed-gap EPS normalization
+        remains an approximation even though the WDM collapse barrier depends on mass.
+
+        The variance in this history is integrated from the configured WDM spectrum. The
+        Ludlow Appendix C analytic CDM variance fit is not used by this routine; the
+        coefficient 1.686 is already present in Correa et al. Eq. (7).
+
+        References
+        ----------
+
+        .. [cite-correa] Correa et al. (2015), The accretion history of dark matter haloes - III. A physical model for the concentration-mass relation, Section 3 and Appendix B.
+            https://arxiv.org/abs/1502.00391
+        """
         Mzi0, alpha, beta = parameters
         return Mzi0 * pow(1 + z - zi, alpha) * np.exp(beta * (z - zi))
 
     def Mzzi(self, M0, z, zi):
+        r"""Evaluate the re-anchored host history with its fixed reference-epoch coefficients.
+
+        Parameters
+        ----------
+        M0 : float
+            Positive z=0 host M200 in physical Msun.
+        z : float or array_like
+            Dimensionless redshift. The cosmological background requires z > -1; population
+            nodes use nonnegative redshifts.
+        zi : float or array_like
+            Dimensionless redshift. The cosmological background requires z > -1; population
+            nodes use nonnegative redshifts.
+
+        Returns
+        -------
+        array_like
+            Host M200(z) in physical Msun, anchored at zi.
+
+        Notes
+        -----
+        The mass-history coefficients, including q = 4.137 / zf**0.9476 and the polynomial for
+        zf, follow Correa et al., Section 3. Their original calibration is retained while the
+        configured background is used; changing the background does not recalibrate the fit.
+
+        The public WDM model uses the bundled WMAP7 spectrum and q10 thermal suppression.
+        Retained structure kernels use CGS mass/radius/density, while host histories and EPS use
+        numerical physical Msun. Each boundary is explicit; the fixed-gap EPS normalization
+        remains an approximation even though the WDM collapse barrier depends on mass.
+
+        The variance in this history is integrated from the configured WDM spectrum. The
+        Ludlow Appendix C analytic CDM variance fit is not used by this routine; the
+        coefficient 1.686 is already present in Correa et al. Eq. (7).
+
+        References
+        ----------
+
+        .. [cite-correa] Correa et al. (2015), The accretion history of dark matter haloes - III. A physical model for the concentration-mass relation, Section 3 and Appendix B.
+            https://arxiv.org/abs/1502.00391
+        """
         return self._host_history_mass(self._host_history_parameters(M0, zi), z, zi)
 
     def Delc(self, x):
+        r"""Evaluate the virial overdensity relative to critical density.
+
+        Parameters
+        ----------
+        x : array_like
+            Dimensionless Omega_m(z)-1.
+
+        Returns
+        -------
+        array_like
+            18*pi**2+82*x-39*x**2 with x=Omega_m(z)-1.
+
+        Notes
+        -----
+        The flat-universe expression 18*pi**2+82*x-39*x**2, x=Omega_m(z)-1, is Bryan & Norman,
+        Eq. (6); it defines overdensity relative to the critical density.
+
+        The public WDM model uses the bundled WMAP7 spectrum and q10 thermal suppression.
+        Retained structure kernels use CGS mass/radius/density, while host histories and EPS use
+        numerical physical Msun. Each boundary is explicit; the fixed-gap EPS normalization
+        remains an approximation even though the WDM collapse barrier depends on mass.
+
+        References
+        ----------
+
+        .. [cite-virial] Bryan & Norman (1998), Statistical Properties of X-ray Clusters: Analytic and Numerical Comparisons, Eq. (6).
+            https://arxiv.org/abs/astro-ph/9710107
+        """
         return 18 * pow(np.pi, 2) + 82.0 * x - 39 * pow(x, 2)
 
     def dMdz(self, M0, z, zi, sigmafac=0):
+        r"""Evaluate the retained virial host-growth factor in the WDM EPS approximation.
+
+        Parameters
+        ----------
+        M0 : float
+            Positive z=0 host M200 in physical Msun.
+        z : float or array_like
+            Dimensionless redshift. The cosmological background requires z > -1; population
+            nodes use nonnegative redshifts.
+        zi : float or array_like
+            Dimensionless redshift. The cosmological background requires z > -1; population
+            nodes use nonnegative redshifts.
+        sigmafac : float
+            Deterministic host-history offset in units of log-mass scatter when N_hermNa=1;
+            low-redshift scatter is anchored at exactly z=1.
+
+        Returns
+        -------
+        array_like
+            [beta+alpha/(1+z-zi)]*Mvir(z) in Msun per unit redshift; sigmafac is retained in the
+            signature but not used here.
+
+        Notes
+        -----
+        The mass-history coefficients, including q = 4.137 / zf**0.9476 and the polynomial for
+        zf, follow Correa et al., Section 3. Their original calibration is retained while the
+        configured background is used; changing the background does not recalibrate the fit.
+
+        The public WDM model uses the bundled WMAP7 spectrum and q10 thermal suppression.
+        Retained structure kernels use CGS mass/radius/density, while host histories and EPS use
+        numerical physical Msun. Each boundary is explicit; the fixed-gap EPS normalization
+        remains an approximation even though the WDM collapse barrier depends on mass.
+
+        The variance in this history is integrated from the configured WDM spectrum. The
+        Ludlow Appendix C analytic CDM variance fit is not used by this routine; the
+        coefficient 1.686 is already present in Correa et al. Eq. (7).
+
+        References
+        ----------
+
+        .. [cite-correa] Correa et al. (2015), The accretion history of dark matter haloes - III. A physical model for the concentration-mass relation, Section 3 and Appendix B.
+            https://arxiv.org/abs/1502.00391
+        """
         Mzi0 = self.Mzi(M0, zi)
         zf = -0.0064 * pow(np.log10(M0), 2) + 0.0237 * np.log10(M0) + 1.8837
         q = 4.137 * pow(zf, -0.9476)
@@ -348,7 +1123,41 @@ class WDMPhysics:
         return (beta + alpha * pow(1 + z - zi, -1)) * Mzzivir / Msolar
 
     def delc_Y11(self, M, z):
-        """Critical overdensity for collapse for WDM, Benson et al. (2012): Eq.7)"""
+        r"""Critical overdensity for collapse for WDM, Benson et al. (2012): Eq.7)
+
+        Parameters
+        ----------
+        M : float or array_like
+            Physical halo mass in Msun for the EPS/linear-variance convention.
+        z : float or array_like
+            Dimensionless redshift. The cosmological background requires z > -1; population
+            nodes use nonnegative redshifts.
+
+        Returns
+        -------
+        array_like
+            Dimensionless mass-dependent WDM collapse threshold, including the retained
+            small-mass correction.
+
+        Notes
+        -----
+        The coefficients 0.04, 2.3, 0.31687, 0.809, 2.4, 0.1, Jeans-mass normalization 3.06e8
+        solar masses, gX=1.5 and equality-redshift normalization 3600 follow Benson et al., Eqs.
+        (7)-(10). The retained implementation takes x=ln(M/MJ); the paper writes log(M/MJ)
+        without specifying its base there. This citation audit preserves that convention and
+        does not establish their equivalence.
+
+        The public WDM model uses the bundled WMAP7 spectrum and q10 thermal suppression.
+        Retained structure kernels use CGS mass/radius/density, while host histories and EPS use
+        numerical physical Msun. Each boundary is explicit; the fixed-gap EPS normalization
+        remains an approximation even though the WDM collapse barrier depends on mass.
+
+        References
+        ----------
+
+        .. [cite-benson] Benson et al. (2013), Dark Matter Halo Merger Histories Beyond Cold Dark Matter: I - Methods and Application to Warm Dark Matter, Eqs. (7)-(10).
+            https://arxiv.org/abs/1209.3018
+        """
         gx = 1.5
         z_eq = 3600 * (OmegaM * pow(h, 2) / 0.15) - 1
         Mj = (
@@ -369,10 +1178,68 @@ class WDMPhysics:
         return 1.686 / self.growthD(z) * correction
 
     def s_Y11(self, M):
+        """Evaluate the present-day linear variance for the WDM EPS prescription.
+
+        Parameters
+        ----------
+        M : float or array_like
+            Physical halo mass in Msun for the EPS/linear-variance convention.
+
+        Returns
+        -------
+        array_like
+            S(M)=sigma(M,0)**2, dimensionless.
+
+        Notes
+        -----
+        The public WDM model uses the bundled WMAP7 spectrum and q10 thermal suppression.
+        Retained structure kernels use CGS mass/radius/density, while host histories and EPS use
+        numerical physical Msun. Each boundary is explicit; the fixed-gap EPS normalization
+        remains an approximation even though the WDM collapse barrier depends on mass.
+        """
         return pow(self.sigmaMz(M, 0), 2)
 
     def Ffunc_Yang(self, delc1, delc2, sig1, sig2):
-        """Returns Eq. (14) of Yang et al. (2011)"""
+        r"""Evaluate the retained conditional EPS kernel before support normalization.
+
+        Parameters
+        ----------
+        delc1 : float or array_like
+            Dimensionless linear-collapse barrier at the indicated epoch, extrapolated in the
+            same growth convention.
+        delc2 : float or array_like
+            Dimensionless linear-collapse barrier at the indicated epoch, extrapolated in the
+            same growth convention.
+        sig1 : array_like
+            Linear variances S=sigma**2 in the Yang kernel despite the historical sig parameter
+            names.
+        sig2 : array_like
+            Linear variances S=sigma**2 in the Yang kernel despite the historical sig parameter
+            names.
+
+        Returns
+        -------
+        array_like
+            Gaussian first-crossing kernel in variance space; sig1 and sig2 denote S rather than
+            rms sigma.
+
+        Notes
+        -----
+        The EPS accretion kernel and, where used, host-history scatter 0.12-0.15*log10(Ma/M0)
+        follow Yang et al., Eqs. (12)-(14), (21). Finite-gap normalization and zero-barrier
+        limits are numerical treatments of that kernel, not new empirical fits.
+
+        The public WDM model uses the bundled WMAP7 spectrum and q10 thermal suppression.
+        Retained structure kernels use CGS mass/radius/density, while host histories and EPS use
+        numerical physical Msun. Each boundary is explicit; the fixed-gap EPS normalization
+        remains an approximation even though the WDM collapse barrier depends on mass.
+
+        References
+        ----------
+
+        .. [cite-yang] Yang et al. (2011), An Analytical Model for the Accretion of Dark Matter Subhalos, Eqs. (7)-(16), (21).
+            https://arxiv.org/abs/1104.1757
+        """
         return (
             pow(2 * np.pi, -0.5)
             * (delc2 - delc1)
@@ -381,11 +1248,58 @@ class WDMPhysics:
         )
 
     def Na_calc(self, ma, zacc, Mhost, z0=0, N_herm=200, Nrand=1000, sigmafac=0):
-        """Return the retained Yang EPS approximation on its active support.
+        r"""Return the retained Yang EPS approximation on its active support.
 
         The analytic normalization treats the barrier gap as fixed. Retaining
         the mass-dependent WDM collapse threshold does not make this an exact
         moving-barrier first-crossing solution.
+
+        Parameters
+        ----------
+        ma : float or array_like
+            Positive subhalo mass at accretion, in the same units as reference_mass; endpoint
+            queries broadcast over mass and redshift.
+        zacc : numpy.ndarray
+            One-dimensional dimensionless accretion-redshift grid, paired with the population
+            grid first axis.
+        Mhost : float
+            Reference host M200 in the variant internal mass unit. M0 normally refers to z=0;
+            explicit epoch flags are described by the caller.
+        z0 : float
+            Target or reference redshift specified by the routine; the tidal ODE evolves from za
+            down to this epoch.
+        N_herm : int
+            Positive Gauss-Hermite quadrature order for the scatter integrated by this routine:
+            concentration in catalogue stages or host history in Na_calc.
+        Nrand : int
+            Number of points in the deterministic auxiliary redshift inversion grid; despite its
+            name, this is not a Monte Carlo sample size.
+        sigmafac : float
+            Deterministic host-history offset in units of log-mass scatter when N_hermNa=1;
+            low-redshift scatter is anchored at exactly z=1.
+
+        Returns
+        -------
+        numpy.ndarray
+            Expected accretion count per d ln(ma) d ln(1+zacc), with the accretion-redshift axis
+            first.
+
+        Notes
+        -----
+        The EPS accretion kernel and, where used, host-history scatter 0.12-0.15*log10(Ma/M0)
+        follow Yang et al., Eqs. (12)-(14), (21). Finite-gap normalization and zero-barrier
+        limits are numerical treatments of that kernel, not new empirical fits.
+
+        Only ma<mmax enters the EPS kernel. Variance gaps are integrated directly over the
+        sharp-k interval to preserve small positive support near saturation. For N_herm=1 the
+        deterministic scatter law is anchored at exactly z=1; otherwise Gauss-Hermite averages
+        the host-history distribution.
+
+        References
+        ----------
+
+        .. [cite-yang] Yang et al. (2011), An Analytical Model for the Accretion of Dark Matter Subhalos, Eqs. (7)-(16), (21).
+            https://arxiv.org/abs/1104.1757
         """
         zacc_2d = np.asarray(zacc).reshape(-1, 1)
         M200_0 = self.Mzzi(Mhost, zacc_2d, z0)
@@ -446,11 +1360,81 @@ class WDMPhysics:
         N_hermNa=200,
         profile_change=True,
     ):
-        """Return dN/dm of current survivors using bound or accretion mass.
+        r"""Return dN/dm of current survivors using bound or accretion mass.
 
         Both displays apply tidal evolution and survival at the observation
         redshift. accretion=True changes the mass coordinate to ma200 only.
         Returned m is the logarithmic bin center in Msun.
+
+        Parameters
+        ----------
+        M0 : float
+            Positive z=0 host M200 in physical Msun.
+        accretion : bool
+            Display accretion rather than present bound mass while retaining survival at the
+            observation epoch.
+        redshift : float or array_like
+            Dimensionless redshift. The cosmological background requires z > -1; population
+            nodes use nonnegative redshifts.
+        dz : float
+            Positive nominal spacing of the accretion-redshift quadrature grid.
+        zmax : float
+            Largest requested accretion redshift, above the target epoch; the actual grid
+            convention belongs to this variant.
+        N_ma : int
+            Number of logarithmically spaced accretion-mass nodes.
+        sigmalogc : float
+            Nonnegative standard deviation of log10 concentration, in dex.
+        N_herm : int
+            Positive Gauss-Hermite quadrature order for the scatter integrated by this routine:
+            concentration in catalogue stages or host history in Na_calc.
+        logmamin : float, optional
+            Lower or upper log10(M200_acc/Msun) bound. A None upper bound uses the model
+            host-relative mass limit.
+        logmamax : float, optional
+            Lower or upper log10(M200_acc/Msun) bound. A None upper bound uses the model
+            host-relative mass limit.
+        sigmafac : float
+            Deterministic host-history offset in units of log-mass scatter when N_hermNa=1;
+            low-redshift scatter is anchored at exactly z=1.
+        N_hermNa : int
+            Positive Gauss-Hermite order for the host-history scatter in the EPS accretion rate.
+        profile_change : bool
+            Apply the variant tidal response of scale radius and density in addition to
+            bound-mass loss.
+
+        Returns
+        -------
+        tuple of numpy.ndarray
+            Mass-bin centers in Msun and dN/dm in inverse Msun for surviving nodes.
+
+        Notes
+        -----
+        The retained default scatter sigma(log10(c)) = 0.128 dex is the Ishiyama et al. Eq. (7),
+        Fig. 10 value for z=0 halos of 1e9 to 1e10 solar masses; Hiroshima et al. adopt the
+        rounded value 0.13 dex. Using one value across masses and redshifts is a model
+        assumption, not a quadrature error or a new calibration. The literature threshold rt/rs
+        > 0.77 follows the Hayashi et al. disruption prescription adopted by Hiroshima et al. A
+        caller-supplied threshold takes precedence in variants that expose it (C and SI
+        currently default to 0). This is a model selection rule; an exact-boundary test does not
+        calibrate disruption physics.
+
+        The public WDM model uses the bundled WMAP7 spectrum and q10 thermal suppression.
+        Retained structure kernels use CGS mass/radius/density, while host histories and EPS use
+        numerical physical Msun. Each boundary is explicit; the fixed-gap EPS normalization
+        remains an approximation even though the WDM collapse barrier depends on mass.
+
+        References
+        ----------
+
+        .. [cite-scatter] Ishiyama et al. (2013), The Cosmogrid Simulation: Statistical Properties of Small Dark Matter Halos, Eq. (7), Fig. 10.
+            https://arxiv.org/abs/1101.2020
+
+        .. [cite-structure] Hiroshima, Ando & Ishiyama (2018), Modeling evolution of dark matter substructure and annihilation boost, Section II, Eqs. (4)-(9), (28), (34).
+            https://arxiv.org/abs/1803.07691
+
+        .. [cite-survival] Hayashi et al. (2003), The Structural Evolution of Substructure, Section 2.1.
+            https://arxiv.org/abs/astro-ph/0203004
         """
         ma200, z_a, rs_a, rhos_a, m0, rs0, rhos0, ct0, weight, survive = self.rs_rhos_calc(
             M0,
@@ -493,11 +1477,84 @@ class WDMPhysics:
         N_hermNa=200,
         profile_change=True,
     ):
-        """Return survivor count and N(ma200 > x), with x in Msun.
+        r"""Return survivor count and N(ma200 > x), with x in Msun.
 
         Optional Mpeak selection is strict ma200 > Mpeak. x contains the
         10000 histogram right edges; cumulative counts are exact sample sums.
         The total counts all selected weights, including the first bin.
+
+        Parameters
+        ----------
+        M0 : float
+            Positive z=0 host M200 in physical Msun.
+        Mpeak : float, optional
+            Strict accretion-M200 satellite proxy threshold in physical Msun, used when
+            Mpeak_thres is true.
+        Mpeak_thres : bool
+            Apply the strict ma200 > Mpeak selection to already surviving nodes.
+        redshift : float or array_like
+            Dimensionless redshift. The cosmological background requires z > -1; population
+            nodes use nonnegative redshifts.
+        dz : float
+            Positive nominal spacing of the accretion-redshift quadrature grid.
+        zmax : float
+            Largest requested accretion redshift, above the target epoch; the actual grid
+            convention belongs to this variant.
+        N_ma : int
+            Number of logarithmically spaced accretion-mass nodes.
+        sigmalogc : float
+            Nonnegative standard deviation of log10 concentration, in dex.
+        N_herm : int
+            Positive Gauss-Hermite quadrature order for the scatter integrated by this routine:
+            concentration in catalogue stages or host history in Na_calc.
+        logmamin : float, optional
+            Lower or upper log10(M200_acc/Msun) bound. A None upper bound uses the model
+            host-relative mass limit.
+        logmamax : float, optional
+            Lower or upper log10(M200_acc/Msun) bound. A None upper bound uses the model
+            host-relative mass limit.
+        sigmafac : float
+            Deterministic host-history offset in units of log-mass scatter when N_hermNa=1;
+            low-redshift scatter is anchored at exactly z=1.
+        N_hermNa : int
+            Positive Gauss-Hermite order for the host-history scatter in the EPS accretion rate.
+        profile_change : bool
+            Apply the variant tidal response of scale radius and density in addition to
+            bound-mass loss.
+
+        Returns
+        -------
+        tuple
+            Total selected expected count, accretion-mass thresholds (Msun), and strict
+            complementary counts.
+
+        Notes
+        -----
+        The retained default scatter sigma(log10(c)) = 0.128 dex is the Ishiyama et al. Eq. (7),
+        Fig. 10 value for z=0 halos of 1e9 to 1e10 solar masses; Hiroshima et al. adopt the
+        rounded value 0.13 dex. Using one value across masses and redshifts is a model
+        assumption, not a quadrature error or a new calibration. The literature threshold rt/rs
+        > 0.77 follows the Hayashi et al. disruption prescription adopted by Hiroshima et al. A
+        caller-supplied threshold takes precedence in variants that expose it (C and SI
+        currently default to 0). This is a model selection rule; an exact-boundary test does not
+        calibrate disruption physics.
+
+        The public WDM model uses the bundled WMAP7 spectrum and q10 thermal suppression.
+        Retained structure kernels use CGS mass/radius/density, while host histories and EPS use
+        numerical physical Msun. Each boundary is explicit; the fixed-gap EPS normalization
+        remains an approximation even though the WDM collapse barrier depends on mass.
+
+        References
+        ----------
+
+        .. [cite-scatter] Ishiyama et al. (2013), The Cosmogrid Simulation: Statistical Properties of Small Dark Matter Halos, Eq. (7), Fig. 10.
+            https://arxiv.org/abs/1101.2020
+
+        .. [cite-structure] Hiroshima, Ando & Ishiyama (2018), Modeling evolution of dark matter substructure and annihilation boost, Section II, Eqs. (4)-(9), (28), (34).
+            https://arxiv.org/abs/1803.07691
+
+        .. [cite-survival] Hayashi et al. (2003), The Structural Evolution of Substructure, Section 2.1.
+            https://arxiv.org/abs/astro-ph/0203004
         """
         ma200, z_a, rs_a, rhos_a, m0, rs0, rhos0, ct0, weight, survive = self.rs_rhos_calc(
             M0,
@@ -535,11 +1592,91 @@ class WDMPhysics:
         N_hermNa=200,
         profile_change=True,
     ):
-        """Return survivor count and N(Vmax > x), with x in km/s.
+        r"""Return survivor count and N(Vmax > x), with x in km/s.
 
         The strict selection uses accretion Vpeak when Vpeak_thres=True,
         otherwise current Vmax. The curve always uses current Vmax and
         10000 histogram right-edge thresholds, with exact sample sums.
+
+        Parameters
+        ----------
+        M0 : float
+            Positive z=0 host M200 in physical Msun.
+        Vpeak_max : float
+            Strict satellite-proxy speed threshold in km/s.
+        Vpeak_thres : bool
+            Apply the speed threshold to Vpeak when true and current Vmax when false; the
+            displayed curve remains in current Vmax.
+        redshift : float or array_like
+            Dimensionless redshift. The cosmological background requires z > -1; population
+            nodes use nonnegative redshifts.
+        dz : float
+            Positive nominal spacing of the accretion-redshift quadrature grid.
+        zmax : float
+            Largest requested accretion redshift, above the target epoch; the actual grid
+            convention belongs to this variant.
+        N_ma : int
+            Number of logarithmically spaced accretion-mass nodes.
+        sigmalogc : float
+            Nonnegative standard deviation of log10 concentration, in dex.
+        N_herm : int
+            Positive Gauss-Hermite quadrature order for the scatter integrated by this routine:
+            concentration in catalogue stages or host history in Na_calc.
+        logmamin : float, optional
+            Lower or upper log10(M200_acc/Msun) bound. A None upper bound uses the model
+            host-relative mass limit.
+        logmamax : float, optional
+            Lower or upper log10(M200_acc/Msun) bound. A None upper bound uses the model
+            host-relative mass limit.
+        sigmafac : float
+            Deterministic host-history offset in units of log-mass scatter when N_hermNa=1;
+            low-redshift scatter is anchored at exactly z=1.
+        N_hermNa : int
+            Positive Gauss-Hermite order for the host-history scatter in the EPS accretion rate.
+        profile_change : bool
+            Apply the variant tidal response of scale radius and density in addition to
+            bound-mass loss.
+
+        Returns
+        -------
+        tuple
+            Total selected expected count, present Vmax thresholds (km/s), and strict
+            complementary counts.
+
+        Notes
+        -----
+        The NFW profile is from Navarro et al. The rounded factors rmax/rs = 2.163 (2.1626 where
+        explicitly used) and 4.625 are NFW maximum-circular-speed identities, as written in
+        Hiroshima et al., Eqs. (5)-(7), rather than independent empirical fits.
+
+        The retained default scatter sigma(log10(c)) = 0.128 dex is the Ishiyama et al. Eq. (7),
+        Fig. 10 value for z=0 halos of 1e9 to 1e10 solar masses; Hiroshima et al. adopt the
+        rounded value 0.13 dex. Using one value across masses and redshifts is a model
+        assumption, not a quadrature error or a new calibration. The literature threshold rt/rs
+        > 0.77 follows the Hayashi et al. disruption prescription adopted by Hiroshima et al. A
+        caller-supplied threshold takes precedence in variants that expose it (C and SI
+        currently default to 0). This is a model selection rule; an exact-boundary test does not
+        calibrate disruption physics.
+
+        The public WDM model uses the bundled WMAP7 spectrum and q10 thermal suppression.
+        Retained structure kernels use CGS mass/radius/density, while host histories and EPS use
+        numerical physical Msun. Each boundary is explicit; the fixed-gap EPS normalization
+        remains an approximation even though the WDM collapse barrier depends on mass.
+
+        References
+        ----------
+
+        .. [cite-nfw] Navarro, Frenk & White (1997), A Universal Density Profile from Hierarchical Clustering.
+            https://arxiv.org/abs/astro-ph/9611107
+
+        .. [cite-structure] Hiroshima, Ando & Ishiyama (2018), Modeling evolution of dark matter substructure and annihilation boost, Section II, Eqs. (4)-(9), (28), (34).
+            https://arxiv.org/abs/1803.07691
+
+        .. [cite-scatter] Ishiyama et al. (2013), The Cosmogrid Simulation: Statistical Properties of Small Dark Matter Halos, Eq. (7), Fig. 10.
+            https://arxiv.org/abs/1101.2020
+
+        .. [cite-survival] Hayashi et al. (2003), The Structural Evolution of Substructure, Section 2.1.
+            https://arxiv.org/abs/astro-ph/0203004
         """
         ma200, z_a, rs_a, rhos_a, m0, rs0, rhos0, ct0, weight, survive = self.rs_rhos_calc(
             M0,

@@ -1,0 +1,2737 @@
+{
+  "audit_started": "2026-10-14 UTC",
+  "audit_completed_at": "2026-10-14T15:03:15.536607+00:00",
+  "code_before_citation_edit": "8baf091948f8216cfad14998772e49053bd633b7",
+  "comparison_baseline": {
+    "kind": "author upstream/main",
+    "sha": "99dfc3632eec0126080c0273ddf78f84fe09216c"
+  },
+  "active_definitions_inventoried": 179,
+  "changed_docstrings": 63,
+  "changed_with_local_references": 63,
+  "local_test_cases_passed": 134,
+  "executable_ast_differences": [],
+  "reference_files_changed": [],
+  "method": "Source-qualified AST inventory including private/nested definitions, existing-attribution and direct-literal screening, followed by primary-paper equation/table matching. Generic numerical controls and fixed regressions are not treated as empirical calibration. Inventory counts alone do not prove scientific correctness.",
+  "limits": [
+    "Viel thermal power uses the square of the density transfer (q10). Schneider c=2.5 sharp-k mass assignment is distinct from the top-hat R=8 Mpc/h normalization. References are also attached to independent test formulas.",
+    "The Ludlow model uses C=650 and f=0.02. Its original profile calibration is Einasto-based; this code uses NFW enclosed masses and retains C. This is an adaptation, not a new calibration.",
+    "Dekker Appendix C prints rounded tidal coefficients, e.g. -0.31, while exact author upstream/main 99dfc3632eec0126080c0273ddf78f84fe09216c uses -0.313 and additional precision in zeta. Both sources are identified; the retained coefficients are unchanged.",
+    "Benson writes x=log(M/MJ) without an explicit base at that equation. The retained implementation uses natural log. This audit does not establish equality of those conventions; the ambiguity is documented in delc_Y11.",
+    "The WMAP7-labelled stored CAMB header is an input record. A Komatsu citation does not recover the exact undocumented original CAMB configuration."
+  ],
+  "references": {
+    "benson": [
+      "Benson et al. (2013), Dark Matter Halo Merger Histories Beyond Cold Dark Matter: I - Methods and Application to Warm Dark Matter, Eqs. (7)-(10).",
+      "https://arxiv.org/abs/1209.3018"
+    ],
+    "constants": [
+      "Mohr & Taylor (2005), CODATA recommended values of the fundamental physical constants: 2002, Table XXVI.",
+      "https://physics.nist.gov/cuu/pdf/CODATA_RMP2005.pdf"
+    ],
+    "conversion": [
+      "Hu & Kravtsov (2003), Sample Variance Considerations for Cluster Surveys, Appendix C.",
+      "https://arxiv.org/abs/astro-ph/0203169"
+    ],
+    "correa": [
+      "Correa et al. (2015), The accretion history of dark matter haloes - III. A physical model for the concentration-mass relation, Section 3 and Appendix B.",
+      "https://arxiv.org/abs/1502.00391"
+    ],
+    "formation": [
+      "Ludlow et al. (2016), The mass-concentration-redshift relation of cold and warm dark matter haloes, Section 4.3, Eqs. (6)-(7).",
+      "https://arxiv.org/abs/1601.02624"
+    ],
+    "growth": [
+      "Carroll, Press & Turner (1992), The Cosmological Constant, Section 3.5.",
+      "https://doi.org/10.1146/annurev.aa.30.090192.002435"
+    ],
+    "ludlow": [
+      "Ludlow et al. (2016), The mass-concentration-redshift relation of cold and warm dark matter haloes, Appendix C.",
+      "https://arxiv.org/abs/1601.02624"
+    ],
+    "nfw": [
+      "Navarro, Frenk & White (1997), A Universal Density Profile from Hierarchical Clustering.",
+      "https://arxiv.org/abs/astro-ph/9611107"
+    ],
+    "scatter": [
+      "Ishiyama et al. (2013), The Cosmogrid Simulation: Statistical Properties of Small Dark Matter Halos, Eq. (7), Fig. 10.",
+      "https://arxiv.org/abs/1101.2020"
+    ],
+    "sharp": [
+      "Schneider (2015), Structure formation with suppressed small-scale perturbations, Eqs. (10)-(12).",
+      "https://doi.org/10.1093/mnras/stv1169"
+    ],
+    "structure": [
+      "Hiroshima, Ando & Ishiyama (2018), Modeling evolution of dark matter substructure and annihilation boost, Section II, Eqs. (5)-(9).",
+      "https://arxiv.org/abs/1803.07691"
+    ],
+    "survival": [
+      "Hayashi et al. (2003), The Structural Evolution of Substructure.",
+      "https://arxiv.org/abs/astro-ph/0203004"
+    ],
+    "time": [
+      "Jiang & van den Bosch (2016), Statistics of Dark Matter Substructure: I. Model and Universal Fitting Functions, Eq. (2).",
+      "https://arxiv.org/abs/1403.6827"
+    ],
+    "tracks": [
+      "Penarrubia et al. (2010), The impact of dark matter cusps and cores on the satellite galaxy population around spiral galaxies, Eq. (8), Fig. 6.",
+      "https://arxiv.org/abs/1002.3376"
+    ],
+    "viel": [
+      "Viel et al. (2005), Constraining warm dark matter candidates including sterile neutrinos and light gravitinos with WMAP and the Lyman-alpha forest, Eqs. (6)-(7).",
+      "https://arxiv.org/abs/astro-ph/0501562"
+    ],
+    "virial": [
+      "Bryan & Norman (1998), Statistical Properties of X-ray Clusters: Analytic and Numerical Comparisons, Eq. (6).",
+      "https://arxiv.org/abs/astro-ph/9710107"
+    ],
+    "wmap": [
+      "Komatsu et al. (2011), Seven-Year Wilkinson Microwave Anisotropy Probe Observations: Cosmological Interpretation.",
+      "https://arxiv.org/abs/1001.4538"
+    ],
+    "wtidal": [
+      "Dekker et al. (2022), Warm dark matter constraints using Milky-Way satellite observations and subhalo evolution modeling, Appendix C.",
+      "https://arxiv.org/abs/2111.13137"
+    ],
+    "yang": [
+      "Yang et al. (2011), An Analytical Model for the Accretion of Dark Matter Subhalos, Eqs. (12)-(14), (21).",
+      "https://arxiv.org/abs/1104.1757"
+    ]
+  },
+  "definitions": [
+    {
+      "repo": "sashimi-w",
+      "file": "hatch_build.py",
+      "name": "_valid_revision",
+      "kind": "FunctionDef",
+      "line": 17,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "hatch_build.py",
+      "name": "CustomBuildHook",
+      "kind": "ClassDef",
+      "line": 42,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "hatch_build.py",
+      "name": "CustomBuildHook._revision_from_existing_artifact",
+      "kind": "FunctionDef",
+      "line": 54,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "hatch_build.py",
+      "name": "CustomBuildHook._revision_from_git_checkout",
+      "kind": "FunctionDef",
+      "line": 77,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "hatch_build.py",
+      "name": "CustomBuildHook._resolve_revision",
+      "kind": "FunctionDef",
+      "line": 112,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "hatch_build.py",
+      "name": "CustomBuildHook.initialize",
+      "kind": "FunctionDef",
+      "line": 148,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "hatch_build.py",
+      "name": "CustomBuildHook.finalize",
+      "kind": "FunctionDef",
+      "line": 175,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "scripts/validate_eps_backport.py",
+      "name": "cases",
+      "kind": "FunctionDef",
+      "line": 29,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "scatter",
+        "structure"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/1101.2020",
+        "https://arxiv.org/abs/1803.07691"
+      ]
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "scripts/validate_eps_backport.py",
+      "name": "snapshot",
+      "kind": "FunctionDef",
+      "line": 92,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "scripts/validate_eps_backport.py",
+      "name": "compare",
+      "kind": "FunctionDef",
+      "line": 151,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "scripts/validate_eps_backport.py",
+      "name": "main",
+      "kind": "FunctionDef",
+      "line": 192,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_components.py",
+      "name": "WDMHostHistory",
+      "kind": "ClassDef",
+      "line": 22,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_components.py",
+      "name": "WDMTidalMassLoss",
+      "kind": "ClassDef",
+      "line": 119,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "wtidal",
+        "time",
+        "virial"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/1403.6827",
+        "https://arxiv.org/abs/2111.13137",
+        "https://arxiv.org/abs/astro-ph/9710107"
+      ]
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_components.py",
+      "name": "WDMTidalSolver",
+      "kind": "ClassDef",
+      "line": 223,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "wtidal",
+        "time",
+        "virial"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/1403.6827",
+        "https://arxiv.org/abs/2111.13137",
+        "https://arxiv.org/abs/astro-ph/9710107"
+      ]
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_components.py",
+      "name": "WDMAccretionSlices",
+      "kind": "ClassDef",
+      "line": 506,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_components.py",
+      "name": "WDMInitialStructure",
+      "kind": "ClassDef",
+      "line": 597,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_components.py",
+      "name": "WDMProfileEvolution",
+      "kind": "ClassDef",
+      "line": 669,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_components.py",
+      "name": "WDMSurvival",
+      "kind": "ClassDef",
+      "line": 814,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "survival",
+        "structure"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/1803.07691",
+        "https://arxiv.org/abs/astro-ph/0203004"
+      ]
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_components.py",
+      "name": "WDMCatalogColumns",
+      "kind": "ClassDef",
+      "line": 895,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_components.py",
+      "name": "WDMCatalogColumns.build",
+      "kind": "FunctionDef",
+      "line": 906,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_components.py",
+      "name": "WDMSurvival.select",
+      "kind": "FunctionDef",
+      "line": 847,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "survival",
+        "structure"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/1803.07691",
+        "https://arxiv.org/abs/astro-ph/0203004"
+      ]
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_components.py",
+      "name": "WDMProfileEvolution.evolve",
+      "kind": "FunctionDef",
+      "line": 716,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "tracks",
+        "structure",
+        "nfw"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/1002.3376",
+        "https://arxiv.org/abs/1803.07691",
+        "https://arxiv.org/abs/astro-ph/9611107"
+      ]
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_components.py",
+      "name": "WDMInitialStructure.initialize",
+      "kind": "FunctionDef",
+      "line": 620,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "nfw",
+        "structure"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/1803.07691",
+        "https://arxiv.org/abs/astro-ph/9611107"
+      ]
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_components.py",
+      "name": "WDMAccretionSlices.build",
+      "kind": "FunctionDef",
+      "line": 546,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_components.py",
+      "name": "WDMTidalSolver.__init__",
+      "kind": "FunctionDef",
+      "line": 263,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "wtidal",
+        "time",
+        "virial"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/1403.6827",
+        "https://arxiv.org/abs/2111.13137",
+        "https://arxiv.org/abs/astro-ph/9710107"
+      ]
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_components.py",
+      "name": "WDMTidalSolver.state_key",
+      "kind": "FunctionDef",
+      "line": 310,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_components.py",
+      "name": "WDMTidalSolver.reference_mass",
+      "kind": "FunctionDef",
+      "line": 342,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_components.py",
+      "name": "WDMTidalSolver.exponent",
+      "kind": "FunctionDef",
+      "line": 373,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "wtidal",
+        "time",
+        "virial"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/1403.6827",
+        "https://arxiv.org/abs/2111.13137",
+        "https://arxiv.org/abs/astro-ph/9710107"
+      ]
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_components.py",
+      "name": "WDMTidalSolver.rate",
+      "kind": "FunctionDef",
+      "line": 414,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "wtidal",
+        "time",
+        "virial"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/1403.6827",
+        "https://arxiv.org/abs/2111.13137",
+        "https://arxiv.org/abs/astro-ph/9710107"
+      ]
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_components.py",
+      "name": "WDMTidalSolver.mass",
+      "kind": "FunctionDef",
+      "line": 465,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_components.py",
+      "name": "WDMTidalMassLoss.rhs",
+      "kind": "FunctionDef",
+      "line": 159,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "wtidal",
+        "time",
+        "virial"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/1403.6827",
+        "https://arxiv.org/abs/2111.13137",
+        "https://arxiv.org/abs/astro-ph/9710107"
+      ]
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_components.py",
+      "name": "WDMHostHistory.__post_init__",
+      "kind": "FunctionDef",
+      "line": 54,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_components.py",
+      "name": "WDMHostHistory.mass_virial",
+      "kind": "FunctionDef",
+      "line": 68,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "yang",
+        "correa"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/1104.1757",
+        "https://arxiv.org/abs/1502.00391"
+      ]
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_migration.py",
+      "name": "Subhalos",
+      "kind": "ClassDef",
+      "line": 24,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "viel"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/astro-ph/0501562"
+      ]
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_migration.py",
+      "name": "Subhalos.__init__",
+      "kind": "FunctionDef",
+      "line": 62,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "viel"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/astro-ph/0501562"
+      ]
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_migration.py",
+      "name": "Subhalos.wdm_power_convention",
+      "kind": "FunctionDef",
+      "line": 125,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_migration.py",
+      "name": "Subhalos.wdm_power_q",
+      "kind": "FunctionDef",
+      "line": 143,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_migration.py",
+      "name": "Subhalos.wdm_power_formula_role",
+      "kind": "FunctionDef",
+      "line": 161,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_migration.py",
+      "name": "Subhalos.half_mode_definition",
+      "kind": "FunctionDef",
+      "line": 179,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_migration.py",
+      "name": "Subhalos.half_mode_power_ratio",
+      "kind": "FunctionDef",
+      "line": 197,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_migration.py",
+      "name": "Subhalos.transfer_amplitude",
+      "kind": "FunctionDef",
+      "line": 214,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "viel"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/astro-ph/0501562"
+      ]
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_migration.py",
+      "name": "Subhalos.power_ratio",
+      "kind": "FunctionDef",
+      "line": 247,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "viel"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/astro-ph/0501562"
+      ]
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_migration.py",
+      "name": "Subhalos._wdm_power_ratio",
+      "kind": "FunctionDef",
+      "line": 282,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "viel"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/astro-ph/0501562"
+      ]
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_migration.py",
+      "name": "Subhalos.half_mode_wavenumber",
+      "kind": "FunctionDef",
+      "line": 320,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "viel"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/astro-ph/0501562"
+      ]
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_migration.py",
+      "name": "Subhalos._validate_cosmology",
+      "kind": "FunctionDef",
+      "line": 370,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_migration.py",
+      "name": "Subhalos.omega_lambda",
+      "kind": "FunctionDef",
+      "line": 398,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_migration.py",
+      "name": "Subhalos.g",
+      "kind": "FunctionDef",
+      "line": 415,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_migration.py",
+      "name": "Subhalos.Hz",
+      "kind": "FunctionDef",
+      "line": 439,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_migration.py",
+      "name": "Subhalos.Omegaz",
+      "kind": "FunctionDef",
+      "line": 465,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_migration.py",
+      "name": "Subhalos.growthD",
+      "kind": "FunctionDef",
+      "line": 492,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "growth"
+      ],
+      "paper_urls": [
+        "https://doi.org/10.1146/annurev.aa.30.090192.002435"
+      ]
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_migration.py",
+      "name": "Subhalos.dOdz",
+      "kind": "FunctionDef",
+      "line": 528,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_migration.py",
+      "name": "Subhalos.dDdz",
+      "kind": "FunctionDef",
+      "line": 553,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "growth"
+      ],
+      "paper_urls": [
+        "https://doi.org/10.1146/annurev.aa.30.090192.002435"
+      ]
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_migration.py",
+      "name": "Subhalos.variance_model",
+      "kind": "FunctionDef",
+      "line": 614,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_migration.py",
+      "name": "Subhalos._variance_gap",
+      "kind": "FunctionDef",
+      "line": 636,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_migration.py",
+      "name": "Subhalos.sigmaMz",
+      "kind": "FunctionDef",
+      "line": 664,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_migration.py",
+      "name": "Subhalos.dsdm",
+      "kind": "FunctionDef",
+      "line": 702,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_migration.py",
+      "name": "Subhalos.conc200",
+      "kind": "FunctionDef",
+      "line": 730,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "formation",
+        "sharp"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/1601.02624",
+        "https://doi.org/10.1093/mnras/stv1169"
+      ]
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_migration.py",
+      "name": "Subhalos.linear_growth_factor",
+      "kind": "FunctionDef",
+      "line": 777,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "growth"
+      ],
+      "paper_urls": [
+        "https://doi.org/10.1146/annurev.aa.30.090192.002435"
+      ]
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_migration.py",
+      "name": "Subhalos._to_canonical",
+      "kind": "FunctionDef",
+      "line": 827,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_migration.py",
+      "name": "Subhalos.rs_rhos_catalog_calc",
+      "kind": "FunctionDef",
+      "line": 866,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "scatter",
+        "structure",
+        "survival"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/1101.2020",
+        "https://arxiv.org/abs/1803.07691",
+        "https://arxiv.org/abs/astro-ph/0203004"
+      ]
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_migration.py",
+      "name": "Subhalos.rs_rhos_calc",
+      "kind": "FunctionDef",
+      "line": 965,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "scatter",
+        "structure",
+        "survival"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/1101.2020",
+        "https://arxiv.org/abs/1803.07691",
+        "https://arxiv.org/abs/astro-ph/0203004"
+      ]
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_migration.py",
+      "name": "Subhalos._execute_population",
+      "kind": "FunctionDef",
+      "line": 1024,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "scatter",
+        "structure",
+        "survival"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/1101.2020",
+        "https://arxiv.org/abs/1803.07691",
+        "https://arxiv.org/abs/astro-ph/0203004"
+      ]
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_migration.py",
+      "name": "Subhalos._validate_catalog_inputs",
+      "kind": "FunctionDef",
+      "line": 1143,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_migration.py",
+      "name": "Subhalos._invert_nfw_mass_fraction",
+      "kind": "FunctionDef",
+      "line": 1197,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_migration.py",
+      "name": "Subhalos.catalog_from_tuple",
+      "kind": "FunctionDef",
+      "line": 1221,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_migration.py",
+      "name": "Subhalos._catalog_metadata",
+      "kind": "FunctionDef",
+      "line": 1296,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_variance.py",
+      "name": "_resolve_model",
+      "kind": "FunctionDef",
+      "line": 28,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_variance.py",
+      "name": "make_variance_model",
+      "kind": "FunctionDef",
+      "line": 71,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "sharp"
+      ],
+      "paper_urls": [
+        "https://doi.org/10.1093/mnras/stv1169"
+      ]
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_variance.py",
+      "name": "make_integrated_variance_model",
+      "kind": "FunctionDef",
+      "line": 118,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "sharp"
+      ],
+      "paper_urls": [
+        "https://doi.org/10.1093/mnras/stv1169"
+      ]
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_variance.py",
+      "name": "_sharp_k_variance_gap",
+      "kind": "FunctionDef",
+      "line": 303,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_variance.py",
+      "name": "_sharp_k_variance_gap.integrate",
+      "kind": "FunctionDef",
+      "line": 358,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_variance.py",
+      "name": "_sharp_k_variance_gap.cutoff",
+      "kind": "FunctionDef",
+      "line": 395,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_variance.py",
+      "name": "make_integrated_variance_model.wdm_power_ratio",
+      "kind": "FunctionDef",
+      "line": 198,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "viel"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/astro-ph/0501562"
+      ]
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_variance.py",
+      "name": "make_integrated_variance_model.normalized_wdm_power_ratio",
+      "kind": "FunctionDef",
+      "line": 245,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "viel"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/astro-ph/0501562"
+      ]
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_physics.py",
+      "name": "_cumulative_above",
+      "kind": "FunctionDef",
+      "line": 54,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_physics.py",
+      "name": "_normalized_eps_kernel",
+      "kind": "FunctionDef",
+      "line": 95,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "yang"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/1104.1757"
+      ]
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_physics.py",
+      "name": "WDMPhysics",
+      "kind": "ClassDef",
+      "line": 176,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "viel",
+        "constants",
+        "wmap"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/1001.4538",
+        "https://arxiv.org/abs/astro-ph/0501562",
+        "https://physics.nist.gov/cuu/pdf/CODATA_RMP2005.pdf"
+      ]
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_physics.py",
+      "name": "WDMPhysics.__init__",
+      "kind": "FunctionDef",
+      "line": 213,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "viel",
+        "sharp",
+        "constants",
+        "wmap"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/1001.4538",
+        "https://arxiv.org/abs/astro-ph/0501562",
+        "https://doi.org/10.1093/mnras/stv1169",
+        "https://physics.nist.gov/cuu/pdf/CODATA_RMP2005.pdf"
+      ]
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_physics.py",
+      "name": "WDMPhysics._power_normalization",
+      "kind": "FunctionDef",
+      "line": 270,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "viel"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/astro-ph/0501562"
+      ]
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_physics.py",
+      "name": "WDMPhysics.TopHat",
+      "kind": "FunctionDef",
+      "line": 308,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_physics.py",
+      "name": "WDMPhysics.SigmaIntegrand",
+      "kind": "FunctionDef",
+      "line": 334,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "viel"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/astro-ph/0501562"
+      ]
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_physics.py",
+      "name": "WDMPhysics.integratePk_th",
+      "kind": "FunctionDef",
+      "line": 372,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_physics.py",
+      "name": "WDMPhysics.conc200",
+      "kind": "FunctionDef",
+      "line": 413,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "formation",
+        "sharp"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/1601.02624",
+        "https://doi.org/10.1093/mnras/stv1169"
+      ]
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_physics.py",
+      "name": "WDMPhysics._real_formation_trials",
+      "kind": "FunctionDef",
+      "line": 542,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "formation"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/1601.02624"
+      ]
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_physics.py",
+      "name": "WDMPhysics.fc",
+      "kind": "FunctionDef",
+      "line": 597,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "nfw"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/astro-ph/9611107"
+      ]
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_physics.py",
+      "name": "WDMPhysics.rhocrit",
+      "kind": "FunctionDef",
+      "line": 628,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_physics.py",
+      "name": "WDMPhysics.Mvir_from_M200",
+      "kind": "FunctionDef",
+      "line": 651,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "nfw"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/astro-ph/9611107"
+      ]
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_physics.py",
+      "name": "WDMPhysics.Mvir_from_M200_fit",
+      "kind": "FunctionDef",
+      "line": 696,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "conversion"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/astro-ph/0203169"
+      ]
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_physics.py",
+      "name": "WDMPhysics.xi",
+      "kind": "FunctionDef",
+      "line": 811,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "ludlow"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/1601.02624"
+      ]
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_physics.py",
+      "name": "WDMPhysics.Mzi",
+      "kind": "FunctionDef",
+      "line": 843,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "correa",
+        "ludlow"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/1502.00391",
+        "https://arxiv.org/abs/1601.02624"
+      ]
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_physics.py",
+      "name": "WDMPhysics._host_history_parameters",
+      "kind": "FunctionDef",
+      "line": 885,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "correa",
+        "ludlow"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/1502.00391",
+        "https://arxiv.org/abs/1601.02624"
+      ]
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_physics.py",
+      "name": "WDMPhysics._host_history_mass",
+      "kind": "FunctionDef",
+      "line": 932,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "correa",
+        "ludlow"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/1502.00391",
+        "https://arxiv.org/abs/1601.02624"
+      ]
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_physics.py",
+      "name": "WDMPhysics.Mzzi",
+      "kind": "FunctionDef",
+      "line": 975,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "correa",
+        "ludlow"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/1502.00391",
+        "https://arxiv.org/abs/1601.02624"
+      ]
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_physics.py",
+      "name": "WDMPhysics.Delc",
+      "kind": "FunctionDef",
+      "line": 1016,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "virial"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/astro-ph/9710107"
+      ]
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_physics.py",
+      "name": "WDMPhysics.dMdz",
+      "kind": "FunctionDef",
+      "line": 1047,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "correa",
+        "ludlow"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/1502.00391",
+        "https://arxiv.org/abs/1601.02624"
+      ]
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_physics.py",
+      "name": "WDMPhysics.delc_Y11",
+      "kind": "FunctionDef",
+      "line": 1102,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "benson"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/1209.3018"
+      ]
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_physics.py",
+      "name": "WDMPhysics.s_Y11",
+      "kind": "FunctionDef",
+      "line": 1157,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_physics.py",
+      "name": "WDMPhysics.Ffunc_Yang",
+      "kind": "FunctionDef",
+      "line": 1179,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "yang"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/1104.1757"
+      ]
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_physics.py",
+      "name": "WDMPhysics.Na_calc",
+      "kind": "FunctionDef",
+      "line": 1227,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "yang"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/1104.1757"
+      ]
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_physics.py",
+      "name": "WDMPhysics.subhalo_distr",
+      "kind": "FunctionDef",
+      "line": 1324,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "scatter",
+        "structure",
+        "survival"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/1101.2020",
+        "https://arxiv.org/abs/1803.07691",
+        "https://arxiv.org/abs/astro-ph/0203004"
+      ]
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_physics.py",
+      "name": "WDMPhysics.N_sat",
+      "kind": "FunctionDef",
+      "line": 1440,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "scatter",
+        "structure",
+        "survival"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/1101.2020",
+        "https://arxiv.org/abs/1803.07691",
+        "https://arxiv.org/abs/astro-ph/0203004"
+      ]
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_physics.py",
+      "name": "WDMPhysics.N_sat_Vthres",
+      "kind": "FunctionDef",
+      "line": 1555,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "nfw",
+        "structure",
+        "scatter",
+        "survival"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/1101.2020",
+        "https://arxiv.org/abs/1803.07691",
+        "https://arxiv.org/abs/astro-ph/0203004",
+        "https://arxiv.org/abs/astro-ph/9611107"
+      ]
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_physics.py",
+      "name": "WDMPhysics.Mvir_from_M200_fit.ffunc",
+      "kind": "FunctionDef",
+      "line": 735,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "conversion"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/astro-ph/0203169"
+      ]
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_physics.py",
+      "name": "WDMPhysics.Mvir_from_M200_fit.xfunc",
+      "kind": "FunctionDef",
+      "line": 767,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "conversion"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/astro-ph/0203169"
+      ]
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_power.py",
+      "name": "top_hat_window",
+      "kind": "FunctionDef",
+      "line": 15,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_power.py",
+      "name": "sigma8_normalization",
+      "kind": "FunctionDef",
+      "line": 42,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "viel"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/astro-ph/0501562"
+      ]
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/reference-generation/ablation.py",
+      "name": "diagnostic_cutoff",
+      "kind": "FunctionDef",
+      "line": 18,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/reference-generation/ablation.py",
+      "name": "main",
+      "kind": "FunctionDef",
+      "line": 42,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/reference-generation/historical-controller/reference_worker.py",
+      "name": "main",
+      "kind": "FunctionDef",
+      "line": 24,
+      "archived": true,
+      "outcome": "immutable_historical_evidence",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/reference-generation/historical-controller/run_reference.py",
+      "name": "sha256",
+      "kind": "FunctionDef",
+      "line": 22,
+      "archived": true,
+      "outcome": "immutable_historical_evidence",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/reference-generation/historical-controller/run_reference.py",
+      "name": "run",
+      "kind": "FunctionDef",
+      "line": 26,
+      "archived": true,
+      "outcome": "immutable_historical_evidence",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/reference-generation/historical-controller/run_reference.py",
+      "name": "main",
+      "kind": "FunctionDef",
+      "line": 98,
+      "archived": true,
+      "outcome": "immutable_historical_evidence",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_build_source_identity.py",
+      "name": "hook",
+      "kind": "FunctionDef",
+      "line": 22,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_build_source_identity.py",
+      "name": "git",
+      "kind": "FunctionDef",
+      "line": 45,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_build_source_identity.py",
+      "name": "repository",
+      "kind": "FunctionDef",
+      "line": 72,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_build_source_identity.py",
+      "name": "archive",
+      "kind": "FunctionDef",
+      "line": 113,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_build_source_identity.py",
+      "name": "test_archive_in_unrelated_repository_keeps_embedded_revision",
+      "kind": "FunctionDef",
+      "line": 140,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_build_source_identity.py",
+      "name": "test_unidentified_export_rejects_enclosing_repository",
+      "kind": "FunctionDef",
+      "line": 164,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_build_source_identity.py",
+      "name": "test_exact_source_checkout_uses_own_revision",
+      "kind": "FunctionDef",
+      "line": 190,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_build_source_identity.py",
+      "name": "test_archive_rejects_conflicting_explicit_revision",
+      "kind": "FunctionDef",
+      "line": 212,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_build_source_identity.py",
+      "name": "test_exact_checkout_rejects_conflicting_explicit_revision",
+      "kind": "FunctionDef",
+      "line": 241,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_build_source_identity.py",
+      "name": "test_malformed_explicit_revision_does_not_silently_fall_back",
+      "kind": "FunctionDef",
+      "line": 269,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_build_source_identity.py",
+      "name": "test_matching_explicit_archive_revision_is_allowed",
+      "kind": "FunctionDef",
+      "line": 297,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_concentration_domain.py",
+      "name": "test_nonreal_formation_trials_are_removed_before_growth",
+      "kind": "FunctionDef",
+      "line": 9,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_concentration_domain.py",
+      "name": "test_concentration_scalar_and_matrix_use_valid_background_inputs",
+      "kind": "FunctionDef",
+      "line": 33,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_eps_stability.py",
+      "name": "model",
+      "kind": "FunctionDef",
+      "line": 12,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_eps_stability.py",
+      "name": "test_kernel_matches_independent_normalization_integral",
+      "kind": "FunctionDef",
+      "line": 29,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_eps_stability.py",
+      "name": "test_fixed_gap_kernel_integrates_to_one",
+      "kind": "FunctionDef",
+      "line": 58,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_eps_stability.py",
+      "name": "test_zero_limit_on_tiny_variance_gap_and_unrepresentable_exponent",
+      "kind": "FunctionDef",
+      "line": 88,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_eps_stability.py",
+      "name": "test_active_domain_errors_are_explicit",
+      "kind": "FunctionDef",
+      "line": 109,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_eps_stability.py",
+      "name": "independent_gap",
+      "kind": "FunctionDef",
+      "line": 138,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_eps_stability.py",
+      "name": "test_variance_gap_matches_independent_interval_integral",
+      "kind": "FunctionDef",
+      "line": 219,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_eps_stability.py",
+      "name": "test_saturated_tail_preserves_positive_gap_and_ordering",
+      "kind": "FunctionDef",
+      "line": 250,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_eps_stability.py",
+      "name": "test_eps_shapes_support_and_finite_low_mass_tails",
+      "kind": "FunctionDef",
+      "line": 285,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_eps_stability.py",
+      "name": "test_deterministic_rows_do_not_depend_on_redshift_grid",
+      "kind": "FunctionDef",
+      "line": 320,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_eps_stability.py",
+      "name": "test_exact_z1_deterministic_scatter_anchor",
+      "kind": "FunctionDef",
+      "line": 349,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_eps_stability.py",
+      "name": "test_active_zero_gap_is_not_silently_erased",
+      "kind": "FunctionDef",
+      "line": 419,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_eps_stability.py",
+      "name": "test_catalog_records_numerical_backport",
+      "kind": "FunctionDef",
+      "line": 451,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_eps_stability.py",
+      "name": "test_wholly_suppressed_catalog_preserves_zero_population",
+      "kind": "FunctionDef",
+      "line": 475,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_eps_stability.py",
+      "name": "test_invalid_population_normalization_raises",
+      "kind": "FunctionDef",
+      "line": 506,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_eps_stability.py",
+      "name": "test_exact_z1_deterministic_scatter_anchor.spy",
+      "kind": "FunctionDef",
+      "line": 374,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_eps_stability.py",
+      "name": "independent_gap.cutoff",
+      "kind": "FunctionDef",
+      "line": 165,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_eps_stability.py",
+      "name": "independent_gap.integrand",
+      "kind": "FunctionDef",
+      "line": 191,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_itamae_migration.py",
+      "name": "population",
+      "kind": "FunctionDef",
+      "line": 28,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_itamae_migration.py",
+      "name": "test_standard_import_and_removed_mode",
+      "kind": "FunctionDef",
+      "line": 49,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_itamae_migration.py",
+      "name": "test_frozen_records_keep_original_mode_and_source_identity",
+      "kind": "FunctionDef",
+      "line": 70,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_itamae_migration.py",
+      "name": "test_full_catalog_matches_independent_reference",
+      "kind": "FunctionDef",
+      "line": 93,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "survival",
+        "structure"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/1803.07691",
+        "https://arxiv.org/abs/astro-ph/0203004"
+      ]
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_itamae_migration.py",
+      "name": "test_calculation_metadata_and_serialization",
+      "kind": "FunctionDef",
+      "line": 166,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_itamae_migration.py",
+      "name": "test_tuple_is_only_a_format_conversion",
+      "kind": "FunctionDef",
+      "line": 219,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_itamae_migration.py",
+      "name": "test_native_astropy_tuple_units",
+      "kind": "FunctionDef",
+      "line": 255,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_itamae_migration.py",
+      "name": "test_growth_derivative_and_physical_mass_boundary",
+      "kind": "FunctionDef",
+      "line": 292,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_itamae_migration.py",
+      "name": "test_constructor_errors",
+      "kind": "FunctionDef",
+      "line": 329,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_itamae_migration.py",
+      "name": "test_catalog_rejects_invalid_inputs_before_work",
+      "kind": "FunctionDef",
+      "line": 371,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_itamae_migration.py",
+      "name": "test_catalog_rejects_invalid_inputs_before_work.forbidden",
+      "kind": "FunctionDef",
+      "line": 395,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_itamae_variance.py",
+      "name": "_fixture_mass_wdm",
+      "kind": "FunctionDef",
+      "line": 17,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_itamae_variance.py",
+      "name": "test_callable_variance_adapter_preserves_standard_model",
+      "kind": "FunctionDef",
+      "line": 34,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_itamae_variance.py",
+      "name": "test_variance_factories_default_to_q10_and_reject_old_models",
+      "kind": "FunctionDef",
+      "line": 66,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "viel"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/astro-ph/0501562"
+      ]
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_itamae_variance.py",
+      "name": "test_callable_adapter_uses_same_continuous_derivative",
+      "kind": "FunctionDef",
+      "line": 122,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_itamae_variance.py",
+      "name": "test_integrated_sharp_k_path_is_sigma8_normalized_and_continuous",
+      "kind": "FunctionDef",
+      "line": 142,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "viel"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/astro-ph/0501562"
+      ]
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_itamae_variance.py",
+      "name": "test_standard_q10_integrated_variance_formula_and_identifier_are_pinned",
+      "kind": "FunctionDef",
+      "line": 231,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "viel"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/astro-ph/0501562"
+      ]
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_itamae_variance.py",
+      "name": "test_variance_and_derivative_use_one_continuous_integral",
+      "kind": "FunctionDef",
+      "line": 269,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_itamae_variance.py",
+      "name": "test_lighter_wdm_has_more_small_scale_power_suppression",
+      "kind": "FunctionDef",
+      "line": 301,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_itamae_variance.py",
+      "name": "test_variance_cache_binds_wdm_particle_mass_and_round_trips",
+      "kind": "FunctionDef",
+      "line": 327,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_itamae_variance.py",
+      "name": "test_integrated_power_is_a_snapshot_of_constructor_parameters",
+      "kind": "FunctionDef",
+      "line": 397,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_itamae_variance.py",
+      "name": "test_integrated_sharp_k_path_is_sigma8_normalized_and_continuous.integrand",
+      "kind": "FunctionDef",
+      "line": 174,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "viel"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/astro-ph/0501562"
+      ]
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_itamae_variance.py",
+      "name": "test_variance_factories_default_to_q10_and_reject_old_models.OldModel",
+      "kind": "ClassDef",
+      "line": 92,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "viel"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/astro-ph/0501562"
+      ]
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_population_components.py",
+      "name": "test_canonical_transport_matches_half_mass_solution_and_chunking",
+      "kind": "FunctionDef",
+      "line": 18,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_power_prescription.py",
+      "name": "test_top_hat_zero_and_bessel_reference",
+      "kind": "FunctionDef",
+      "line": 12,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_power_prescription.py",
+      "name": "test_eps_power_has_independent_top_hat_sigma8",
+      "kind": "FunctionDef",
+      "line": 30,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_power_prescription.py",
+      "name": "test_invalid_normalization_cannot_create_a_physical_spectrum",
+      "kind": "FunctionDef",
+      "line": 65,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_q10_policy.py",
+      "name": "test_retired_q5_is_rejected_instead_of_reinterpreted",
+      "kind": "FunctionDef",
+      "line": 11,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_q10_policy.py",
+      "name": "test_public_default_is_q10_and_old_constant_is_removed",
+      "kind": "FunctionDef",
+      "line": 34,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "viel"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/astro-ph/0501562"
+      ]
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_q10_policy.py",
+      "name": "test_transfer_and_power_are_distinct_and_both_half_modes_are_explicit",
+      "kind": "FunctionDef",
+      "line": 67,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_q10_policy.py",
+      "name": "test_half_mode_threshold_must_be_a_real_scalar_between_zero_and_one",
+      "kind": "FunctionDef",
+      "line": 95,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_shared_picard.py",
+      "name": "solver",
+      "kind": "FunctionDef",
+      "line": 11,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_shared_picard.py",
+      "name": "test_wdm_adapter_preserves_physical_rhs_and_matches_direct_reference",
+      "kind": "FunctionDef",
+      "line": 29,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_shared_picard.py",
+      "name": "test_catalog_default_and_explicit_ode_have_identical_accretion_weights",
+      "kind": "FunctionDef",
+      "line": 61,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_shared_picard.py",
+      "name": "test_tuple_conversion_has_no_invented_solver_identity",
+      "kind": "FunctionDef",
+      "line": 90,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_surviving_observables.py",
+      "name": "population_model",
+      "kind": "FunctionDef",
+      "line": 10,
+      "archived": false,
+      "outcome": "local_paper_references_added_or_completed",
+      "reference_keys": [
+        "nfw",
+        "structure"
+      ],
+      "paper_urls": [
+        "https://arxiv.org/abs/1803.07691",
+        "https://arxiv.org/abs/astro-ph/9611107"
+      ]
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_surviving_observables.py",
+      "name": "test_mass_distribution_uses_survivors_in_both_mass_displays",
+      "kind": "FunctionDef",
+      "line": 98,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_surviving_observables.py",
+      "name": "test_mass_threshold_total_and_exact_cumulative_axis",
+      "kind": "FunctionDef",
+      "line": 131,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_surviving_observables.py",
+      "name": "test_velocity_selection_and_cumulative_current_velocity",
+      "kind": "FunctionDef",
+      "line": 172,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_surviving_observables.py",
+      "name": "population_model.population",
+      "kind": "FunctionDef",
+      "line": 49,
+      "archived": false,
+      "outcome": "no_additional_paper_value_reference_identified",
+      "reference_keys": [],
+      "paper_urls": []
+    }
+  ],
+  "source_identity_checks": [
+    {
+      "repo": "sashimi-w",
+      "file": "hatch_build.py",
+      "source_before_sha256": "ad20152c824107f811a04a1c490fce5c0665d1b89c548d1c4c9a6496cb504577",
+      "source_after_sha256": "ad20152c824107f811a04a1c490fce5c0665d1b89c548d1c4c9a6496cb504577",
+      "executable_ast_sha256": "af58625cfa4bff04058550ecf106c58f45a88ca83fbaf2b2897767a9999cbc84",
+      "executable_ast_equal": true,
+      "historical_archive": false
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "scripts/check_observable_counts.py",
+      "source_before_sha256": "350939305afd42620589dcea0685bdd58242ba159a7ac01d65e5a24ad5c1b69b",
+      "source_after_sha256": "350939305afd42620589dcea0685bdd58242ba159a7ac01d65e5a24ad5c1b69b",
+      "executable_ast_sha256": "ca754e4c99bda72b3957e0ef6b9d057ca4dbe7d6eaa1fce6cdfb9e5d2d41d4b2",
+      "executable_ast_equal": true,
+      "historical_archive": false
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "scripts/execute_scientific_validation.py",
+      "source_before_sha256": "79503b79e4e580807f5d444bf9126b5701c6a9208f3ce6ec238edf8196ae256d",
+      "source_after_sha256": "79503b79e4e580807f5d444bf9126b5701c6a9208f3ce6ec238edf8196ae256d",
+      "executable_ast_sha256": "878e82997d469a6e91add156ee0178fd6eb7f6986e168cce5cc23775bfd6e77d",
+      "executable_ast_equal": true,
+      "historical_archive": false
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "scripts/execute_walkthrough.py",
+      "source_before_sha256": "ebe470e8031171581e1e9ee5ab4df19b11b05cc68cd33ea7450e1b0d01bf3c98",
+      "source_after_sha256": "ebe470e8031171581e1e9ee5ab4df19b11b05cc68cd33ea7450e1b0d01bf3c98",
+      "executable_ast_sha256": "9e0e9d969aa472c777246d9dea0a56e01fd195ea8fddd34708ad063991d9e93b",
+      "executable_ast_equal": true,
+      "historical_archive": false
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "scripts/validate_eps_backport.py",
+      "source_before_sha256": "8951fda9be53dc7d45bfd3fd58062710bdc96cef4e8833bd197cdb61b480aacc",
+      "source_after_sha256": "cdb7dd91709da7364ee5345ee2f48933b4bf1b39bef77e169890b18337536883",
+      "executable_ast_sha256": "cbb82fffbf294cdd389c0b497627e9b7da4b45918ed0580fb1c0f022abd91d93",
+      "executable_ast_equal": true,
+      "historical_archive": false
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/__init__.py",
+      "source_before_sha256": "b75898127c2a95a7473dab7e92260bf5c4ab706d6615a7772acf399016a1482d",
+      "source_after_sha256": "b75898127c2a95a7473dab7e92260bf5c4ab706d6615a7772acf399016a1482d",
+      "executable_ast_sha256": "26d31d8e841eed6b74ec9dff6da6a15be5f2c9a51785052dcd0fd1e5335daeb1",
+      "executable_ast_equal": true,
+      "historical_archive": false
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae.py",
+      "source_before_sha256": "ca239a8c52ab7954375f556ae138f437e75bcb1cf58256686f515e9a93f3d61e",
+      "source_after_sha256": "ca239a8c52ab7954375f556ae138f437e75bcb1cf58256686f515e9a93f3d61e",
+      "executable_ast_sha256": "83ea6e3df14ed580a83d72a951f52b513fd33c6ed23665bcb25555b331a855df",
+      "executable_ast_equal": true,
+      "historical_archive": false
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_components.py",
+      "source_before_sha256": "4b8507163816847cef21876d508bac09a479284838f51578dada8d63fb79c61c",
+      "source_after_sha256": "168438e94381936267aee97d941e5cfab5d0d2b7f3723701be5b948985791c9b",
+      "executable_ast_sha256": "f2c0bcfadab97ee2eabb5405b735303fa1f8a722c4b71879bf813cdad9190a60",
+      "executable_ast_equal": true,
+      "historical_archive": false
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_migration.py",
+      "source_before_sha256": "c82a65dc18872fa61ef5acf6f1a9e0b2fe2b2e41209ddd1b3beb4567df156100",
+      "source_after_sha256": "bdca609265c69faaf2cf55a099930425370a0e5e273eb486aafbeea7254fafc8",
+      "executable_ast_sha256": "bdd29540ac51bdfeff24ece24e51c9e603a00c9ff9c365ee03d3ec421e3dc501",
+      "executable_ast_equal": true,
+      "historical_archive": false
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_itamae_variance.py",
+      "source_before_sha256": "e4bd603ad6a52194e2c3a83aa08dfa139eab516d90bb5ac2597c0c64182c41b8",
+      "source_after_sha256": "5625a6884f5ec3284ff0c5de206f696fb5cc7dda7ff829475a39463725253701",
+      "executable_ast_sha256": "39ade6b037ace2a357844bba546afb7c4574a3100a4737e89c3cbadd21b164ac",
+      "executable_ast_equal": true,
+      "historical_archive": false
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_physics.py",
+      "source_before_sha256": "d2bd7d95bac8e957773568cbb610ea3afce047796cae7f301c5c7731ee1dfc1f",
+      "source_after_sha256": "7af18f92939e64adf0fcb5bbf7b20aec0141c7c598dff287ffc08a79b354dcd1",
+      "executable_ast_sha256": "5af0bb11b4993b381c76623f2aeb2e4b4983ced9f2731d1fcc0a132f9d5ebc05",
+      "executable_ast_equal": true,
+      "historical_archive": false
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w/_power.py",
+      "source_before_sha256": "31253f9eb96a2591b8e1f23deca03d77717f5fb09d3d011004296d799aca3ac3",
+      "source_after_sha256": "f6a2255e98c51aa246e88a1e6bef75762820893e5c4e7a92374ff6c727a6cb75",
+      "executable_ast_sha256": "f4b9a88e0532d305816249cec1db4f8e4f101255dbbf3065f5dfbc5a055719a9",
+      "executable_ast_equal": true,
+      "historical_archive": false
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w_itamae.py",
+      "source_before_sha256": "3fe916a83b25bfd0bee7f72a070f0e09527a1a4356a356b65a650ac4673f73bf",
+      "source_after_sha256": "3fe916a83b25bfd0bee7f72a070f0e09527a1a4356a356b65a650ac4673f73bf",
+      "executable_ast_sha256": "4ca89185096b941c706596d747da919070093dcdae14d4bf68f6e3a82ce635df",
+      "executable_ast_equal": true,
+      "historical_archive": false
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w_itamae_components.py",
+      "source_before_sha256": "a5e53cfa0f3c9c3812f127a83a3890dab1f3debadf6d2dbfcde13421bf5c3194",
+      "source_after_sha256": "a5e53cfa0f3c9c3812f127a83a3890dab1f3debadf6d2dbfcde13421bf5c3194",
+      "executable_ast_sha256": "106d6747961e65d52c268d68e2371db1bb9a98bc0e20bc4eb1591583c1062c46",
+      "executable_ast_equal": true,
+      "historical_archive": false
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w_itamae_migration.py",
+      "source_before_sha256": "043ce1ae08ee4cf997aad1bbbd388c08fd1ab70af8cbe7b85876c7b691c83e33",
+      "source_after_sha256": "043ce1ae08ee4cf997aad1bbbd388c08fd1ab70af8cbe7b85876c7b691c83e33",
+      "executable_ast_sha256": "49143affbda4113705843613bfeb3b8ffbaf220337f17d17dd7a685d9bdde160",
+      "executable_ast_equal": true,
+      "historical_archive": false
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w_itamae_variance.py",
+      "source_before_sha256": "89b8471cc6460a919c7116eb02e0866c407df322041ecedaabfaca228cb617c8",
+      "source_after_sha256": "89b8471cc6460a919c7116eb02e0866c407df322041ecedaabfaca228cb617c8",
+      "executable_ast_sha256": "dfa6c4ac922db07e7b7afd5c6904c509630664225e8348dad08283f899a329f7",
+      "executable_ast_equal": true,
+      "historical_archive": false
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "src/sashimi_w_physics.py",
+      "source_before_sha256": "4bf740343ed7d501540f88467f3add8acb7b669d5cbb4aee0c90b6ddeb00b8b6",
+      "source_after_sha256": "4bf740343ed7d501540f88467f3add8acb7b669d5cbb4aee0c90b6ddeb00b8b6",
+      "executable_ast_sha256": "15e657843ea713b4511a6f2d249b71f73a996373f4a88824fcf2490f5321e22d",
+      "executable_ast_equal": true,
+      "historical_archive": false
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/reference-generation/ablation.py",
+      "source_before_sha256": "1556da6a8efe9e1726d662772e57a540410a08f3ecc3267f94b9b4b8d2ad180b",
+      "source_after_sha256": "1556da6a8efe9e1726d662772e57a540410a08f3ecc3267f94b9b4b8d2ad180b",
+      "executable_ast_sha256": "14dbe5cd4c0206d649ee9e266a66b017783fe27c035a35955aafaf806ae07cf5",
+      "executable_ast_equal": true,
+      "historical_archive": false
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/reference-generation/historical-controller/reference_worker.py",
+      "source_before_sha256": "f7f33a77b19117f17a5a6ca606c8507d8552e515cb325429c3961c235739798b",
+      "source_after_sha256": "f7f33a77b19117f17a5a6ca606c8507d8552e515cb325429c3961c235739798b",
+      "executable_ast_sha256": "afde5e67e910ecfd896c6150d29aff8d21c58d38d27d6360868eef227227bca2",
+      "executable_ast_equal": true,
+      "historical_archive": true
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/reference-generation/historical-controller/run_reference.py",
+      "source_before_sha256": "bb22d3196573c224f1cb811f211fbf81844737c3b625812addf90ede96b34b85",
+      "source_after_sha256": "bb22d3196573c224f1cb811f211fbf81844737c3b625812addf90ede96b34b85",
+      "executable_ast_sha256": "3b0a902da8766a444f9f0934725f452765a64c853b16a23ff35830d9cdd98a88",
+      "executable_ast_equal": true,
+      "historical_archive": true
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_build_source_identity.py",
+      "source_before_sha256": "5ba031686547b5f8f08f47887a0a9370b3dcbc008e3d6c0bcff8b00dca402b04",
+      "source_after_sha256": "5ba031686547b5f8f08f47887a0a9370b3dcbc008e3d6c0bcff8b00dca402b04",
+      "executable_ast_sha256": "3a20d57c0dba41cc59d50ceaff8a3df3e190d59ab7e1919a60a2ac17b3276ef4",
+      "executable_ast_equal": true,
+      "historical_archive": false
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_concentration_domain.py",
+      "source_before_sha256": "0f7a40c5066aadd07fde07e7074c42195a2e372bcca525081430b49225353eb6",
+      "source_after_sha256": "0f7a40c5066aadd07fde07e7074c42195a2e372bcca525081430b49225353eb6",
+      "executable_ast_sha256": "d02891811dee35a017de386e098ec741cf11599083c497d130e6add05a626fe5",
+      "executable_ast_equal": true,
+      "historical_archive": false
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_eps_stability.py",
+      "source_before_sha256": "b237155c900cdc80ef08de7ea70be789d7a7640e9b1245a082157b432996eec5",
+      "source_after_sha256": "b237155c900cdc80ef08de7ea70be789d7a7640e9b1245a082157b432996eec5",
+      "executable_ast_sha256": "343001b9c02ee811829171c4e23e09aea70aac764257d4acf5793f1e1d7d13b4",
+      "executable_ast_equal": true,
+      "historical_archive": false
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_itamae_migration.py",
+      "source_before_sha256": "be6d6deb45ca9e9a94dff073549ae678b83d782f3fb0388cb704c3270b400a63",
+      "source_after_sha256": "923d9fdf2fd2174a650dac16a8b2d86f06bfe795eaeacb454ad84db8b70851e9",
+      "executable_ast_sha256": "a9bd6925ac3b1cf8f6b44431eb33f1356c5c013e6c47343f50f66f4cf81040cf",
+      "executable_ast_equal": true,
+      "historical_archive": false
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_itamae_variance.py",
+      "source_before_sha256": "ffd907e91fb9e8a7b5089610e89c3ee38f04f795fffa0be9edf1ebd81997780b",
+      "source_after_sha256": "e10d83f27e07be99f5cc88b01e225a99bb5f25944efc03557b36d5bfed58fb50",
+      "executable_ast_sha256": "02038ed15c75908c99205a788816167f2b72046cf74d05d0e958eaf4028abfec",
+      "executable_ast_equal": true,
+      "historical_archive": false
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_population_components.py",
+      "source_before_sha256": "1878ff43db3d0ff38abe620b2229b32e1733fab84207d8f40e0853a7faee8a2d",
+      "source_after_sha256": "1878ff43db3d0ff38abe620b2229b32e1733fab84207d8f40e0853a7faee8a2d",
+      "executable_ast_sha256": "b7052c3cff485fb9db1177a181611579953e87cff81eb1abec99cb9dd3bcca29",
+      "executable_ast_equal": true,
+      "historical_archive": false
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_power_prescription.py",
+      "source_before_sha256": "71f2d92b4f68bfd618df33a9fd2cd2f8119bb2f317dc97e9b4e982e0da5023fb",
+      "source_after_sha256": "71f2d92b4f68bfd618df33a9fd2cd2f8119bb2f317dc97e9b4e982e0da5023fb",
+      "executable_ast_sha256": "faefdce1caf616ed56cb13ae58d75de72a906cc18107115f5bef16001b7dd847",
+      "executable_ast_equal": true,
+      "historical_archive": false
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_q10_policy.py",
+      "source_before_sha256": "27d7bdd40dc8889c5492a7004a15cb4db4ff9cf1e21a57c0ca5ec528f91edab2",
+      "source_after_sha256": "f1ba615bc20da3b9f9a74f625d004e59742dae4bcd0191c439ba87033637c832",
+      "executable_ast_sha256": "9b209b51c779fd76741a77be45d42895c7c7fa2c0d181455e3290e2b7ba97869",
+      "executable_ast_equal": true,
+      "historical_archive": false
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_shared_picard.py",
+      "source_before_sha256": "1c0dace33e3e0eeeb95a7eec4fdd02182472db8b877cd6f2fb2a16094bd748ff",
+      "source_after_sha256": "1c0dace33e3e0eeeb95a7eec4fdd02182472db8b877cd6f2fb2a16094bd748ff",
+      "executable_ast_sha256": "34b6711d19a63fe6ab142e23c468fa66157992f409e60bd7d2856ba66e074355",
+      "executable_ast_equal": true,
+      "historical_archive": false
+    },
+    {
+      "repo": "sashimi-w",
+      "file": "tests/test_surviving_observables.py",
+      "source_before_sha256": "2f5241fbcad98e1fc8fa51249c6ab25fbe03cb6e94b47e2166ac9a080cc5bd12",
+      "source_after_sha256": "2d5938c9990229439c3c5a7bc219de8bd5ce9f5c7f0c0a85d7cfc61893eda2b0",
+      "executable_ast_sha256": "7d95fe4362ecd94dd6956735ca0c81e5b787375f3f307fc0cfd3f12aafa4f3fd",
+      "executable_ast_equal": true,
+      "historical_archive": false
+    }
+  ],
+  "dependency_documentation_revision": {
+    "previous_itamae": "c452c5bbbbf8276870a8ff1f61f77d8bff0d8d7c",
+    "new_itamae": "4aeb13ed4e3e3e87171fe800e08f74b95c1244a2",
+    "executable_code_unchanged": true
+  }
+}

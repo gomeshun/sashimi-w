@@ -1,0 +1,24 @@
+{
+  "schema": "sashimi-w:prescription-source-evidence:v1",
+  "calculation_identity": "c=2.5;wdm-top-hat:R=8-Mpc/h:z=0:v1",
+  "repositories": {
+    "standalone": {
+      "prechange_revision": "685bcfde7bf3ac5805492b56070151ba0415a9ca",
+      "source_sha256": {
+        "sashimi_w.py": "98134bc6737d4d62c2bf15f502abc15eed41a9c406d722ae2d0364f32e2fcd11",
+        "sashimi_w_numerics.py": "6c972986532cbd39a89ff7dd2dc1c31c767b25bfa5f8fc1354e0bd9bcd40d8ba",
+        "sashimi_w_power.py": "31253f9eb96a2591b8e1f23deca03d77717f5fb09d3d011004296d799aca3ac3",
+        "picard_tidal_stripping.py": "005643cd500fbdab74896933bdb7779bca8ca73feca0c27b7bd3956e09a745e1"
+      }
+    },
+    "migration": {
+      "prechange_revision": "465db7a0f24def6ebe065718fe1f5f5fc543c048",
+      "source_sha256": {
+        "src/sashimi_w/_physics.py": "d2bd7d95bac8e957773568cbb610ea3afce047796cae7f301c5c7731ee1dfc1f",
+        "src/sashimi_w/_itamae_variance.py": "e4bd603ad6a52194e2c3a83aa08dfa139eab516d90bb5ac2597c0c64182c41b8",
+        "src/sashimi_w/_itamae_migration.py": "c82a65dc18872fa61ef5acf6f1a9e0b2fe2b2e41209ddd1b3beb4567df156100",
+        "src/sashimi_w/_power.py": "31253f9eb96a2591b8e1f23deca03d77717f5fb09d3d011004296d799aca3ac3"
+      }
+    }
+  }
+}

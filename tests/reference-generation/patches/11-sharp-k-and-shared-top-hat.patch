@@ -1,0 +1,83 @@
+--- a/sashimi_w.py
++++ b/sashimi_w.py
+@@ -197,7 +197,8 @@
+         sig_interp_th   = interp1d(self.filter_Mass, Sigma_th)
+         MassIn8Mpc   = 4/3 * np.pi * 8**3 * self.Rhomean_z
+         sig_8_th        = sig_interp_th(MassIn8Mpc)
+-        normalise_th    = sig_8_th / sigma_8
++        self._prepare_reference_integral()
++        normalise_th    = np.sqrt(self._reference_normalization2)
+         Sigma_th       /= normalise_th
+         Sigma_Sq_th     = Sigma_th**2 
+               
+@@ -687,12 +688,12 @@
+                      epsabs=0.0, epsrel=2.0e-12)[0]
+                      for left, right in zip(self._reference_log_k[:-1], self._reference_log_k[1:])]
+         self._reference_integral_cumulative = np.r_[0.0, np.cumsum(intervals)]
+-        self._reference_normalization2 = self._reference_integral_scalar(self.MassIn8Mpc/h)/sigma_8**2
++        self._reference_normalization2 = self._reference_top_hat_variance()/sigma_8**2
+ 
+     @lru_cache(maxsize=100000)
+     def _reference_integral_scalar(self, physical_mass):
+-        radius = (3.0*(physical_mass*h)/(4.0*np.pi*self.Rhomean_z))**(1.0/3.0)/2.5
+-        cutoff = (9.0*np.pi/2.0)**(1.0/3.0)/radius
++        radius = (3.0*(physical_mass*h)/(4.0*np.pi*self.Rhomean_z))**(1.0/3.0)
++        cutoff = 2.5/radius
+         if cutoff <= k_file[0]:
+             return 0.0
+         if cutoff >= k_file[-1]:
+@@ -712,8 +713,8 @@
+     def _reference_moving_boundary(self, mass, z):
+         self._prepare_reference_integral()
+         mass, z = np.broadcast_arrays(np.asarray(mass, dtype=float), np.asarray(z, dtype=float))
+-        radius = (3.0*(mass*h)/(4.0*np.pi*self.Rhomean_z))**(1.0/3.0)/2.5
+-        cutoff = (9.0*np.pi/2.0)**(1.0/3.0)/radius
++        radius = (3.0*(mass*h)/(4.0*np.pi*self.Rhomean_z))**(1.0/3.0)
++        cutoff = 2.5/radius
+         active = (cutoff>k_file[0]) & (cutoff<k_file[-1])
+         result = np.zeros_like(mass)
+         result[active] = -self._reference_integrand(np.log(cutoff[active]))/(3.0*mass[active]*self._reference_normalization2)
+@@ -736,3 +737,43 @@
+                 +(b/2+b**2/(6*a))*y[...,-2]
+                 +b*(2*b+3*a)/(6*(a+b))*y[...,-1])
+         return integrate.simps(y[...,:-1], x=x[...,:-1])+last
++
++
++    def _reference_top_hat_variance(self):
++        """Integrate raw WDM power under a radius 8 Mpc/h spherical top-hat.
++
++        Returns
++        -------
++        float
++            Dimensionless zero-redshift variance of the unnormalized q10
++            spectrum on the original finite table domain.
++
++        Notes
++        -----
++        Integrate each original interpolation interval using adaptive
++        QUADPACK. The window uses the independent spherical-Bessel formula.
++        This reference imports neither the current W product nor ITAMAE.
++        """
++        from scipy.special import spherical_jn
++
++        def integrand(log_k):
++            """Weight the raw dimensionless power by the spherical window.
++
++            Parameters
++            ----------
++            log_k : float
++                Natural logarithm of k in h/Mpc.
++
++            Returns
++            -------
++            float
++                Contribution to the top-hat variance per dln(k).
++            """
++            x = 8.0*np.exp(log_k)
++            window = 3.0*spherical_jn(1, x)/x
++            return self._reference_integrand(log_k)*window**2
++
++        return sum(integrate.quad(integrand, left, right,
++                   epsabs=1.0e-16, epsrel=2.0e-12)[0]
++                   for left, right in zip(self._reference_log_k[:-1],
++                                          self._reference_log_k[1:]))
