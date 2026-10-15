@@ -1,0 +1,60 @@
+--- a/sashimi_w.py
++++ b/sashimi_w.py
+@@ -1,4 +1,5 @@
+ import numpy as np
++from functools import lru_cache
+ import matplotlib.pyplot as plt
+ from scipy import integrate
+ from scipy import interpolate
+@@ -670,3 +671,51 @@
+         return Ncum[0], x, Ncum
+ 
+ 
++
++    def _reference_integrand(self, log_k):
++        k = np.exp(log_k)
++        q = getattr(self, 'wdm_power_q', 5.0)
++        ratio = (1.0 + (self.a*k)**(2.0*1.12))**(-q/1.12)
++        return k**3*np.interp(k, k_file, Pk_file)*ratio/(2.0*np.pi**2)
++
++    def _prepare_reference_integral(self):
++        if hasattr(self, '_reference_integral_cumulative'):
++            return
++        # Integrate on the original spectrum's own knots with adaptive QUADPACK.
++        # This is independent of the product's fixed Gauss-Legendre grid.
++        self._reference_log_k = np.log(k_file)
++        intervals = [integrate.quad(self._reference_integrand, left, right,
++                     epsabs=0.0, epsrel=2.0e-12)[0]
++                     for left, right in zip(self._reference_log_k[:-1], self._reference_log_k[1:])]
++        self._reference_integral_cumulative = np.r_[0.0, np.cumsum(intervals)]
++        self._reference_normalization2 = self._reference_integral_scalar(self.MassIn8Mpc/h)/sigma_8**2
++
++    @lru_cache(maxsize=100000)
++    def _reference_integral_scalar(self, physical_mass):
++        radius = (3.0*(physical_mass*h)/(4.0*np.pi*self.Rhomean_z))**(1.0/3.0)/2.5
++        cutoff = (9.0*np.pi/2.0)**(1.0/3.0)/radius
++        if cutoff <= k_file[0]:
++            return 0.0
++        if cutoff >= k_file[-1]:
++            return self._reference_integral_cumulative[-1]
++        upper = np.log(cutoff)
++        cell = min(int(np.searchsorted(self._reference_log_k, upper, side='right')-1), len(k_file)-2)
++        extra = integrate.quad(self._reference_integrand, self._reference_log_k[cell], upper,
++                               epsabs=0.0, epsrel=2.0e-12)[0]
++        return self._reference_integral_cumulative[cell]+extra
++
++    def _reference_sigma0(self, mass):
++        self._prepare_reference_integral()
++        mass = np.asarray(mass, dtype=float)
++        raw = np.asarray([self._reference_integral_scalar(float(m)) for m in mass.reshape(-1)]).reshape(mass.shape)
++        return np.sqrt(raw/self._reference_normalization2)
++
++    def _reference_moving_boundary(self, mass, z):
++        self._prepare_reference_integral()
++        mass, z = np.broadcast_arrays(np.asarray(mass, dtype=float), np.asarray(z, dtype=float))
++        radius = (3.0*(mass*h)/(4.0*np.pi*self.Rhomean_z))**(1.0/3.0)/2.5
++        cutoff = (9.0*np.pi/2.0)**(1.0/3.0)/radius
++        active = (cutoff>k_file[0]) & (cutoff<k_file[-1])
++        result = np.zeros_like(mass)
++        result[active] = -self._reference_integrand(np.log(cutoff[active]))/(3.0*mass[active]*self._reference_normalization2)
++        return result*self.growthD(z)**2
