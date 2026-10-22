@@ -9,11 +9,52 @@ from sashimi_w_itamae_variance import make_integrated_variance_model, make_varia
 
 @pytest.mark.parametrize("factory", [Subhalos, make_integrated_variance_model, make_variance_model])
 def test_retired_q5_is_rejected_instead_of_reinterpreted(factory):
+    """Prevent an old power-suppression choice from silently becoming q10.
+
+    Parameters
+    ----------
+    factory : callable
+        Alternative public model/adapter constructor that must obey the same stated
+        boundary.
+
+    Notes
+    -----
+    Pass criteria: The model and both variance factories reject published-q5 explicitly.
+
+    Failure criteria: a stated numerical/identity mismatch, a missing required exception or
+    warning, or an unexpected calculation failure fails the test.
+
+    Scope: This controlled calculation does not calibrate a subhalo population against
+    simulations or observations.
+    """
     with pytest.raises(ValueError, match="retired"):
         factory(wdm_power_convention="published-q5")
 
 
 def test_public_default_is_q10_and_old_constant_is_removed():
+    r"""Expose the adopted WDM power prescription as fixed model state.
+
+    Notes
+    -----
+    Viel et al. give the thermal-relic amplitude T = [1+(alpha*k)**(2*nu)]**(-5/nu),
+    nu=1.12, and alpha=0.049*(m/keV)**(-1.11)*(Omega_WDM/0.25)**0.11*(h/0.7)**1.22 in Mpc/h.
+    Power uses T**2, hence exponent -10/nu; k is in h/Mpc.
+
+    Pass criteria: The default reports q10/standard-t2-q10, the old constant is absent and
+    prescription fields cannot be reassigned.
+
+    Failure criteria: any mismatch with the stated value, shape or identity requirements
+    fails the test.
+
+    Scope: This controlled calculation does not calibrate a subhalo population against
+    simulations or observations.
+
+    References
+    ----------
+
+    .. [cite-viel] Viel et al. (2005), Constraining warm dark matter candidates including sterile neutrinos and light gravitinos with WMAP and the Lyman-alpha forest, Eqs. (6)-(7).
+        https://arxiv.org/abs/astro-ph/0501562
+    """
     model = Subhalos(2.0)
     assert model.wdm_power_q == 10
     assert model.wdm_power_convention == "standard-t2-q10"
@@ -24,6 +65,19 @@ def test_public_default_is_q10_and_old_constant_is_removed():
 
 
 def test_transfer_and_power_are_distinct_and_both_half_modes_are_explicit():
+    """Distinguish transfer amplitude from power suppression and their half-mode scales.
+
+    Notes
+    -----
+    Pass criteria: P_ratio=T**2, both tend to one at k=0, the amplitude-half point has
+    P_ratio=0.25, and the power-half point lies at smaller k.
+
+    Failure criteria: any mismatch with the stated value, shape or identity requirements
+    fails the test.
+
+    Scope: This controlled calculation does not calibrate a subhalo population against
+    simulations or observations.
+    """
     model = Subhalos(2.0, wdm_power_convention="standard-t2-q10")
     k = np.geomspace(1e-4, 1e3, 101).reshape(101, 1)
     np.testing.assert_allclose(model.power_ratio(k), model.transfer_amplitude(k) ** 2, rtol=5e-15)
@@ -39,6 +93,25 @@ def test_transfer_and_power_are_distinct_and_both_half_modes_are_explicit():
 
 @pytest.mark.parametrize("threshold", [0, 1, -1, np.nan, np.inf, [0.5], True])
 def test_half_mode_threshold_must_be_a_real_scalar_between_zero_and_one(threshold):
+    """Require a meaningful suppression level for half-mode inversion.
+
+    Parameters
+    ----------
+    threshold : object
+        Parametrized physical selection or half-mode threshold; the test states which values
+        must be accepted or rejected.
+
+    Notes
+    -----
+    Pass criteria: Endpoints, outside-range values, NaN/infinity, arrays and Boolean
+    thresholds are rejected.
+
+    Failure criteria: a stated numerical/identity mismatch, a missing required exception or
+    warning, or an unexpected calculation failure fails the test.
+
+    Scope: This controlled calculation does not calibrate a subhalo population against
+    simulations or observations.
+    """
     model = Subhalos(2, wdm_power_convention="standard-t2-q10")
     with pytest.raises(ValueError, match="power_ratio"):
         model.half_mode_wavenumber(power_ratio=threshold)

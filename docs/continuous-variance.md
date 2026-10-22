@@ -1,5 +1,9 @@
 # Continuous WDM variance and redshift-resolved mass integration
 
+Update 2026-10-14: [c=2.5 and a common top-hat sigma8 amplitude](w-power-prescription.md)
+supersede the historical filter/normalization choices below. The following
+report records the earlier continuous-integral change and its original runs.
+
 Update 2026-09-11: q10 is now the sole supported thermal-WDM product prescription.
 The q5 results below are historical; see [adoption](q10-adoption.md).
 

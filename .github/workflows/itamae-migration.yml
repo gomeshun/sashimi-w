@@ -148,7 +148,7 @@ jobs:
         PY
     - name: Lint maintained migration modules
       run: uv run --no-sync ruff check src/sashimi_w/__init__.py src/sashimi_w/_physics.py src/sashimi_w/_itamae.py
-        src/sashimi_w/_itamae_migration.py src/sashimi_w/_itamae_components.py src/sashimi_w/_itamae_variance.py
+        src/sashimi_w/_itamae_migration.py src/sashimi_w/_itamae_components.py src/sashimi_w/_itamae_variance.py src/sashimi_w/_power.py
         tests
       if: matrix.python-version == '3.11'
     - name: Stage shipped tests outside the source checkout
@@ -192,4 +192,4 @@ concurrency:
     == 'workflow_dispatch' && github.run_id || github.ref }}
   cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' }}
 env:
-  ITAMAE_REF: 23d01e8758a88b061b87de9e488c38ec89fd8e4f
+  ITAMAE_REF: 4552d5e5de1650bcc3c41a2857536d608909b7e7

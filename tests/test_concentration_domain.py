@@ -7,6 +7,19 @@ from sashimi_w import Subhalos, OmegaM, STANDARD_T2_Q10, Msolar
 
 
 def test_nonreal_formation_trials_are_removed_before_growth():
+    """Evaluate the WDM concentration relation only on real formation-redshift branches.
+
+    Notes
+    -----
+    Pass criteria: At z=0, trials at or below the density boundary are excluded; retained
+    trials have the expected values and finite z>-1.
+
+    Failure criteria: any mismatch with the stated value, shape or identity requirements
+    fails the test.
+
+    Scope: This controlled calculation does not calibrate a subhalo population against
+    simulations or observations.
+    """
     concentration = np.arange(1.0, 5.0)
     # At z=0 the real-branch boundary is density_ratio=1-OmegaM.
     density = np.array([0.0, 1 - OmegaM, 1.0, 2.0])
@@ -18,6 +31,19 @@ def test_nonreal_formation_trials_are_removed_before_growth():
 
 
 def test_concentration_scalar_and_matrix_use_valid_background_inputs():
+    """Give a physical concentration independently of scalar or matrix query form.
+
+    Notes
+    -----
+    Pass criteria: The 1e9-solar-mass, z=0.5 concentration is finite and positive and the
+    one-element matrix query equals the scalar.
+
+    Failure criteria: any mismatch with the stated value, shape or identity requirements
+    fails the test.
+
+    Scope: This controlled calculation does not calibrate a subhalo population against
+    simulations or observations.
+    """
     model = Subhalos(2.0, wdm_power_convention=STANDARD_T2_Q10)
     scalar = model.conc200(1e9 * Msolar, 0.5)
     matrix = model.conc200(np.array([[1e9]]) * Msolar, np.array([[0.5]]))

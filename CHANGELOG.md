@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased — sharp-k mass assignment and common sigma8 amplitude
+
+- Use k_cut=2.5/R_th without the additional (9*pi/2)**(1/3) factor.
+- Normalize q10 WDM power once with a radius 8 Mpc/h top-hat, and share the
+  amplitude between EPS variance and Ludlow concentration.
+- Advance calculation/cache identity to `sashimi-w:thermal-wdm-q10:2026-10-14:v3`
+  and record the normalization target, divisor and mass-assignment factor.
+- Add independently patched author-source references and top-hat/cutoff
+  integrals. Historical arrays and test comparison tolerances are preserved.
+  These changes require new physical validation; they do not update empirical
+  WDM constraints. See [power prescription](docs/w-power-prescription.md).
+
 ## Unreleased — EPS numerical backport
 
 - Stabilize the retained WDM EPS approximation on active support with direct
