@@ -1353,7 +1353,14 @@ class subhalos:
         # Integrate variance gaps directly; subtracting two saturated WDM
         # variances loses the positive support in high-order host tails.
         ds = self._variance.gap(small[allowed],big[allowed])
-        dsmin = self._variance.gap(minimum[allowed],big[allowed])
+        # The normalization interval depends on host history and epoch only.
+        # Evaluate each active interval before broadcasting over subhalo mass;
+        # keep the original gap quadrature and host-weight reduction unchanged.
+        active_host = np.any(allowed, axis=-1, keepdims=True)
+        normalization = np.zeros_like(mmax)
+        normalization[active_host] = self._variance.gap(
+            mmax[active_host], Mmax[active_host])
+        dsmin = np.broadcast_to(normalization, allowed.shape)[allowed]
         gap = d2[allowed]-d1[allowed]
         if np.any(gap < 0) or np.any(ds <= 0) or np.any(dsmin <= 0):
             raise ValueError("WDM EPS requires nonnegative barrier and positive variance gaps.")
