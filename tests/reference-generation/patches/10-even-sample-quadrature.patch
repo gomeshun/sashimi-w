@@ -1,0 +1,33 @@
+--- a/sashimi_w.py
++++ b/sashimi_w.py
+@@ -555,7 +555,7 @@
+ 
+         Na = self.Na_calc(ma_by_redshift,zdist,M0,z0=0,N_herm=N_hermNa,Nrand=1000,
+                           sigmafac=sigmafac)
+-        Na_total = integrate.simps(integrate.simps(Na,x=np.log(ma_by_redshift)),x=np.log(1+zdist))
++        Na_total = self._reference_simpson(self._reference_simpson(Na,x=np.log(ma_by_redshift)),x=np.log(1+zdist))
+         weight = Na/(1.0+zdist.reshape(np.alen(zdist),1))
+         weight = weight/np.sum(weight)*Na_total
+         weight = (weight.reshape((len(zdist),1,len(ma))))*w1/np.sqrt(np.pi)
+@@ -714,3 +714,21 @@
+         result = np.zeros_like(mass)
+         result[active] = -self._reference_integrand(np.log(cutoff[active]))/(3.0*mass[active]*self._reference_normalization2)
+         return result*self.growthD(z)**2
++
++    @staticmethod
++    def _reference_simpson(y, x):
++        # Composite odd-sample Simpson plus the last-interval quadratic
++        # integral. Derive the last three weights by integrating the Lagrange
++        # basis on [x[-2], x[-1]]; no current SciPy implementation is imported.
++        y, x = np.broadcast_arrays(np.asarray(y), np.asarray(x))
++        count = y.shape[-1]
++        if count == 2:
++            return (x[...,1]-x[...,0])*(y[...,1]+y[...,0])/2.0
++        if count % 2:
++            return integrate.simps(y, x=x)
++        a = x[...,-2]-x[...,-3]
++        b = x[...,-1]-x[...,-2]
++        last = (-b**3/(6*a*(a+b))*y[...,-3]
++                +(b/2+b**2/(6*a))*y[...,-2]
++                +b*(2*b+3*a)/(6*(a+b))*y[...,-1])
++        return integrate.simps(y[...,:-1], x=x[...,:-1])+last

@@ -1,0 +1,39 @@
+--- a/sashimi_w.py
++++ b/sashimi_w.py
+@@ -66,7 +66,8 @@
+ 
+ class subhalos:
+ 
+-    def __init__(self, mass_wdm=1.5):
++    def __init__(self, mass_wdm=1.5, wdm_power_q=5.0):
++        self.wdm_power_q = float(wdm_power_q)
+         self.mass_wdm = mass_wdm
+ 
+         ########################################################
+@@ -97,14 +98,14 @@
+         for ii in range(500):
+             self.logk      = self.log_k_min + self.dlogk*ii
+             self.sum_rect  = Pk_interp(10**self.logk)*(10**self.logk)**2*10**self.logk*np.log(10) * \
+-                                (1+(self.a*(10**self.logk))**(2*1.12))**(-5./1.12)
++                                (1+(self.a*(10**self.logk))**(2*1.12))**(-self.wdm_power_q/1.12)
+             self.tot_sum   = self.tot_sum + self.sum_rect         
+         self.log_k_min     = self.log_k_min - self.dlogk
+         self.sum_rect_min  = Pk_interp(10**self.log_k_min)*(10**self.log_k_min)**2 * 10**self.log_k_min * np.log(10) * \
+-                                (1+(self.a*(10**self.log_k_min))**(2*1.12))**(-5./1.12)
++                                (1+(self.a*(10**self.log_k_min))**(2*1.12))**(-self.wdm_power_q/1.12)
+         self.log_k_max     = self.log_k_max + self.dlogk
+         self.sum_rect_max  = Pk_interp(10**self.log_k_max)*(10**self.log_k_max)**2 * 10**self.log_k_max * np.log(10) * \
+-                                (1+(self.a*(10**self.log_k_max))**(2*1.12))**(-5./1.12)
++                                (1+(self.a*(10**self.log_k_max))**(2*1.12))**(-self.wdm_power_q/1.12)
+         self.sigma_sq      = (self.tot_sum + 0.5*self.sum_rect_min + 0.5*self.sum_rect_max) * self.dlogk
+         self.sigma_sq     /= (2*np.pi**2)     
+         
+@@ -140,7 +141,7 @@
+         om_wdm = OmegaM-OmegaB
+         a = 0.049*(1/self.mass_wdm)**1.11 * (om_wdm/0.25)**0.11 * (h/0.7)**1.22 # Mpc/h
+         nu = 1.12        
+-        return k**2 * Pk_interp(k) * self.TopHat(k,r)**2     * (1+(a*k)**(2*nu))**(-5./nu)
++        return k**2 * Pk_interp(k) * self.TopHat(k,r)**2     * (1+(a*k)**(2*nu))**(-self.wdm_power_q/nu)
+ 
+     """ Integration function """ 
+     def integratePk_th(self,kmin, kmax, r):

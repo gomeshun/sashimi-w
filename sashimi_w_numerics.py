@@ -26,17 +26,80 @@ SOFTWARE.
 import numpy as np
 from numpy.polynomial.legendre import leggauss
 from scipy.optimize import brentq
+from sashimi_w_power import SHARP_K_MASS_ASSIGNMENT, sigma8_normalization
 
 
 class SharpKVariance:
-    """Finite sharp-k integral on every original, linearly interpolated P(k) cell.
+    r"""Finite sharp-k integral on every original, linearly interpolated P(k) cell.
 
     Sixteen-point Gauss-Legendre integration in log(k) resolves each input
     spectrum knot. Partial cells use the same rule; no mass interpolation or
     projection is applied. Physical masses are in Msun, k in h/Mpc.
+    The cutoff is 2.5/R_th, where R_th encloses the physical halo mass.
+    The amplitude is set independently by a top-hat at 8 Mpc/h.
+
+    Parameters
+    ----------
+    k, power : array_like
+        Original k and CDM power table in h/Mpc and (Mpc/h)**3.
+    alpha : float
+        Viel thermal suppression length in Mpc/h.
+    density : float
+        Numerical mean density in Msun*h**2/Mpc**3.
+    hubble_h : float
+        Reduced Hubble parameter used to convert physical halo masses.
+    normalizing_mass : float
+        Physical mass in Msun enclosed by the sigma8 top-hat sphere.
+    sigma8 : float
+        Target top-hat rms contrast at that radius, at redshift zero.
+
+    Notes
+    -----
+    Viel et al. give the thermal-relic amplitude T = [1+(alpha*k)**(2*nu)]**(-5/nu),
+    nu=1.12, and alpha=0.049*(m/keV)**(-1.11)*(Omega_WDM/0.25)**0.11*(h/0.7)**1.22 in Mpc/h.
+    Power uses T**2, hence exponent -10/nu; k is in h/Mpc.
+
+    References
+    ----------
+
+    .. [cite-viel] Viel et al. (2005), Constraining warm dark matter candidates including sterile neutrinos and light gravitinos with WMAP and the Lyman-alpha forest, Eqs. (6)-(7).
+        https://arxiv.org/abs/astro-ph/0501562
     """
 
     def __init__(self, k, power, alpha, density, hubble_h, normalizing_mass, sigma8):
+        r"""Tabulate raw sharp-k cells and set the independent top-hat amplitude.
+
+        Parameters
+        ----------
+        k, power : array_like
+            Wavenumbers in h/Mpc and CDM power in (Mpc/h)**3.
+        alpha : float
+            WDM suppression length in Mpc/h.
+        density : float
+            Mean density in numerical Msun*h**2/Mpc**3 units.
+        hubble_h : float
+            Dimensionless reduced Hubble parameter.
+        normalizing_mass : float
+            Physical top-hat mass in Msun, corresponding to radius 8 Mpc/h
+            for the supplied cosmology. It does not set a sharp-k cutoff.
+        sigma8 : float
+            Positive target top-hat rms density contrast at redshift zero.
+
+        Notes
+        -----
+        Viel et al. give the thermal-relic amplitude T = [1+(alpha*k)**(2*nu)]**(-5/nu),
+        nu=1.12, and alpha=0.049*(m/keV)**(-1.11)*(Omega_WDM/0.25)**0.11*(h/0.7)**1.22 in Mpc/h.
+        Power uses T**2, hence exponent -10/nu; k is in h/Mpc.
+
+        Forward and reverse cell sums preserve small positive EPS variance
+        gaps; only the amplitude divisor and mass assignment change here.
+
+        References
+        ----------
+
+        .. [cite-viel] Viel et al. (2005), Constraining warm dark matter candidates including sterile neutrinos and light gravitinos with WMAP and the Lyman-alpha forest, Eqs. (6)-(7).
+            https://arxiv.org/abs/astro-ph/0501562
+        """
         self.k = np.asarray(k, dtype=float)
         self.power = np.asarray(power, dtype=float)
         self.logk = np.log(self.k)
@@ -45,9 +108,38 @@ class SharpKVariance:
         cells = self._partial(self.logk[:-1], self.logk[1:])
         self.cumulative = np.r_[0., np.cumsum(cells)]
         self.tail = np.r_[np.cumsum(cells[::-1])[::-1], 0.]
-        self.normalization2 = self._raw(normalizing_mass)/sigma8**2
+        radius8 = (3 * normalizing_mass * hubble_h / (4 * np.pi * density)) ** (1 / 3)
+        self.normalization2 = sigma8_normalization(
+            self.k, self.power, alpha, sigma8, radius=radius8
+        ) ** 2
 
     def _integrand(self, logk):
+        r"""Evaluate the sharp-k variance integrand per logarithmic wavenumber.
+
+        Parameters
+        ----------
+        logk : array_like
+            Natural logarithm of k in h/Mpc.
+
+        Returns
+        -------
+        integrand : numpy.ndarray
+            Dimensionless k**3*P_CDM*T**2/(2*pi**2), before dlnk integration.
+
+        Notes
+        -----
+        Viel et al. give the thermal-relic amplitude T = [1+(alpha*k)**(2*nu)]**(-5/nu),
+        nu=1.12, and alpha=0.049*(m/keV)**(-1.11)*(Omega_WDM/0.25)**0.11*(h/0.7)**1.22 in Mpc/h.
+        Power uses T**2, hence exponent -10/nu; k is in h/Mpc.
+
+        The enclosing table supplies CDM power in (Mpc/h)**3; the Viel transfer is squared before integration.
+
+        References
+        ----------
+
+        .. [cite-viel] Viel et al. (2005), Constraining warm dark matter candidates including sterile neutrinos and light gravitinos with WMAP and the Lyman-alpha forest, Eqs. (6)-(7).
+            https://arxiv.org/abs/astro-ph/0501562
+        """
         k = np.exp(logk)
         suppression = (1+(self.alpha*k)**(2*1.12))**(-10/1.12)
         return k**3*np.interp(k, self.k, self.power)*suppression/(2*np.pi**2)
@@ -59,11 +151,45 @@ class SharpKVariance:
         return half*np.sum(self._integrand(nodes)*self.weights, axis=-1)
 
     def _cutoff(self, mass):
+        r"""Map physical mass to the Schneider sharp-k upper wavenumber.
+
+        Parameters
+        ----------
+        mass : array_like
+            Finite positive physical halo mass in Msun.
+
+        Returns
+        -------
+        numpy.ndarray
+            Cutoff 2.5/R_th in h/Mpc with the input shape, where
+            R_th**3=3*(mass*h)/(4*pi*density).
+
+        Raises
+        ------
+        ValueError
+            If mass is nonfinite or nonpositive.
+
+        Notes
+        -----
+        The sharp-k mass assignment M=(4*pi/3)*rho*(c*R)**3 with c=2.5 follows Schneider. This
+        calibrated mass mapping is distinct from the real-space top-hat radius used to define
+        sigma8.
+
+        M=(4*pi/3)*rho*(c*R)**3 with W=Theta(1-k*R) gives this
+        cutoff for c=2.5. No additional (9*pi/2)**(1/3) is applied.
+
+        References
+        ----------
+
+        .. [cite-sharp] Schneider (2015), Structure formation with suppressed small-scale perturbations, Eqs. (10)-(12).
+            https://doi.org/10.1093/mnras/stv1169
+            Full text: https://arxiv.org/abs/1412.2133
+        """
         mass = np.asarray(mass, dtype=float)
         if np.any(~np.isfinite(mass)) or np.any(mass <= 0):
             raise ValueError("Mass must be finite and positive.")
-        radius = (3*(mass*self.h)/(4*np.pi*self.density))**(1/3)/2.5
-        return (9*np.pi/2)**(1/3)/radius
+        radius = (3*(mass*self.h)/(4*np.pi*self.density))**(1/3)
+        return SHARP_K_MASS_ASSIGNMENT/radius
 
     def _raw(self, mass):
         cutoff = self._cutoff(mass)
@@ -115,10 +241,30 @@ def _real_numeric(value, name):
 
 
 def nfw_mass_function(x):
-    """Return ``ln(1+x)-x/(1+x)`` for finite nonnegative ``x``.
+    r"""Evaluate the dimensionless enclosed-mass factor of an NFW halo.
 
-    A small-radius series avoids subtracting two nearly equal terms. Values
-    smaller than the floating-point subnormal range can still underflow.
+    Parameters
+    ----------
+    x : array_like
+        Nonnegative dimensionless radius r/rs.
+
+    Returns
+    -------
+    enclosed : numpy.ndarray
+        ln(1+x)-x/(1+x), using a stable small-radius evaluation.
+
+    Notes
+    -----
+    The enclosed-mass factor ln(1+c)-c/(1+c) follows the NFW density profile. Algebraic
+    inversion tolerances concern this profile identity, not agreement with simulated halos.
+
+    Physical enclosed mass is 4*pi*rhos*rs**3 times this factor. Small-radius series coefficients are algebraic, not empirical fit parameters.
+
+    References
+    ----------
+
+    .. [cite-nfw] Navarro, Frenk & White (1997), A Universal Density Profile from Hierarchical Clustering.
+        https://arxiv.org/abs/astro-ph/9611107
     """
     x = _real_numeric(x, "NFW radius ratio")
     if not np.all(np.isfinite(x)) or np.any(x < 0.0):
@@ -133,10 +279,35 @@ def nfw_mass_function(x):
 
 
 def invert_nfw_mass_function(y):
-    """Invert the NFW enclosed-mass function over representable positive radii.
+    r"""Recover a nonnegative NFW truncation radius from dimensionless enclosed mass.
 
-    Solve in log-radius so an absolute tolerance in radius cannot erase a
-    small, positive solution. The output retains the input shape.
+    Parameters
+    ----------
+    y : array_like
+        Nonnegative m/(4*pi*rhos*rs**3).
+
+    Returns
+    -------
+    radius : numpy.ndarray
+        Dimensionless radius r/rs with the input shape.
+
+    Notes
+    -----
+    The enclosed-mass factor ln(1+c)-c/(1+c) follows the NFW density profile. Algebraic
+    inversion tolerances concern this profile identity, not agreement with simulated halos.
+
+    The scalar root solve in logarithmic radius preserves the NFW mass equation. Root tolerances describe numerical inversion, not physical profile accuracy.
+
+    Navarro et al. print the density and circular-speed relations. The potential with zero
+    at infinity and numerical or Lambert-W inversion of the enclosed-mass factor are
+    derived consequences of that profile; these closed forms and solver controls are not
+    equations printed in the cited paper.
+
+    References
+    ----------
+
+    .. [cite-nfw] Navarro, Frenk & White (1997), A Universal Density Profile from Hierarchical Clustering.
+        https://arxiv.org/abs/astro-ph/9611107
     """
     y = _real_numeric(y, "Enclosed-mass function")
     if not np.all(np.isfinite(y)) or np.any(y < 0.0):

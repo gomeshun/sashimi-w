@@ -1,0 +1,11 @@
+--- a/sashimi_w.py
++++ b/sashimi_w.py
+@@ -525,7 +525,7 @@
+             ma_by_redshift[iz] = ma
+             Oz = self.Omegaz(pOmega,zdist[iz])
+             zcalc = np.linspace(zdist[iz],redshift,100)
+-            sol = odeint(msolve,ma,zcalc)
++            sol = odeint(msolve,ma,zcalc,rtol=1e-11,atol=1e-13)
+             m0 = sol[-1]
+             c200sub = self.conc200(ma200*Msolar,zdist[iz])
+             rvirsub = pow(3*ma*Msolar*pow(rhocrit0*self.g(zdist[iz]) \

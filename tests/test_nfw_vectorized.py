@@ -6,6 +6,22 @@ import numpy as np
 
 
 def test_vectorized_inverse_spans_radii_and_the_disruption_threshold():
+    r"""Notes
+    -----
+    The literature threshold rt/rs > 0.77 follows the Hayashi et al. disruption prescription
+    adopted by Hiroshima et al. A caller-supplied threshold takes precedence in variants
+    that expose it (C and SI currently default to 0). This is a model selection rule; an
+    exact-boundary test does not calibrate disruption physics.
+
+    References
+    ----------
+
+    .. [cite-survival] Hayashi et al. (2003), The Structural Evolution of Substructure, Section 2.1.
+        https://arxiv.org/abs/astro-ph/0203004
+
+    .. [cite-structure] Hiroshima, Ando & Ishiyama (2018), Modeling evolution of dark matter substructure and annihilation boost, Section II, Eqs. (4)-(9), (28), (34).
+        https://arxiv.org/abs/1803.07691
+    """
     variant=next(v for v in ('c','si','w','f') if (Path(__file__).resolve().parents[1]/('sashimi_'+v+'.py')).exists())
     numerics=importlib.import_module('sashimi_'+variant+'_numerics')
     radii=np.r_[np.logspace(-100,100,61),.77-1e-10,.77+1e-10,0.]
