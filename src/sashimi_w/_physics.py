@@ -1338,7 +1338,15 @@ class WDMPhysics:
         # Evaluate only ma < mmax; forbidden nodes must not create invalid
         # fractional powers or poison the host-history quadrature.
         ds = self._variance_gap(small[allowed], big[allowed])
-        dsmin = self._variance_gap(minimum[allowed], big[allowed])
+        # The normalization interval depends on host history and epoch only.
+        # Evaluate each active interval before broadcasting over subhalo mass;
+        # keep the original gap quadrature and host-weight reduction unchanged.
+        active_host = np.any(allowed, axis=-1, keepdims=True)
+        normalization = np.zeros_like(mmax)
+        normalization[active_host] = self._variance_gap(
+            mmax[active_host], Mmax[active_host]
+        )
+        dsmin = np.broadcast_to(normalization, allowed.shape)[allowed]
         Phi[allowed] = _normalized_eps_kernel(d2[allowed] - d1[allowed], ds, dsmin)
         F2 = Phi[0] if N_herm == 1 else np.sum(Phi * wwi / np.sqrt(np.pi), axis=0)
         Na = F2 * self.dsdm(ma, 0) * self.dMdz(Mhost, zacc_2d, z0, sigmafac) * (1 + zacc_2d)
